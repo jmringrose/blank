@@ -39,7 +39,8 @@
     --noise: 0;
 }
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+/*@source '../../storage/framework/views!*.php';*/
+
 /* some tweaks to daisy ui */
 .modal-box {
     @apply border-2 border-accent;
