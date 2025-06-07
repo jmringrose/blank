@@ -4,13 +4,11 @@ Generic error handler for AXIOS
 checks for 405 - expired and other AXIOS errors
  */
 export default {errorhandler}
-import { Toaster, toast } from 'vue-sonner'
 import 'vue-sonner/style.css'
 export function errorhandler(err) {
     // 403 or code 4 the video has expired, code can't connect
-    var msg = '';
-    var txt = "Don't reload if you need to copy any data you have added.";
-    //console.log(err.response);
+    let msg = '';
+    let txt = "Don't reload if you need to copy any data you have added.";
     if (typeof err.response === 'undefined') {
         //console.log('No error seen.')
         return;

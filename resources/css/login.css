@@ -8,7 +8,6 @@ html {
     color: #C8C8FF;
     font-size: 16px;
     font-weight: 400;
-    font-smoothing: antialiased;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale
 }
@@ -19,7 +18,7 @@ body {
 }
 body > .bg {
     background-color: #000000;
-    background-image: url(../../loginbackground.jpg);
+    background-image: url(/Users/james/Herd/Blank/public/loginbackground.jpg);
     background-size: cover;
     -webkit-filter: blur(6px);
     -moz-filter: blur(6px);
@@ -75,7 +74,6 @@ body a:hover {
     box-shadow: 0 0 10px #000000
 }
 .panel .bg {
-    /*background-image: url(/img/bg1.png);*/
     background-size: cover;
     background-position: 50%
 }

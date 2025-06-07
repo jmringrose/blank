@@ -1,16 +1,20 @@
 {
+  "public/loginbackground.jpg": {
+    "file": "assets/loginbackground-B3IzRlSw.jpg",
+    "src": "public/loginbackground.jpg"
+  },
   "resources/css/app.css": {
-    "file": "assets/app-B7O9__rl.css",
+    "file": "assets/app-nijp9cnm.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/css/login.css": {
-    "file": "assets/login-CAmbtsX6.css",
+    "file": "assets/login-BgZLjtry.css",
     "src": "resources/css/login.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-Dlsz1Y95.js",
+    "file": "assets/app-CAM7NcHh.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

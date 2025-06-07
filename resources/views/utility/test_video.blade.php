@@ -5,5 +5,20 @@
         <videoplayer video-url="bunny.mp4" showtitle=""></videoplayer>
         <status-button></status-button>
         <status-panel></status-panel>
+        <status-light></status-light>
+        <status-light></status-light>
+        <status-light></status-light>
+        <status-light></status-light>
+        <status-light></status-light>
+        <status-light></status-light>
+        <status-light></status-light>
+        <status-light></status-light>
+        <status-light></status-light>
+        <status-light></status-light>
+        <status-light></status-light>
+        <status-light></status-light>
+        <status-light></status-light>
+        <status-light></status-light>
+        <status-light></status-light>
     </div>
 @endsection
