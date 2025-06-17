@@ -4,22 +4,22 @@
     "src": "public/loginbackground.jpg"
   },
   "resources/css/app.css": {
-    "file": "assets/app-nijp9cnm.css",
+    "file": "assets/app-BiM4wGus.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/css/login.css": {
-    "file": "assets/login-BgZLjtry.css",
+    "file": "assets/login-AQGswV-L.css",
     "src": "resources/css/login.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-CAM7NcHh.js",
+    "file": "assets/app-8fUB0vQQ.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "css": [
-      "assets/app-BcSUQNuP.css"
+      "assets/app-CwABoOdl.css"
     ]
   }
 }
