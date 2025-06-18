@@ -22,10 +22,16 @@
             <headingsmall title="Test page"
                           name="{{ Auth()->user()->name}}"
                           id="{{ Auth()->user()->id }}"
-                          link1="Test page 1"
+
+                          link1="Colors and Tailwind"
                           url1="/test"
-                          link2="Test page 2"
+
+                          link2="Video and Pina"
                           url2="/test2"
+
+                          link3="Data Table"
+                          url3="/test3"
+
                           theme="{{ Auth()->user()->theme }}"
 
             ></headingsmall>

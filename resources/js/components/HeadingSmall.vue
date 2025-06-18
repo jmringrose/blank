@@ -8,6 +8,8 @@ interface Props {
     url1: string;
     link2: string;
     url2: string;
+    link3: string;
+    url3: string;
     theme: string;
 }
 import {themeChange} from 'theme-change';
@@ -89,11 +91,14 @@ const storeAndToggleTheme = (id, theme) => {
         </div>
         <div class="navbar-center hidden lg:flex">
             <ul class="menu menu-horizontal px-1">
-                <li v-if="link1 > ''">
-                    <a class="block mt-1 mr-4 py-2 px-3 rounded-sm md:border-0 md:p-0 md:dark:hover:bg-transparent" :href="url1">{{ link1 }}</a>
+                <li v-if="link1 > ''" class="mt-1 dark:bg-stone-600 mr-4 py-2 px-3 rounded-sm md:border-1 md:p-0 md:dark:hover:bg-transparent">
+                    <a class="" :href="url1">{{ link1 }}</a>
                 </li>
-                <li v-if="link2 > ''">
-                    <a class="block mt-1 mr-4 py-2 px-3 rounded-sm md:border-0 md:p-0 md:dark:hover:bg-transparent" :href="url2">{{ link2 }}</a>
+                <li v-if="link2 > ''" class="mt-1 dark:bg-stone-600 mr-4 py-2 px-3 rounded-sm md:border-1 md:p-0 md:dark:hover:bg-transparent">
+                    <a class="" :href="url2">{{ link2 }}</a>
+                </li>
+                <li v-if="link3 > ''" class="mt-1 dark:bg-stone-600 mr-4 py-2 px-3 rounded-sm md:border-1 md:p-0 md:dark:hover:bg-transparent">
+                    <a class="" :href="url3">{{ link3 }}</a>
                 </li>
             </ul>
         </div>

@@ -6,7 +6,7 @@
                 Delete Selected
             </button>
         </div>
-        <span class="mr-2 mt-2">Search field:</span>
+        <span class="mr-2 mt-2">Search specific field:</span>
         <select v-model="searchField" class="ml-2 mr-4 select w-46 ">
         <option selected value="">Pick Something</option>
         <option selected>Name</option>
@@ -14,7 +14,7 @@
         </select>
         <div class="mr-2 mt-2">Search value: </div>
         <div><input v-model="searchValue" class="ml-2 w-24 input" type="text"></div>
-        <div class="mr-4">
+        <div class="mr-4 ml-4">
             <button class="btn btn-alternative" @click="clearSearch">
                 Clear Search
             </button>
@@ -32,26 +32,33 @@
         buttons-pagination
         header-text-direction="center"
         table-class-name="customize-table"
-        theme-color="#1d90ff"
+        theme-color="#f48225"
     >
-        <template #expand="item">
+<!--
+
+  'when_event', 'email', 'role', 'result', 'user_id', 'user_ip','location'
+  -->
+           <template #expand="item">
             <div class="mt-2 ml-12">
-                {{ item.age }} (years)
+                {{ item.role }} (Role)
             </div>
             <div class="mt-2 ml-12">
-                {{ item.weight }} (lbs)
+                {{ item.result }} (Result)
             </div>
             <div class="mt-2 ml-12">
-                {{ item.name }} (persons name)
+                {{ item.user_id }} (User ID)
             </div>
             <div class="mt-2 ml-12">
-                {{ item.favouriteFruits }} (fruit)
+                {{ item.user_ip }} (IP Address)
+            </div>
+               <div class="mt-2 ml-12">
+                {{ item.location }} (Location)
             </div>
         </template>
         <!-- twisty for extra info -->
         <template #item-actions="item">
             <div class="flex justify-center">
-                <button class="btn btn-sm btn-error" @click.stop="deleteItem(item)">Delete</button>
+                <button class="btn btn-sm" @click.stop="deleteItem(item)">Delete</button>
             </div>
         </template>
     </EasyDataTable>
@@ -59,26 +66,44 @@
     {{ itemsSelected }}
 </template>
 <script lang="ts" setup>
-import {ref} from 'vue';
+import axios from 'axios';
+import {ref, onMounted} from 'vue';
 import type {Item} from "vue3-easy-data-table";
 
 const searchField = ref("");
 const searchValue = ref("");
+const itemsSelected = ref<Item[]>([]);
 const sortBy = "Age";
 const sortType = "desc";
-const itemsSelected = ref<Item[]>([]);
 
 const showRow = (item) => {
     alert(JSON.stringify(item));
 };
+// Fix the getHistory function
+const items = ref([]);
 
+const getHistory = () => {
+    console.log('getting history');
+    axios.get('/history')
+        .then((res) => {
+            items.value = res.data; // Set the items with the response data
+        })
+        .catch((error) => {
+            console.error('Error fetching history:', error);
+            items.value = []; // Set empty array on error
+        });
+};
+
+// Call getHistory in onMounted
+onMounted(() => {
+    getHistory();
+});
 const deleteItem = (item) => {
     const index = items.value.findIndex(i => i.name === item.name);
     if (index !== -1) {
         items.value.splice(index, 1);
     }
 };
-
 
 const clearSearch = () => {
     searchField.value = "";
@@ -93,35 +118,16 @@ const deleteSelected = () => {
     }
 };
 
-const mockClientItems = (itemsNumber = 100) => {
-    const mockItems = [];
-    const sports = ["basketball", "football", "running", "swimming"];
-    const fruits = ["banana", "apple", "orange", "peach"];
-
-    for (let i = 1; i < itemsNumber + 1; i += 1) {
-        mockItems.push({
-            name: `name-${i}`,
-            address: `address-${i}`,
-            height: i,
-            weight: i * 4,
-            age: i,
-            favouriteSport: sports[i % 4],
-            favouriteFruits: fruits[i % 4]
-        });
-    }
-    return mockItems;
-};
-
 const headers = [
-    {text: "Name", value: "name", width: 150, fixed: true},
-    {text: "Address", value: "address", width: 200},
-    {text: "Height", value: "height", sortable: true, width: 100},
-    {text: "Favourite sport", value: "favouriteSport", width: 100},
-    {text: "Favourite fruits", value: "favouriteFruits", width: 100},
+
+    // 'id','app_id','module_name','verb','event', 'email', 'name', 'when_event', 'email', 'role', 'result', 'user_id', 'user_ip','location'
+    {text: "ID", value: "id", width: 50, fixed: true},
+    {text: "Module", value: "module_name", width: 200},
+    {text: "Verb", value: "verb", sortable: true, width: 130},
+    {text: "Event", value: "event", width: 100},
+    {text: "email", value: "email", width: 150},
     {text: "Actions", value: "actions", width: 100}
 ];
-
-const items = ref(mockClientItems());
 </script>
 <style>
 .customize-table {
@@ -144,7 +150,7 @@ const items = ref(mockClientItems());
     --easy-table-body-row-font-size: 14px;
 
     --easy-table-body-row-hover-font-color: #2d3a4f;
-    --easy-table-body-row-hover-background-color: #eeeeee;
+    --easy-table-body-row-hover-background-color: rgba(102, 160, 183, 0.8);
 
     --easy-table-body-item-padding: 10px 15px;
 
@@ -160,7 +166,7 @@ const items = ref(mockClientItems());
 
     --easy-table-scrollbar-track-color: #2d3a4f;
     --easy-table-scrollbar-color: #2d3a4f;
-    --easy-table-scrollbar-thumb-color: #4c5d7a;;
+    --easy-table-scrollbar-thumb-color: #4c5d7a;
     --easy-table-scrollbar-corner-color: #2d3a4f;
 
     --easy-table-loading-mask-background-color: #2d3a4f;
