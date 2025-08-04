@@ -4,7 +4,9 @@ Generic error handler for AXIOS
 checks for 405 - expired and other AXIOS errors
  */
 export default {errorhandler}
-import 'vue-sonner/style.css'
+import { useToast } from "vue-toastification";
+const toast = useToast();
+
 export function errorhandler(err) {
     // 403 or code 4 the video has expired, code can't connect
     let msg = '';

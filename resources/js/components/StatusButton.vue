@@ -1,6 +1,4 @@
 <template>
-
-
     <div v-if="store.hasInsurance">
        <button class="btn btn-accent text-utility-content" @click="markAsUninsured">Mark as Uninsured</button>
     </div>

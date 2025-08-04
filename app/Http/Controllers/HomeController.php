@@ -10,19 +10,6 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 class HomeController extends Controller
 {
-    public function test(Request $request): View
-    {
-        return view('utility.test', [ 'user' => $request->user(), ]);
-    }
-
-    public function secondTest(Request $request): View
-    {
-        return view('utility.test_video', [ 'user' => $request->user(), ]);
-    }
-    public function thirdTest(Request $request): View
-    {
-        return view('utility.test_datatable', [ 'user' => $request->user(), ]);
-    }
 
     /**
      * Display the user's profile form.
@@ -44,9 +31,7 @@ class HomeController extends Controller
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
-
         $request->user()->save();
-
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 

@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
-use App\Models\Record;
+use App\Models\Sequence;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -9,22 +9,27 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 class RecordController extends Controller
 {
+    //=====================================================================================================
     public function history()
     {
-        return Record::all()->toJson();
+        return Sequence::all()->toJson();
     }
+    //=====================================================================================================
     public function test(Request $request): View
     {
         return view('utility.test', ['user' => $request->user(),]);
     }
+    //=====================================================================================================
     public function secondTest(Request $request): View
     {
         return view('utility.test_video', ['user' => $request->user(),]);
     }
+    //=====================================================================================================
     public function thirdTest(Request $request): View
     {
         return view('utility.test_datatable', ['user' => $request->user(),]);
     }
+    //=====================================================================================================
     /**
      * Display the user's profile form.
      */
@@ -32,6 +37,7 @@ class RecordController extends Controller
     {
         return view('profile.edit', ['user' => $request->user(),]);
     }
+    //=====================================================================================================
     /**
      * Update the user's profile information.
      */
@@ -44,6 +50,7 @@ class RecordController extends Controller
         $request->user()->save();
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
+    //=====================================================================================================
     /**
      * Delete the user's account.
      */

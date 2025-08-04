@@ -1,8 +1,10 @@
-<template>
+.customize-table {
+--custom-selected: rgba(122, 201, 67, 0.2); /* Define the color for selected rows */
+}<template>
     <!-- header stuff  -->
     <div class="flex mb-4 text-base-content">
         <div class="mr-4">
-            <button :disabled="!itemsSelected.length" class="btn btn-error btn-sm" @click="confirmDeleteSelected">
+            <button :disabled="!itemsSelected.length" class="btn btn-error btn-sm" @click="deleteSelected">
                 Delete
             </button>
         </div>
@@ -51,8 +53,6 @@
 
     <EasyDataTable
         v-model:items-selected="itemsSelected"
-        sort-by="id"
-        sort-type="desc"
         :headers="filteredHeaders"
         :items="items"
         :rows-per-page="15"
@@ -67,7 +67,7 @@
         table-class-name="customize-table"
     >
 
-<!--        <template #expand="item">
+        <template #expand="item">
             <div class="ml-8 border border-zinc-400 rounded-xl p-2 pb-6 w-128 shadow-lg bg-base-300">
                 <h3 class="text-lg font-bold mb-4 ml-4">Additional Details</h3>
                 <div class="mt-2 ml-4">
@@ -89,11 +89,11 @@
                     {{ item.location }} (Location)
                 </div>
             </div>
-        </template>-->
+        </template>
 
         <template #item-actions="item">
             <div class="flex justify-center">
-                <button class="btn btn-sm btn-secondary h-6 w-6 mr-1" @click.stop="confirmDeleteItem(item)"><span class="!text-base material-symbols-outlined">delete</span></button>
+                <button class="btn btn-sm btn-secondary h-6 w-6 mr-1" @click.stop="deleteItem(item)"><span class="!text-base material-symbols-outlined">delete</span></button>
                 <button class="btn btn-sm btn-secondary h-6 w-6  mr-1" @click.stop="editItem(item)"><span class="!text-base material-symbols-outlined">edit</span></button>
 <!--                <button class="btn btn-sm btn-secondary" @click.stop="deleteItem(item)"><span class="!text-base material-symbols-outlined">file_copy</span></button>-->
             </div>
@@ -119,30 +119,13 @@
         </template>
 
     </EasyDataTable>
-
-    <!-- Loading and error states -->
-    <div v-if="loading" class="flex justify-center my-4">
-        <div class="loading loading-spinner loading-lg"></div>
-    </div>
-    <div v-if="error" class="alert alert-error my-4">
-        {{ error }}
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div v-if="showDeleteModal" class="modal modal-open">
-        <div class="modal-box">
-            <h3 class="font-bold text-lg">Confirm Delete</h3>
-            <p class="py-4">{{ deleteModalMessage }}</p>
-            <div class="modal-action">
-                <button class="btn btn-error" @click="proceedWithDelete">
-                    Yes, Delete
-                </button>
-                <button class="btn" @click="cancelDelete">
-                    Cancel
-                </button>
-            </div>
-        </div>
-    </div>
+<!-- Loading and error states -->
+<div v-if="loading" class="flex justify-center my-4">
+    <div class="loading loading-spinner loading-lg"></div>
+</div>
+<div v-if="error" class="alert alert-error my-4">
+    {{ error }}
+</div>
 </template>
 <script lang="ts" setup>
 import axios from 'axios';
@@ -157,14 +140,11 @@ const toast = useToast();
 // Table Headers
 // =====================
 const headers = [
-    { text: "ID", value: "id", sortable: true, width: 100 },
-    { text: "First", value: "first", sortable: true, width: 100 },
-    { text: "Last", value: "last", sortable: true, width: 100 },
-    { text: "Email", value: "email", sortable: true, width: 100 },
-    { text: "Current", value: "current_step",  sortable: true,width: 80 },
-    { text: "Next", value: "next_send_at", sortable: true, width: 200 },
-    { text: "Unsub", value: "unsub_token", sortable: true, width: 100 },
-    { text: "Actions", value: "actions", width: 80 }
+    { text: "Email", value: "email", sortable: true, width: 150 },
+    { text: "Module", value: "module_name", sortable: true, width: 200 },
+    { text: "Verb", value: "verb", sortable: true, width: 175 },
+    { text: "Event", value: "event", width: 150 },
+    { text: "Actions", value: "actions", width: 100 }
 ];
 
 // =====================
@@ -176,11 +156,6 @@ const itemsSelected = ref<Item[]>([]);
 const items = ref<Item[]>([]);
 const loading = ref(false);
 const error = ref("");
-
-// Delete confirmation modal
-const showDeleteModal = ref(false);
-const deleteModalMessage = ref("");
-const pendingDeleteAction = ref<(() => Promise<void>) | null>(null);
 
 // Column visibility
 const visibleColumns = ref(headers.map(header => header.value));
@@ -217,76 +192,29 @@ onMounted(() => {
 });
 
 // =====================
-// Delete Confirmation Functions
-// =====================
-const confirmDeleteItem = (item: Item) => {
-    deleteModalMessage.value = `Are you sure you want to delete the record for "${item.email}"? This action cannot be undone.`;
-    pendingDeleteAction.value = () => deleteItem(item);
-    showDeleteModal.value = true;
-};
-
-const confirmDeleteSelected = () => {
-    if (itemsSelected.value.length === 0) return;
-
-    const count = itemsSelected.value.length;
-    const emails = itemsSelected.value.map(item => item.email).slice(0, 3).join(', ');
-    const moreText = count > 3 ? ` and ${count - 3} more` : '';
-
-    deleteModalMessage.value = `Are you sure you want to delete ${count} selected record${count > 1 ? 's' : ''}? (${emails}${moreText}) This action cannot be undone.`;
-    pendingDeleteAction.value = () => deleteSelected();
-    showDeleteModal.value = true;
-};
-
-const proceedWithDelete = async () => {
-    if (pendingDeleteAction.value) {
-        await pendingDeleteAction.value();
-    }
-    cancelDelete();
-};
-
-const cancelDelete = () => {
-    showDeleteModal.value = false;
-    deleteModalMessage.value = "";
-    pendingDeleteAction.value = null;
-};
-
-// =====================
 // Table Actions
 // =====================
-const deleteItem = async (item: Item) => {
-    try {
-        await axios.delete(`/api/sequences/${item.id}`);
-        const index = items.value.findIndex(i => i.id === item.id);
-        if (index !== -1) {
-            items.value.splice(index, 1);
-            toast.success(`Deleted: ${item.email}`);
-        }
-    } catch (err) {
-        console.error('Delete failed:', err);
-        toast.error('Failed to delete item');
+const deleteItem = (item: Item) => {
+    // Assuming each item has a unique identifier, ideally an ID
+    // If email is being used as a unique identifier, be cautious about duplicates
+    const index = items.value.findIndex(i => i.email === item.email && i.event === item.event);
+    if (index !== -1) {
+        items.value.splice(index, 1);
+        toast.success(`Deleted item: ${item.email}`);
     }
 };
 
 const editItem = (item: Item) => {
-    window.location.href = `/email-sequences/${item.id}/edit`;
+    toast.success(`This would whisk you away to edit the record: ${item.email}`);
 };
 
-const deleteSelected = async () => {
+const deleteSelected = () => {
     if (itemsSelected.value.length > 0) {
-        const selectedIds = itemsSelected.value.map(item => item.id);
-
-        try {
-            await axios.post('/api/sequences/bulk-delete', {
-                ids: selectedIds
-            });
-
-            items.value = items.value.filter(item => !selectedIds.includes(item.id));
-            itemsSelected.value = [];
-            toast.success(`${selectedIds.length} items deleted`);
-        } catch (err) {
-            console.error('Bulk delete failed:', err);
-            toast.error('Failed to delete selected items');
-        }
+        // Create a more specific identifier using both email and event
+        const selectedIdentifiers = itemsSelected.value.map(item => `${item.email}-${item.event}`);
+        items.value = items.value.filter(item => !selectedIdentifiers.includes(`${item.email}-${item.event}`));
+        itemsSelected.value = [];
+        toast.success(`${selectedIdentifiers.length} items deleted`);
     }
 };
 
@@ -341,6 +269,7 @@ const toggleColumnVisibility = (columnValue: string) => {
     opacity: 0.5;
     cursor: not-allowed;
 }
+
 .rounded-pagination-button:not(:disabled):hover {
     background-color: #66a0b7;
 }
@@ -384,8 +313,6 @@ const toggleColumnVisibility = (columnValue: string) => {
     --easy-table-scrollbar-corner-color: #2d3a4f;
 
     --easy-table-loading-mask-background-color: #2d3a4f;
-
-
 }
 
 </style>

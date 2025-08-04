@@ -1,3 +1,53 @@
+<template>
+    <div class="navbar shadow-sm">
+        <div class="navbar-start max-w-5/6 text-primary-content">
+            <a class="hidden mr-4 ml-4 ">Template</a>
+            <a class="hidden md:flex mr-4  align-middle" href="/home"><span class="material-symbols-outlined align-top">home</span><span class="hidden md:block ml-2">Home</span></a>
+            <div class="dropdown">
+                <button class="btn btn-ghost block md:hidden" tabindex="0">
+                    <span class="material-symbols-outlined">Menu</span>
+                </button>
+                <ul class="menu menu-sm dropdown-content bg-base-300  rounded-box z-1 mt-3 w-52 p-2 shadow-lg border">
+                    <li>
+                        <a href="/home" class="mt-1 mr-2"><span class="material-symbols-outlined align-top">home</span> Home</a>
+                    </li>
+                    <li v-if="link1 > ''" class="mt-1 mr-2 ">
+                        <a :href="url1" class=""><span class="material-symbols-outlined">Palette</span> {{ link1 }}</a>
+                    </li>
+                    <li v-if="link2 > ''"  class="mt-1 mr-2">
+                        <a :href="url2" class=""><span class="material-symbols-outlined">Database</span> {{ link2 }}</a>
+                    </li>
+                    <li v-if="link3 > ''"  class="mt-1 mr-2 ">
+                        <a :href="url3" class=""><span class="material-symbols-outlined">Table</span> {{ link3 }}</a>
+                    </li>
+                    <li v-if="link4 > ''"  class="mt-1 mr-2 ">
+                        <a :href="url4" class=""><span class="material-symbols-outlined">Ballot</span> {{ link4 }}</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="navbar-center hidden md:flex">
+            <ul class="menu menu-horizontal px-1 text-primary-content ">
+                <li v-if="link1 > ''" class="mt-1 mr-2 ">
+                    <a :href="url1" class=""><span class="material-symbols-outlined">Palette</span> {{ link1 }}</a>
+                </li>
+                <li v-if="link2 > ''"  class="mt-1 mr-2 ">
+                    <a :href="url2" class=""><span class="material-symbols-outlined">Database</span> {{ link2 }}</a>
+                </li>
+                <li v-if="link3 > ''"  class="mt-1 mr-2 ">
+                    <a :href="url3" class=""><span class="material-symbols-outlined">Table</span> {{ link3 }}</a>
+                </li>
+                <li v-if="link4 > ''"  class="mt-1 mr-2 ">
+                    <a :href="url4" class=""><span class="material-symbols-outlined">Ballot</span> {{ link4 }}</a>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-end text-accent">
+            <switcher :id=props.id :theme=props.theme></switcher>
+            <button class="ml-2 btn btn-sm btn-secondary font-semibold" @click="logout">Logout</button>
+        </div>
+    </div>
+</template>
 <script lang="ts" setup>
 interface Props {
     title: string;
@@ -10,17 +60,21 @@ interface Props {
     url2: string;
     link3: string;
     url3: string;
+    link4: string;
+    url4: string;
     theme: string;
 }
+
+import switcher from './ColorSwitcher.vue'
 import {themeChange} from 'theme-change';
-import { onMounted, ref } from 'vue';
-import { useToast } from '../composables/useToast';
+import {useToast} from "vue-toastification";
+import {onMounted, ref} from 'vue';
 import axios from 'axios';
 import {errorhandler} from "../composables/ErrorHandlerForAxios.js";
 
 const props = defineProps<Props>();
-const currentTheme = ref(props.theme || '');
 const toast = useToast();
+const currentTheme = ref(props.theme || '');
 
 onMounted(() => {
     themeChange(false);
@@ -31,7 +85,7 @@ onMounted(() => {
     }
 });
 const logout = () => {
-    axios.post('/logout', { viewer_name: props.name })
+    axios.post('/logout', {viewer_name: props.name})
         .then(res => {
             window.location.href = '/home';
         })
@@ -47,75 +101,12 @@ const storeAndToggleTheme = (id, theme) => {
         return;
     }
     // Save theme preference
-    axios.post('/theme', { id: id, theme: theme })
+    axios.post('/theme', {id: id, theme: theme})
         .then(res => {
-            toast.info("Color scheme saved [" + theme + "]");
+            toast.info("Color scheme saved [" + theme + "]", {duration: 100});
         })
         .catch(err => {
             errorhandler(err);
         });
 };
 </script>
-<template>
-
-     <div class="navbar bg-base-300 shadow-sm">
-        <div class="navbar-start max-w-5/6">
-            <div class="dropdown">
-
-                <button tabindex="0" class="btn btn-ghost lg:hidden">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /> </svg>
-                </button>
-
-                <ul class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-                    <li v-if="link1 > ''">
-                        <a class="block mt-1 py-2 px-3 rounded-sm md:border-0 md:p-0 md:dark:hover:bg-transparent" :href="url1">{{ link1 }}</a>
-                    </li>
-                    <li v-if="link2 > ''">
-                        <a class="block mt-1 py-2 px-3 rounded-sm md:border-0 md:p-0 md:dark:hover:bg-transparent" :href="url2">{{ link2 }}</a>
-                    </li>
-                    <li>
-                        <select id="theme" name="theme" class="select select-sm bg-base-300"
-                                v-model="currentTheme"
-                                @change="storeAndToggleTheme(id, currentTheme)"
-                                data-choose-theme>
-                            <option value="abyss">Default</option>
-                            <option value="retroish">Light</option>
-                            <option value="luxury">Dark</option>
-                        </select>
-                    </li>
-
-                </ul>
-            </div>
-            <a class="btn btn-ghost text-xl">James Template</a>
-        </div>
-        <div class="navbar-center hidden lg:flex">
-            <ul class="menu menu-horizontal px-1">
-                <li v-if="link1 > ''" class="mt-1 dark:bg-stone-600 mr-4 py-2 px-3 rounded-sm md:border-1 md:p-0 md:dark:hover:bg-transparent">
-                    <a class="" :href="url1">{{ link1 }}</a>
-                </li>
-                <li v-if="link2 > ''" class="mt-1 dark:bg-stone-600 mr-4 py-2 px-3 rounded-sm md:border-1 md:p-0 md:dark:hover:bg-transparent">
-                    <a class="" :href="url2">{{ link2 }}</a>
-                </li>
-                <li v-if="link3 > ''" class="mt-1 dark:bg-stone-600 mr-4 py-2 px-3 rounded-sm md:border-1 md:p-0 md:dark:hover:bg-transparent">
-                    <a class="" :href="url3">{{ link3 }}</a>
-                </li>
-            </ul>
-        </div>
-        <div class="navbar-end">
-            <select id="theme" name="theme" class="mr-4 select select-sm bg-base-300 w-36"
-                    v-model="currentTheme"
-                    @change="storeAndToggleTheme(id, currentTheme)"
-                    data-choose-theme>
-                <option value="abyss">Default</option>
-                <option value="retroish">Light</option>
-                <option value="luxury">Dark</option>
-            </select>
-            <button class="btn btn-accent btn-sm font-semibold" @click="logout">Logout</button>
-        </div>
-    </div>
-
-
-    <Toaster richColors position="top-center" />
-
-</template>

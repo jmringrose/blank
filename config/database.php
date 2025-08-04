@@ -42,6 +42,17 @@ return [
             'synchronous' => null,
         ],
 
+        'sqlite_remote' => [
+            'driver' => 'sqlite',
+            'url' => env('DB_REMOTE_URL'),
+            'database' => env('DB_REMOTE_DATABASE'),
+            'prefix' => '',
+            'foreign_key_constraints' => env('DB_REMOTE_FOREIGN_KEYS', true),
+            'busy_timeout' => env('DB_REMOTE_BUSY_TIMEOUT', 2000),
+            'journal_mode' => env('DB_REMOTE_JOURNAL_MODE', 'WAL'),
+            'synchronous' => env('DB_REMOTE_SYNCHRONOUS', 'NORMAL'),
+        ],
+
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
