@@ -5,6 +5,7 @@
 /.idea
 /.vscode
 /node_modules
+/vendor
 /public/*
 /storage/*.key
 /storage/framework/views/*

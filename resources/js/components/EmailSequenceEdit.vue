@@ -108,7 +108,7 @@
                     :disabled="processing"
                     class="btn btn-primary"
                 >
-                    {{ processing ? 'Updating...' : 'Update Email Sequence' }}
+                    {{ processing ? 'Updating...' : 'Update' }}
                 </button>
 
                 <button
@@ -116,7 +116,7 @@
                     @click="goBack"
                     class="btn btn-secondary"
                 >
-                    Cancel
+                    Return
                 </button>
             </div>
         </form>
@@ -148,13 +148,13 @@ const emailSequenceId = ref(null);
 // Get ID from URL
 onMounted(() => {
     const pathParts = window.location.pathname.split('/');
-    emailSequenceId.value = pathParts[pathParts.length - 2]; // assuming URL like /email-sequences/{id}/edit
+    emailSequenceId.value = pathParts[pathParts.length - 2]; // assuming URL like /email-sequence/{id}/edit
     loadEmailSequence();
 });
 
 const loadEmailSequence = async () => {
     try {
-        const response = await axios.get(`/api/email-sequences/${emailSequenceId.value}`);
+        const response = await axios.get(`/api/email-sequence/${emailSequenceId.value}`);
         const data = response.data;
 
         form.first = data.first || '';
@@ -178,7 +178,7 @@ const updateEmailSequence = async () => {
     errors.value = {};
 
     try {
-        const response = await axios.put(`/api/email-sequences/${emailSequenceId.value}`, form);
+        const response = await axios.put(`/api/email-sequence/${emailSequenceId.value}`, form);
         toast.success('Email sequence updated successfully!');
 
         // Optionally redirect or update form with returned data
@@ -205,6 +205,6 @@ const updateEmailSequence = async () => {
 };
 
 const goBack = () => {
-    window.history.back();
+    window.location.href = '/test3';
 };
 </script>

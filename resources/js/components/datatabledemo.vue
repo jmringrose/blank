@@ -7,40 +7,35 @@
             </button>
         </div>
         <span class="mr-2 mt-2 text-sm">Search specific field:</span>
-        <select v-model="searchField" class="ml-2 mr-4 select bg-secondary select-sm w-32 ">
-        <option selected value="">Pick Something</option>
-        <option v-for="header in headers" :key="header.value" :value="header.value">
-            {{ header.text }}
-        </option>
+        <select v-model="searchField" class="ml-2 mr-4 select bg-secondary select-sm w-36 ">
+            <option selected value="">Pick Something</option>
+            <option v-for="header in headers" :key="header.value" :value="header.value">
+                {{ header.text }}
+            </option>
         </select>
-
-        <div class="mt-2 text-sm">Search value: </div>
-
-
+        <div class="mt-2 text-sm">Search value:</div>
         <div><input v-model="searchValue" class="ml-2 w-32 input bg-base-200 input-sm" type="text"></div>
-
-
         <div class="mr-2 ml-2">
             <button class="btn btn-secondary btn-sm w-32" @click="clearSearch">
                 Clear Search
             </button>
         </div>
-
-
         <!-- Column visibility dropdown -->
         <div class="dropdown dropdown-end">
-            <label tabindex="0" class="btn btn-sm btn-secondary">
+            <label class="btn btn-sm btn-secondary" tabindex="0">
                 Columns
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                <svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+                    <path d="m6 9 6 6 6-6"/>
+                </svg>
             </label>
-            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-200 rounded-box w-52">
+            <ul class="dropdown-content z-[1] menu p-2 shadow bg-base-200 rounded-box w-52" tabindex="0">
                 <li v-for="header in headers" :key="header.value">
                     <label class="flex items-center cursor-pointer">
                         <input
-                            type="checkbox"
                             :checked="visibleColumns.includes(header.value)"
-                            @change="toggleColumnVisibility(header.value)"
                             class="checkbox checkbox-sm"
+                            type="checkbox"
+                            @change="toggleColumnVisibility(header.value)"
                         />
                         <span class="ml-2">{{ header.text }}</span>
                     </label>
@@ -48,78 +43,71 @@
             </ul>
         </div>
     </div>
-
     <EasyDataTable
         v-model:items-selected="itemsSelected"
-        sort-by="id"
-        sort-type="desc"
+        :expand-column-width=10
         :headers="filteredHeaders"
         :items="items"
+        :row-class-name="rowClass"
         :rows-per-page="15"
-        :expand-column-width=10
         :search-field="searchField"
         :search-value="searchValue"
-        :row-class-name="rowClass"
-        theme-color="#1d90ff"
         alternating
-        body-text-direction="center"
-        header-text-direction="center"
+        body-text-direction="left"
+        header-text-direction="left"
+        sort-by="id"
+        sort-type="desc"
         table-class-name="customize-table"
+        theme-color="#1d90ff"
     >
-
-<!--        <template #expand="item">
-            <div class="ml-8 border border-zinc-400 rounded-xl p-2 pb-6 w-128 shadow-lg bg-base-300">
-                <h3 class="text-lg font-bold mb-4 ml-4">Additional Details</h3>
-                <div class="mt-2 ml-4">
-                    {{ item.name }} (Name)
-                </div>
-                <div class="mt-2 ml-4">
-                    {{ item.role }} (Role)
-                </div>
-                <div class="mt-2 ml-4">
-                    {{ item.result }} (Result)
-                </div>
-                <div class="mt-2 ml-4">
-                    {{ item.user_id }} (User ID)
-                </div>
-                <div class="mt-2 ml-4">
-                    {{ item.user_ip }} (IP Address)
-                </div>
-                <div class="mt-2 ml-4">
-                    {{ item.location }} (Location)
-                </div>
+        <template #item-next_send_at="{ next_send_at }">
+            <div class="text-center">
+    <span
+        :class="getRelativeDate(next_send_at).class"
+        :title="next_send_at ? new Date(next_send_at).toLocaleString() : 'Not scheduled'"
+    >
+        {{ getRelativeDate(next_send_at).display }}
+    </span>
+                <!-- Hidden ISO date string for sorting -->
+                <span class="sr-only">{{ next_send_at || '9999-12-31' }}</span>
             </div>
-        </template>-->
-
+        </template>
         <template #item-actions="item">
             <div class="flex justify-center">
                 <button class="btn btn-sm btn-secondary h-6 w-6 mr-1" @click.stop="confirmDeleteItem(item)"><span class="!text-base material-symbols-outlined">delete</span></button>
                 <button class="btn btn-sm btn-secondary h-6 w-6  mr-1" @click.stop="editItem(item)"><span class="!text-base material-symbols-outlined">edit</span></button>
-<!--                <button class="btn btn-sm btn-secondary" @click.stop="deleteItem(item)"><span class="!text-base material-symbols-outlined">file_copy</span></button>-->
+                <!--                <button class="btn btn-sm btn-secondary" @click.stop="deleteItem(item)"><span class="!text-base material-symbols-outlined">file_copy</span></button>-->
             </div>
         </template>
-
+        <!-- Custom slot for unsub_token column -->
+        <template #item-unsub_token="{ unsub_token }">
+          <span
+              :class="unsub_token ? 'text-green-600' : 'text-red-600'"
+              :title="unsub_token ? 'Unsubscribe token exists' : 'No unsubscribe token'"
+              class="font-bold text-lg"
+          >
+            {{ unsub_token ? '✓' : '✗' }}
+          </span>
+        </template>
         <template #pagination="{ prevPage, nextPage, isFirstPage, isLastPage }">
             <div class="custom-pagination">
                 <button
                     :disabled="isFirstPage"
-                    @click="prevPage"
                     class="rounded-pagination-button"
+                    @click="prevPage"
                 >
                     Prev
                 </button>
                 <button
                     :disabled="isLastPage"
-                    @click="nextPage"
                     class="rounded-pagination-button"
+                    @click="nextPage"
                 >
                     Next
                 </button>
             </div>
         </template>
-
     </EasyDataTable>
-
     <!-- Loading and error states -->
     <div v-if="loading" class="flex justify-center my-4">
         <div class="loading loading-spinner loading-lg"></div>
@@ -127,7 +115,6 @@
     <div v-if="error" class="alert alert-error my-4">
         {{ error }}
     </div>
-
     <!-- Delete Confirmation Modal -->
     <div v-if="showDeleteModal" class="modal modal-open">
         <div class="modal-box">
@@ -146,9 +133,9 @@
 </template>
 <script lang="ts" setup>
 import axios from 'axios';
-import { ref, onMounted, computed } from 'vue';
-import type { Item } from "vue3-easy-data-table";
-import { useToast } from "vue-toastification";
+import {computed, onMounted, ref} from 'vue';
+import type {Item} from "vue3-easy-data-table";
+import {useToast} from "vue-toastification";
 
 // Toast instance
 const toast = useToast();
@@ -157,14 +144,14 @@ const toast = useToast();
 // Table Headers
 // =====================
 const headers = [
-    { text: "ID", value: "id", sortable: true, width: 100 },
-    { text: "First", value: "first", sortable: true, width: 100 },
-    { text: "Last", value: "last", sortable: true, width: 100 },
-    { text: "Email", value: "email", sortable: true, width: 100 },
-    { text: "Current", value: "current_step",  sortable: true,width: 80 },
-    { text: "Next", value: "next_send_at", sortable: true, width: 200 },
-    { text: "Unsub", value: "unsub_token", sortable: true, width: 100 },
-    { text: "Actions", value: "actions", width: 80 }
+    {text: "ID", value: "id", sortable: true, width: 100},
+    {text: "First", value: "first", sortable: true, width: 100},
+    {text: "Last", value: "last", sortable: true, width: 100},
+    {text: "Email", value: "email", sortable: true, width: 100},
+    {text: "Current", value: "current_step", sortable: true, width: 80},
+    {text: "Next", value: "next_send_at", sortable: true, width: 100},
+    {text: "Unsub", value: "unsub_token", sortable: true, width: 100},
+    {text: "Actions", value: "actions", width: 80}
 ];
 
 // =====================
@@ -255,11 +242,13 @@ const cancelDelete = () => {
 // =====================
 const deleteItem = async (item: Item) => {
     try {
-        await axios.delete(`/api/sequences/${item.id}`);
+        await axios.delete(`/api/sequence/${item.id}`);
         const index = items.value.findIndex(i => i.id === item.id);
         if (index !== -1) {
             items.value.splice(index, 1);
             toast.success(`Deleted: ${item.email}`);
+            // This function would load data for the table
+            getHistory();
         }
     } catch (err) {
         console.error('Delete failed:', err);
@@ -267,8 +256,85 @@ const deleteItem = async (item: Item) => {
     }
 };
 
+
+const getUnsubStatusIcon = (unsubToken: string | null) => {
+    if (unsubToken) {
+        return {icon: '✓', class: 'text-green-600 font-bold'};
+    } else {
+        return {icon: '✗', class: 'text-red-600 font-bold'};
+    }
+}
+
+
+// Function to format relative date
+const getRelativeDate = (dateString: string | null) => {
+    if (!dateString) return {display: 'Not scheduled', class: 'text-gray-400'};
+
+    try {
+        const date = new Date(dateString);
+        const now = new Date();
+        // Strip out time, work with dates only
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const diffInMs = target.getTime() - today.getTime();
+        const diffInDays = Math.round(diffInMs / (1000 * 60 * 60 * 24));
+
+        const weekdays = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+        const dayName = weekdays[date.getDay()];
+
+        // Today
+        if (diffInDays === 0) {
+            return {display: 'Today', class: 'text-blue-600 font-semibold'};
+        }
+        // Tomorrow
+        if (diffInDays === 1) {
+            return {display: 'Tomorrow', class: 'text-green-600'};
+        }
+        // Yesterday
+        if (diffInDays === -1) {
+            return {display: 'Yesterday', class: 'text-orange-600'};
+        }
+
+        // "This [Day]" or "Last [Day]" or "Next [Day]" (focus on Tue as example)
+        const weekdayDiff = (target.getDay() - today.getDay());
+        const sameWeek = Math.abs(diffInDays) <= 6 && (target > today ? target < new Date(today.getTime() + 7 * 86400000) : target > new Date(today.getTime() - 7 * 86400000));
+        if (sameWeek) {
+            if (diffInDays > 0) {
+                return {display: `This ${dayName}`, class: 'text-green-600'};
+            } else {
+                return {display: `Last ${dayName}`, class: 'text-orange-600'};
+            }
+        }
+
+        // "Next [Day]"
+        if (diffInDays > 6 && diffInDays <= 13) {
+            return {display: `Next ${dayName}`, class: 'text-green-600'};
+        }
+
+        // "Last [Day]"
+        if (diffInDays < -6 && diffInDays >= -13) {
+            return {display: `Last ${dayName}`, class: 'text-orange-600'};
+        }
+
+        // Future (e.g., "in 17 days")
+        if (diffInDays > 13) {
+            return {display: `In ${diffInDays} days`, class: 'text-green-600'};
+        }
+        // Past (e.g., "17 days ago")
+        if (diffInDays < -13) {
+            return {display: `${Math.abs(diffInDays)} days ago`, class: 'text-red-600'};
+        }
+
+        // Fallback: formatted date
+        const month = date.toLocaleDateString('en-US', {month: 'short'});
+        return {display: `${month} ${date.getDate()}, ${date.getFullYear()}`, class: 'text-gray-600'};
+    } catch (e) {
+        return {display: 'Invalid date', class: 'text-red-600'};
+    }
+};
+
 const editItem = (item: Item) => {
-    window.location.href = `/email-sequences/${item.id}/edit`;
+    window.location.href = `/email-sequence/${item.id}/edit`;
 };
 
 const deleteSelected = async () => {
@@ -276,12 +342,12 @@ const deleteSelected = async () => {
         const selectedIds = itemsSelected.value.map(item => item.id);
 
         try {
-            await axios.post('/api/sequences/bulk-delete', {
+            await axios.post('/api/sequence/bulk-delete', {
                 ids: selectedIds
             });
-
             items.value = items.value.filter(item => !selectedIds.includes(item.id));
             itemsSelected.value = [];
+            getHistory();
             toast.success(`${selectedIds.length} items deleted`);
         } catch (err) {
             console.error('Bulk delete failed:', err);
@@ -309,9 +375,7 @@ const toggleColumnVisibility = (columnValue: string) => {
     }
 };
 </script>
-
 <style scoped>
-
 .custom-pagination {
     display: flex;
     justify-content: center;
@@ -387,5 +451,4 @@ const toggleColumnVisibility = (columnValue: string) => {
 
 
 }
-
 </style>

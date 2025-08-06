@@ -31,10 +31,16 @@ class TestController extends Controller
         return view('utility.test_form', ['user' => $request->user(),]);
     }
     //=====================================================================================================
-    public function emailTest(Request $request): View
+    public function emailTest($id): View
     {
-        $record = EmailSequence::find(83);
+        $record = EmailSequence::find($id);
+        //dump($record);
         return view('emails.steps.email_one', ['record' => $record]);
+    }
+    //=====================================================================================================
+    public function testApi(): View
+    {
+        return view('utility.test_api');
     }
     //=====================================================================================================
 }

@@ -196,7 +196,7 @@
             </td>
             <td style="padding: 8px; vertical-align: top;" class="text-cell">
                 <p style="font-size: 16px; color: #000000; margin: 0; line-height: 1.4;">
-                    Hello, I’m James, the guide behind Real Cool Photography Tours.
+                    I’m James, the guide behind Real Cool Photography Tours.
                     I’ve spent years chasing light, mist, and magic across the globe,
                     and now I’ve created this guide about Costa Rica to help you capture its wild beauty like a pro.
                     Whether it’s your first visit or you’re a seasoned photographer,
@@ -279,8 +279,7 @@
         <tr>
             <td style="padding: 20px;">
                 <p style="font-size: 16px; color: #666666; margin: 0;">
-                    If for any reason you are not interested in hearing more about Costa Rica Photo Tours then please click here to <a href="{{ route('unsubscribe', ['token' => $unsubscribe_token]) }}">unsubscribe.</a>
-
+                    If for any reason you are not interested in hearing more about Costa Rica Photo Tours then please click here to <a href="{{ route('unsubscribe', ['token' => $record->unsub_token]) }}">unsubscribe.</a>
                 </p>
             </td>
         </tr>
