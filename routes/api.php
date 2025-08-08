@@ -7,6 +7,10 @@ use App\Http\Controllers\EmailSequenceController;
 
 
 //Route::middleware([])->group(function () {
+
+    Route::get('/email-sequence/summary', [\App\Http\Controllers\API\SequenceController::class, 'dashboardSummary']);
+    Route::get('/status/queue', [\App\Http\Controllers\API\SequenceController::class, 'queueStatus']);
+
     Route::get('/unsubscribe/{token}', [SequenceController::class, 'unsubscribe'])->name('unsubscribe');
     Route::get('/email-sequence/{id}', [EmailSequenceController::class, 'show']);
     Route::put('/email-sequence/{id}', [EmailSequenceController::class, 'update']);

@@ -2,44 +2,48 @@
     <div class="navbar shadow-sm">
         <div class="navbar-start max-w-5/6 text-primary-content">
             <a class="hidden mr-4 ml-4 ">Template</a>
-            <a class="hidden md:flex mr-4  align-middle" href="/home"><span class="material-symbols-outlined align-top">home</span><span class="hidden md:block ml-2">Home</span></a>
+            <a class="hidden md:flex mr-4  align-middle" href="/dashboard"><span class="material-symbols-outlined align-top">home</span><span class="hidden md:block ml-2">Home</span></a>
             <div class="dropdown">
                 <button class="btn btn-ghost block md:hidden" tabindex="0">
                     <span class="material-symbols-outlined">Menu</span>
                 </button>
                 <ul class="menu menu-sm dropdown-content bg-base-300  rounded-box z-1 mt-3 w-52 p-2 shadow-lg border">
                     <li>
-                        <a href="/home" class="mt-1 mr-2"><span class="material-symbols-outlined align-top">home</span> Home</a>
+                        <a class="mt-1 mr-2" href="/dashboard"><span class="material-symbols-outlined align-top">home</span> Home</a>
                     </li>
-                    <li v-if="link1 > ''" class="mt-1 mr-2 ">
-                        <a :href="url1" class=""><span class="material-symbols-outlined">Palette</span> {{ link1 }}</a>
-                    </li>
-                    <li v-if="link2 > ''"  class="mt-1 mr-2">
+                    <!--
+                    <li v-if="link2 > ''" class="mt-1 mr-2">
                         <a :href="url2" class=""><span class="material-symbols-outlined">Database</span> {{ link2 }}</a>
                     </li>
-                    <li v-if="link3 > ''"  class="mt-1 mr-2 ">
+                                        <li v-if="link1 > ''" class="mt-1 mr-2 ">
+                                            <a :href="url1" class=""><span class="material-symbols-outlined">Palette</span> {{ link1 }}</a>
+                                        </li>-->
+                    <li v-if="link3 > ''" class="mt-1 mr-2 ">
                         <a :href="url3" class=""><span class="material-symbols-outlined">Table</span> {{ link3 }}</a>
                     </li>
-                    <li v-if="link4 > ''"  class="mt-1 mr-2 ">
-                        <a :href="url4" class=""><span class="material-symbols-outlined">Ballot</span> {{ link4 }}</a>
-                    </li>
+                    <!--
+                                        <li v-if="link4 > ''"  class="mt-1 mr-2 ">
+                                            <a :href="url4" class="">an class="material-symbols-outlined">Ballot</span> {{ link4 }}</a>
+                                        </li>-->
                 </ul>
             </div>
         </div>
         <div class="navbar-center hidden md:flex">
             <ul class="menu menu-horizontal px-1 text-primary-content ">
-                <li v-if="link1 > ''" class="mt-1 mr-2 ">
-                    <a :href="url1" class=""><span class="material-symbols-outlined">Palette</span> {{ link1 }}</a>
-                </li>
-                <li v-if="link2 > ''"  class="mt-1 mr-2 ">
-                    <a :href="url2" class=""><span class="material-symbols-outlined">Database</span> {{ link2 }}</a>
-                </li>
-                <li v-if="link3 > ''"  class="mt-1 mr-2 ">
+                <!--
+                               <li v-if="link2 > ''" class="mt-1 mr-2 ">
+                                   <a :href="url2" class=""><span class="material-symbols-outlined">Database</span> {{ link2 }}</a>
+                               </li>
+                                           <li v-if="link1 > ''" class="mt-1 mr-2 ">
+                                           <a :href="url1" class=""><span class="material-symbols-outlined">Palette</span> {{ link1 }}</a>
+                                       </li>-->
+                <li v-if="link3 > ''" class="mt-1 mr-2 ">
                     <a :href="url3" class=""><span class="material-symbols-outlined">Table</span> {{ link3 }}</a>
                 </li>
-                <li v-if="link4 > ''"  class="mt-1 mr-2 ">
-                    <a :href="url4" class=""><span class="material-symbols-outlined">Ballot</span> {{ link4 }}</a>
-                </li>
+                <!--
+                                <li v-if="link4 > ''"  class="mt-1 mr-2 ">
+                                    <a :href="url4" class=""><span class="material-symbols-outlined">Ballot</span> {{ link4 }}</a>
+                                </li>-->
             </ul>
         </div>
         <div class="navbar-end text-accent">

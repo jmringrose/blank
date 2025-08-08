@@ -8,7 +8,6 @@ use App\Mail\FollowUpStep;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 
-
 class marketingEmails extends Command
 {
     protected $signature = 'emails:followup';
@@ -21,13 +20,10 @@ class marketingEmails extends Command
         $totalEmails = EmailSequence::count();
         $this->info("Target: ". now());
 
+        // for test force a specific record
         //$sequences = EmailSequence::where('id', 82)->get();
-        $sequences = EmailSequence::where('next_send_at', '<=', now())->get();
-
-
+        $sequences = EmailSequence::where('next_send_at', '<=', now())->where('current','>', 0)->get();
         $this->info('Sending follow-up emails: ' . count($sequences) . " of ".  $totalEmails);
-
-
         $this->info(asset('img/emails/small/wide__DSC9054.jpg'));
 
         foreach ($sequences as $sequence) {
@@ -43,7 +39,6 @@ class marketingEmails extends Command
             } else {
                 //$sequence->delete();
             }
-            exit(1);
             sleep($seconds);
         }
         $this->info('Follow-up emails processed. '.$sent.' emails sent.');

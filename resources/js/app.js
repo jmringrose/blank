@@ -21,6 +21,7 @@ import datatabledemo from './components/datatabledemo.vue';
 import storedump from './components/StoreDump.vue';
 import formdemo from './components/FormDemo.vue';
 import EmailSequenceEdit from './components/EmailSequenceEdit.vue';
+import dashboardSequences from './components/dashboardSequences.vue';
 
 // Create Vue app
 const app = createApp({});
@@ -48,6 +49,7 @@ app.component('headingsmall', HeadingSmall);
 app.component('videoplayer', videoplayer);
 app.component('datatabledemo', datatabledemo);
 app.component('email-sequence-edit', EmailSequenceEdit);
+app.component('dashboard-sequences', dashboardSequences);
 
 // Mount the app
 app.mount('#app');

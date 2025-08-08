@@ -11,8 +11,10 @@ Route::get('/unsbscribe',  [EmailSequenceController::class, 'unsubscribe']);
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
+    Route::get('/dashboard', [\App\Http\Controllers\API\SequenceController::class, 'dashboard']);
+
     Route::get('/', [TestController::class, 'test'])->name('home');
-    Route::get('/dashboard', [TestController::class, 'test'])->name('dashboard');
+
     Route::get('/home', [TestController::class, 'test'])->name('home');
     Route::get('/test', [TestController::class, 'test'])->name('test');
     Route::get('/test2', [TestController::class, 'secondTest'])->name('test2');

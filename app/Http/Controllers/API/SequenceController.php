@@ -12,9 +12,11 @@ use Carbon\Carbon;
 
 class SequenceController extends Controller
 {
-    /**
-     * Add a new sequence entry or update an existing one.
-     */
+
+   public function dashboard() {
+       return view('dashboard');
+   }
+
     public function addToSequence(Request $request)
     {
         // Validate the incoming POST data
@@ -35,7 +37,7 @@ class SequenceController extends Controller
         $sequence->save();
 
         // Notify admin
-        Mail::to(env('ADMIN_EMAIL'))->send(new AdminSequenceNotification('subscribed', $sequence));
+        Mail::to(env('ADMIN_EMAIL'))->queue(new AdminSequenceNotification('subscribed', $sequence));
 
         // Return a success response
         return response()->json([
@@ -60,7 +62,7 @@ class SequenceController extends Controller
 
         // Notify admin
         // Notify admin
-        \Mail::to(env('ADMIN_EMAIL'))->send(new \App\Mail\AdminSequenceNotification('unsubscribed', $sequence));
+        \Mail::to(env('ADMIN_EMAIL'))->queue(new \App\Mail\AdminSequenceNotification('unsubscribed', $sequence));
 
         return view('email-sequences.unsubscribed');
     }
@@ -112,11 +114,40 @@ class SequenceController extends Controller
             'ids' => 'required|array',
             'ids.*' => 'integer'
         ]);
-
         $deletedCount = EmailSequence::whereIn('id', $validated['ids'])->delete();
-
         return response()->json([
             'message' => $deletedCount . ' sequences deleted successfully'
         ], 200);
+    }
+    public function dashboardSummary()
+    {
+        // Get total count
+        $total = \App\Models\EmailSequence::count();
+
+        // Count per current_step
+        $byStep = \App\Models\EmailSequence::select('current_step', \DB::raw('count(*) as count'))
+            ->groupBy('current_step')
+            ->orderBy('current_step')
+            ->get();
+
+        // Optionally, transform to a key=>value array for easier frontend use
+        $steps = [];
+        foreach ($byStep as $row) {
+            $steps[$row->current_step] = $row->count;
+        }
+
+        return response()->json([
+            'total' => $total,
+            'steps' => $steps
+        ]);
+    }
+    public function queueStatus()
+    {
+        $last = cache('queue_worker_heartbeat');
+        $isRunning = false;
+        if ($last && \Carbon\Carbon::parse($last)->gt(now()->subSeconds(90))) {
+            $isRunning = true;
+        }
+        return response()->json(['running' => $isRunning, 'last_seen' => $last]);
     }
 }
