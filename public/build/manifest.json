@@ -4,7 +4,7 @@
     "src": "public/loginbackground.jpg"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DD3SHr3l.css",
+    "file": "assets/app-B6LGDafw.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -14,13 +14,13 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-BC9PIb-f.js",
+    "file": "assets/app-INzybqlG.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "css": [
-      "assets/app-DMXbE01_.css",
-      "assets/app-DD3SHr3l.css"
+      "assets/app-BYfTxFC7.css",
+      "assets/app-B6LGDafw.css"
     ]
   }
 }

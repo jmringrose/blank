@@ -6,7 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
-
+use Illuminate\Support\Facades\Cache; // ← add this
 use Illuminate\Support\Facades\Config;
 
 
@@ -68,11 +68,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Route::prefix('api')->middleware('api')->group(base_path('routes/api.php'));
+      /*  Route::prefix('api')->middleware('api')->group(base_path('routes/api.php'));
         \Illuminate\Support\Facades\Queue::before(function () {
             cache(['queue_worker_heartbeat' => now()], 60); // 60 seconds expires
+        });*/
+        Queue::looping(function () {
+            Cache::put('queue:heartbeat:global', now()->toIso8601String(), now()->addSeconds(180));
         });
-
 
     }
 

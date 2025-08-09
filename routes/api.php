@@ -4,6 +4,7 @@
 use App\Http\Controllers\API\SequenceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EmailSequenceController;
+use Illuminate\Support\Facades\Cache;
 
 
 //Route::middleware([])->group(function () {
@@ -21,4 +22,8 @@ use App\Http\Controllers\EmailSequenceController;
     Route::delete('/sequence/bulk', [SequenceController::class, 'bulkDestroy']);
     Route::post('/sequence/bulk-delete', [SequenceController::class, 'bulkDelete']);
 
+
+
+
+Route::get('/health/queue', [SequenceController::class, 'queueHealth']);
 //});

@@ -17,11 +17,12 @@ import test from './components/test.vue';
 import tabdemo from './components/TabDemo.vue';
 import HeadingSmall from './components/HeadingSmall.vue';
 import videoplayer from './components/VideoPlayer.vue';
-import datatabledemo from './components/datatabledemo.vue';
+import Datatable from './components/datatable.vue';
 import storedump from './components/StoreDump.vue';
 import formdemo from './components/FormDemo.vue';
 import EmailSequenceEdit from './components/EmailSequenceEdit.vue';
 import dashboardSequences from './components/dashboardSequences.vue';
+import QueueStatus from './components/QueueStatus.vue';
 
 // Create Vue app
 const app = createApp({});
@@ -47,9 +48,10 @@ app.component('formdemo', formdemo);
 app.component('tabdemo', tabdemo);
 app.component('headingsmall', HeadingSmall);
 app.component('videoplayer', videoplayer);
-app.component('datatabledemo', datatabledemo);
+app.component('datatable', Datatable);
 app.component('email-sequence-edit', EmailSequenceEdit);
 app.component('dashboard-sequences', dashboardSequences);
+app.component('queuestatus', QueueStatus);
 
 // Mount the app
 app.mount('#app');

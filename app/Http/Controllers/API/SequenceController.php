@@ -150,4 +150,29 @@ class SequenceController extends Controller
         }
         return response()->json(['running' => $isRunning, 'last_seen' => $last]);
     }
+
+    public function queueHealth()
+    {
+        $threshold = (int) env('QUEUE_HEARTBEAT_THRESHOLD', 180);
+        $ts = cache()->get('queue:heartbeat:global');
+
+        $running = false;
+        $age = null;
+
+        if ($ts) {
+            $last = Carbon::parse($ts)->utc();
+            $now = now()->utc();
+            $age = $now->diffInSeconds($last, true);
+            $running = $age <= $threshold;
+        }
+
+        return response()->json([
+            'running' => $running,
+            'last_seen' => $ts,
+            'age_sec' => $age,
+            'cache_store' => config('cache.default'),
+            'checked_at' => now()->toIso8601String(),
+        ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+          ->header('Pragma', 'no-cache');
+    }
 }

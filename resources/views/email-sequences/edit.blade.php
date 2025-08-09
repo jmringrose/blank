@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div id="email-sequence-edit-app">
+    <div id="email-sequence-edit-app" class="bg-base-300 w-lg p-2 content-center mx-auto border border-stone-500 rounded-2xl mt-12">
         <email-sequence-edit></email-sequence-edit>
     </div>
 @endsection

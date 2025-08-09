@@ -1,8 +1,11 @@
 <template>
     <div class="navbar shadow-sm">
-        <div class="navbar-start max-w-5/6 text-primary-content">
+        <div class="container flex mx-auto">
+        <div class="navbar-start text-primary-content">
             <a class="hidden mr-4 ml-4 ">Template</a>
             <a class="hidden md:flex mr-4  align-middle" href="/dashboard"><span class="material-symbols-outlined align-top">home</span><span class="hidden md:block ml-2">Home</span></a>
+
+
             <div class="dropdown">
                 <button class="btn btn-ghost block md:hidden" tabindex="0">
                     <span class="material-symbols-outlined">Menu</span>
@@ -49,6 +52,7 @@
         <div class="navbar-end text-accent">
             <switcher :id=props.id :theme=props.theme></switcher>
             <button class="ml-2 btn btn-sm btn-secondary font-semibold" @click="logout">Logout</button>
+        </div>
         </div>
     </div>
 </template>

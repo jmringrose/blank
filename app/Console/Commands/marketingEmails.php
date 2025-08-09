@@ -6,7 +6,6 @@ use Illuminate\Console\Command;
 use App\Models\EmailSequence;
 use App\Mail\FollowUpStep;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\DB;
 
 class marketingEmails extends Command
 {

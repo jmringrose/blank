@@ -11,7 +11,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         // Register custom commands here
-        \App\Console\Commands\marketingEmails::class, // Add your custom command here
+        \App\Console\Commands\marketingEmails::class,
+        \App\Console\Commands\SendTestEmail::class,
     ];
     /**
      * Define the application's command schedule.
