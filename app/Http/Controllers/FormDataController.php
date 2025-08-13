@@ -8,12 +8,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
-class HomeController extends Controller
+class FormDataController extends Controller
 {
 
     //=====================================================================================================
-    public function dashboard() {
-        return view('dashboard');
+    public function index()
+    {
+        return view('form-data.form_datatable');
     }
 
     /**

@@ -42,17 +42,18 @@
                           name="{{ Auth()->user()->name}}"
                           id="{{ Auth()->user()->id }}"
 
-                          link1="Tailwind"
-                          url1="/test"
+                          link1="Dashboard"
+                          url1="/dashboard"
 
-                          link2="Pina"
-                          url2="/test2"
+                          link2="Form Data"
+                          url2="/formdata"
 
-                          link3="DataTable"
-                          url3="/test3"
+                          link3="Sequences"
+                          url3="/sequences"
 
-                          link4="Forms"
+                          link4=""
                           url4="/test4"
+
                           theme="{{ Auth()->user()->theme }}"
             ></headingsmall>
             <!-- Page Heading -->

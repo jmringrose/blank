@@ -32,6 +32,8 @@
     @endphp
     @vite('resources/css/app.css')
     @vite('resources/css/login.css')
+    @vite('resources/js/app.js')
+
 </head>
 <body class=''>
 <div class="bg"></div>

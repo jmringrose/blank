@@ -3,21 +3,49 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use App\Models\EmailSequence;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\AdminSequenceNotification;
 use Carbon\Carbon;
 
-class SequenceController extends Controller
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+
+class APISequenceController extends Controller
 {
 
-   public function dashboard() {
-       return view('dashboard');
-   }
-
-    public function addToSequence(Request $request)
+    //=====================================================================================================
+    public function sequencedata()
+    {
+        return EmailSequence::all()->toJson();
+    }
+    //=====================================================================================================
+    public function getSequence($id): \Illuminate\Http\JsonResponse
+    {
+        $emailSequence = EmailSequence::findOrFail($id);
+        return response()->json($emailSequence);
+    }
+    //=====================================================================================================
+    public function updateSequence(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'first'        => 'required|string|max:255',
+            'last'         => 'required|string|max:255',
+            'email'        => 'required|email|max:255',
+            'current_step' => 'required|integer|min:0',
+            'unsub_token'  => 'nullable|string|max:255',
+            'next_send_at' => 'nullable|date',
+        ]);
+        $emailSequence = EmailSequence::findOrFail($id);
+        $emailSequence->update($validated);
+        return response()->json([
+            'success' => true,
+            'message' => 'Email sequence updated successfully!',
+            'data'    => $emailSequence
+        ]);
+    }
+   //=====================================================================================================
+    public function saveSequence(Request $request)
     {
         // Validate the incoming POST data
         $validated = $request->validate([
@@ -45,7 +73,7 @@ class SequenceController extends Controller
             'sequence' => $sequence,
         ], 200);
     }
-
+    //=====================================================================================================
     public function unsubscribe($token)
     {
         $sequence = \App\Models\EmailSequence::where('unsub_token', $token)->first();
@@ -66,7 +94,7 @@ class SequenceController extends Controller
 
         return view('email-sequences.unsubscribed');
     }
-
+    //=====================================================================================================
     /**
      * Reset the sequence based on the given sequence ID.
      */
@@ -91,7 +119,7 @@ class SequenceController extends Controller
             'sequence' => $sequence,
         ], 200);
     }
-
+    //=====================================================================================================
     /**
      * Delete a single sequence.
      */
@@ -104,7 +132,7 @@ class SequenceController extends Controller
             'message' => 'Sequence deleted successfully'
         ], 200);
     }
-
+    //=====================================================================================================
     /**
      * Delete multiple sequences.
      */

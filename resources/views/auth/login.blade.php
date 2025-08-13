@@ -2,7 +2,8 @@
 
 @section('content')
     <div class="bg-overlay"></div>
-    <div class="center-container">
+    <div class="center-container" id="app">
+        <login></login>
         <div class="panel">
             <div class="bg"></div>
             <div class="bg-overlay"></div>
@@ -13,6 +14,7 @@
                 <div class="form-group text-2xl font-semibold text-center">
                     <h2>James' Videos Login</h2>
                 </div>
+                <!--
                 <form method="POST" action="{{ route('login') }}" aria-label="{{ __('Login') }}" class="rounded" autocomplete="on">
                     @csrf
                     <div class="form-group">
@@ -52,6 +54,7 @@
                         </div>
                     </div>
                 </form>
+                -->
             </div>
         </div>
     </div>

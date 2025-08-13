@@ -9,11 +9,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 class RecordController extends Controller
 {
-    //=====================================================================================================
-    public function history()
-    {
-        return Sequence::all()->toJson();
-    }
+
     //=====================================================================================================
     public function test(Request $request): View
     {

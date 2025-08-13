@@ -1,11 +1,6 @@
 <template>
     <!-- header stuff  -->
     <div class="flex mb-4 text-base-content">
-        <div class="mr-4">
-            <button :disabled="!itemsSelected.length" class="btn btn-error btn-sm" @click="confirmDeleteSelected">
-                Delete
-            </button>
-        </div>
         <span class="mr-2 mt-2 text-sm">Search specific field:</span>
         <select v-model="searchField" class="ml-2 mr-4 select bg-secondary select-sm w-36 ">
             <option selected value="">Pick Something</option>
@@ -44,8 +39,7 @@
         </div>
     </div>
     <EasyDataTable
-        v-model:items-selected="itemsSelected"
-        :expand-column-width=10
+        :expand-column-width="50"
         :headers="filteredHeaders"
         :items="items"
         :row-class-name="rowClass"
@@ -59,36 +53,41 @@
         sort-type="desc"
         table-class-name="customize-table"
         theme-color="#1d90ff"
+        hide-rows-per-page
     >
-        <template #item-next_send_at="{ next_send_at }">
-            <div class="text-center">
-    <span
-        :class="getRelativeDate(next_send_at).class"
-        :title="next_send_at ? new Date(next_send_at).toLocaleString() : 'Not scheduled'"
-    >
-        {{ getRelativeDate(next_send_at).display }}
-    </span>
-                <!-- Hidden ISO date string for sorting -->
-                <span class="sr-only">{{ next_send_at || '9999-12-31' }}</span>
-            </div>
-        </template>
+
         <template #item-actions="item">
             <div class="flex justify-center">
                 <button class="btn btn-sm btn-secondary h-6 w-6 mr-1" @click.stop="confirmDeleteItem(item)"><span class="!text-base material-symbols-outlined">delete</span></button>
                 <button class="btn btn-sm btn-secondary h-6 w-6  mr-1" @click.stop="editItem(item)"><span class="!text-base material-symbols-outlined">edit</span></button>
-                <!--                <button class="btn btn-sm btn-secondary" @click.stop="deleteItem(item)"><span class="!text-base material-symbols-outlined">file_copy</span></button>-->
             </div>
         </template>
-        <!-- Custom slot for unsub_token column -->
-        <template #item-unsub_token="{ unsub_token }">
-          <span
-              :class="unsub_token ? 'text-green-600' : 'text-red-600'"
-              :title="unsub_token ? 'Unsubscribe token exists' : 'No unsubscribe token'"
-              class="font-bold text-lg"
-          >
-            {{ unsub_token ? '✓' : '✗' }}
-          </span>
+
+
+        <template #item-date_created="{ date_created }">
+            <span :title="date_created">{{ formatDate(date_created) }}</span>
         </template>
+
+        <!-- Tour Date field formatting -->
+        <template #item-fields.select-1="item">
+            <span :title="item.fields['select-1']">{{ formatTourDate(item.fields['select-1']) }}</span>
+        </template>
+
+        <!-- Expand template to show all form fields -->
+        <template #expand="item">
+            <div class="p-3 bg-stone-500 rounded text-yellow-100">
+                <h4 class="font-bold mb-1 font-semibold text-stone-900 text-xl">Form Fields:</h4>
+                <hr class="text-stone-700 mb-3">
+                <div class="grid grid-cols-2 gap-2">
+                    <div v-for="(value, key) in item.fields" :key="key" v-show="!excludeFromExpand.includes(key)" class="flex">
+                        <span class="font-medium w-32 text-stone-900">{{ translateMetaKey(key) }}:</span>
+                        <span v-if="value && value.includes(',')" class="whitespace-pre-line text-gray-200">{{ value.replace(/,/g, ',\n') }}</span>
+                        <span v-else class="text-gray-200">{{ value }}</span>
+                    </div>
+                </div>
+            </div>
+        </template>
+
         <template #pagination="{ prevPage, nextPage, isFirstPage, isLastPage }">
             <div class="custom-pagination">
                 <button
@@ -107,6 +106,7 @@
                 </button>
             </div>
         </template>
+
     </EasyDataTable>
     <!-- Loading and error states -->
     <div v-if="loading" class="flex justify-center my-4">
@@ -140,17 +140,62 @@ import {useToast} from "vue-toastification";
 // Toast instance
 const toast = useToast();
 
+// Meta key lookup map
+const metaKeyLookup = {
+    'name-1': 'Users Name',
+    '_forminator_user_ip': 'Users IP',
+    'email-1': 'Email Address',
+    'select-1': 'Tour Start',
+    'checkbox-1': 'Diet',
+    'checkbox-2': 'Fitness',
+    'slider-1': 'Bird',
+    'slider-2': 'Wildlife',
+    'slider-3': 'Landscape',
+    'slider-4': 'Documentary',
+    'slider-5': 'Lighhroom',
+    'slider-6': 'Contests',
+    'radio-2': 'Tech Skill',
+    'radio-1': 'Lightroom',
+    'textarea-1': 'Special Needs'
+    // Add more mappings as needed
+};
+
+const translateMetaKey = (key: string) => {
+    return metaKeyLookup[key] || key;
+};
+
+// Fields to exclude from expand view (already shown in table)
+const excludeFromExpand = ['name-1', 'email-1', 'select-1'];
+
+const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+};
+
+const formatTourDate = (dateRange: string) => {
+    if (!dateRange) return 'N/A';
+    // Extract first date from "February 1 - February 7" format
+    const firstDate = dateRange.split(' - ')[0];
+    return firstDate;
+};
+
 // =====================
 // Table Headers
 // =====================
 const headers = [
-    {text: "ID", value: "id", sortable: true, width: 100},
-    {text: "First", value: "first", sortable: true, width: 100},
-    {text: "Last", value: "last", sortable: true, width: 100},
-    {text: "Email", value: "email", sortable: true, width: 100},
-    {text: "Current", value: "current_step", sortable: true, width: 80},
-    {text: "Next", value: "next_send_at", sortable: true, width: 100},
-    {text: "Unsub", value: "unsub_token", sortable: true, width: 100},
+    {text: "ID", value: "entry_id", sortable: true, width: 59},
+    {text: "Tour Date", value: "fields.select-1", sortable: true, width: 180},
+    {text: "Name", value: "fields.name-1", sortable: true, width: 180},
+    {text: "Email", value: "fields.email-1", sortable: true, width: 200},
+    {text: "Created", value: "date_created", sortable: true, width: 180},
     {text: "Actions", value: "actions", width: 80}
 ];
 
@@ -184,7 +229,7 @@ const rowClass = (item) => {
 const getHistory = () => {
     loading.value = true;
     error.value = "";
-    axios.get('/sequences/data')
+    axios.get('/forms/data')
         .then((res) => {
             items.value = res.data; // Assign response data to table items
         })
@@ -428,8 +473,8 @@ const toggleColumnVisibility = (columnValue: string) => {
     --easy-table-body-row-height: 20px;
     --easy-table-body-row-font-size: 14px;
 
-    --easy-table-body-row-hover-font-color: #2d3a4f;
-    --easy-table-body-row-hover-background-color: rgba(202, 217, 232, 0.8);
+    --easy-table-body-row-hover-font-color: #2d3a4f !important;
+    --easy-table-body-row-hover-background-color: #374151 !important;
     --easy-table-body-item-padding: 10px 15px;
 
     --easy-table-footer-background-color: #2d3a4f;

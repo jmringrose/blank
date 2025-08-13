@@ -2,6 +2,16 @@
     <div class="max-w-2xl mx-auto p-6">
         <h1 class="text-2xl font-bold mb-6">Edit Email Sequence</h1>
 
+
+        <template>
+            <div>
+                <div v-if="loading">Loading…</div>
+                <div v-else-if="error">Error: {{ error }}</div>
+                <pre v-else>{{ me }}</pre>
+            </div>
+        </template>
+
+
         <div v-if="loading" class="flex justify-center my-4">
             <div class="loading loading-spinner loading-lg"></div>
         </div>
@@ -129,7 +139,8 @@ import { ref, reactive, onMounted } from 'vue';
 import { useToast } from "vue-toastification";
 
 const toast = useToast();
-
+const error = ref('');
+const me = ref(null); // or your resource
 const loading = ref(true);
 const processing = ref(false);
 const errors = ref({});
@@ -154,9 +165,8 @@ onMounted(() => {
 
 const loadEmailSequence = async () => {
     try {
-        const response = await axios.get(`/api/email-sequence/${emailSequenceId.value}`);
+        const response = await axios.get(`/api/getsequence/${emailSequenceId.value}`);
         const data = response.data;
-
         form.first = data.first || '';
         form.last = data.last || '';
         form.email = data.email || '';
@@ -178,7 +188,7 @@ const updateEmailSequence = async () => {
     errors.value = {};
 
     try {
-        const response = await axios.put(`/api/email-sequence/${emailSequenceId.value}`, form);
+        const response = await axios.put(`/api/updatesequence/${emailSequenceId.value}`, form);
         toast.success('Email sequence updated successfully!');
 
         // Optionally redirect or update form with returned data
@@ -205,6 +215,6 @@ const updateEmailSequence = async () => {
 };
 
 const goBack = () => {
-    window.location.href = '/test3';
+    window.location.href = '/sequences';
 };
 </script>

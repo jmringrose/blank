@@ -12,13 +12,11 @@
         import EmailSequenceEdit from '@/components/EmailSequenceEdit.vue';
         import { createPinia } from 'pinia';
         import Toast from "vue-toastification";
-
         const app = createApp({
             components: {
                 EmailSequenceEdit
             }
-        });
-
+        })
         app.use(createPinia());
         app.use(Toast);
         app.mount('#email-sequence-edit-app');

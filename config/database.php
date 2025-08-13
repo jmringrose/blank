@@ -28,7 +28,6 @@ return [
     | is supported by Laravel. You're free to add / remove connections.
     |
     */
-
     'connections' => [
 
         'sqlite' => [
@@ -42,15 +41,22 @@ return [
             'synchronous' => null,
         ],
 
-        'sqlite_remote' => [
-            'driver' => 'sqlite',
-            'url' => env('DB_REMOTE_URL'),
-            'database' => env('DB_REMOTE_DATABASE'),
-            'prefix' => '',
-            'foreign_key_constraints' => env('DB_REMOTE_FOREIGN_KEYS', true),
-            'busy_timeout' => env('DB_REMOTE_BUSY_TIMEOUT', 2000),
-            'journal_mode' => env('DB_REMOTE_JOURNAL_MODE', 'WAL'),
-            'synchronous' => env('DB_REMOTE_SYNCHRONOUS', 'NORMAL'),
+        // your default connection...
+        'wordpress' => [
+            'driver'   => 'mysql',
+            'host'     => '127.0.0.1',
+            'port'     => '3306',
+            'database' => 'costarica',
+            'username' => 'wp_reader',
+            'password' => 'dzEg8%Hs6$PRW!Y%3x',
+            'charset'  => 'utf8mb4',
+            'collation'=> 'utf8mb4_unicode_ci',
+            'prefix'   => '',
+            'strict'   => false,
+            'options' => [
+                \PDO::ATTR_TIMEOUT => 5,
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+            ],
         ],
 
         'mysql' => [
