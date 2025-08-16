@@ -10,12 +10,13 @@ class SequenceController extends Controller
    //=====================================================================================================
     public function index()
     {
-        return view('email-sequences.sequence_datatable');
+        return view('marketing-sequences.sequence_datatable');
     }
     //=====================================================================================================
     public function edit($id)
     {
-        return view('email-sequences.edit');
+        $sequence = EmailSequence::findOrFail($id);
+        return view('marketing-sequences.edit', compact('sequence'));
     }
     //=====================================================================================================
     public function show($id): \Illuminate\Http\JsonResponse

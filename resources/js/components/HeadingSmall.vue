@@ -3,14 +3,14 @@
         <div class="container flex mx-auto">
             <div class="navbar-start text-primary-content">
                 <a class="hidden mr-4 ml-4 ">Template</a>
-                <a class="hidden md:flex mr-4  align-middle" href="/dashboard"><span class="material-symbols-outlined align-top">home</span><span class="hidden md:block ml-2">Home</span></a>
+                <a class="hidden md:flex mr-4  align-middle" href="/dashboard"><span class="material-symbols-outlined align-top">home</span><span class="hidden md:block ml-2">Dashboard</span></a>
                 <div class="dropdown">
                     <button class="btn btn-ghost block md:hidden" tabindex="0">
                         <span class="material-symbols-outlined">Menu</span>
                     </button>
                     <ul class="menu menu-sm dropdown-content bg-base-300  rounded-box z-1 mt-3 w-52 p-2 shadow-lg border">
                         <li>
-                            <a class="mt-1 mr-2" href="/dashboard"><span class="material-symbols-outlined align-top">home</span> Home</a>
+                            <a class="mt-1 mr-2" href="/dashboard"><span class="material-symbols-outlined align-top">home</span> Dashboard</a>
                         </li>
                         <li v-if="link1 > ''" class="mt-1 mr-2 ">
                             <a :href="url1" class=""><span class="material-symbols-outlined">Palette</span> {{ link1 }}</a>
@@ -27,6 +27,9 @@
                         <li v-if="link4 > ''" class="mt-1 mr-2 ">
                             <a :href="url4" class=""><span class="material-symbols-outlined">Ballot</span> {{ link4 }}</a>
                         </li>
+                        <li v-if="link5 > ''" class="mt-1 mr-2 ">
+                            <a :href="url5" class=""><span class="material-symbols-outlined">mail</span> {{ link5 }}</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -35,7 +38,6 @@
                     <li v-if="link1 > ''" class="mt-1 mr-2 ">
                         <a :href="url1" class=""><span class="material-symbols-outlined">Palette</span> {{ link1 }}</a>
                     </li>
-
                     <li v-if="link2 > ''" class="mt-1 mr-2 ">
                         <a :href="url2" class=""><span class="material-symbols-outlined">Database</span> {{ link2 }}</a>
                     </li>
@@ -45,6 +47,9 @@
                     </li>
                     <li v-if="link4 > ''" class="mt-1 mr-2 ">
                         <a :href="url4" class=""><span class="material-symbols-outlined">Ballot</span> {{ link4 }}</a>
+                    </li>
+                    <li v-if="link5 > ''" class="mt-1 mr-2 ">
+                        <a :href="url5" class=""><span class="material-symbols-outlined">mail</span> {{ link5 }}</a>
                     </li>
                 </ul>
             </div>
@@ -69,6 +74,8 @@ interface Props {
     url3: string;
     link4: string;
     url4: string;
+    link5: string;
+    url5: string;
     theme: string;
 }
 
@@ -98,12 +105,12 @@ const logout = async () => {
     auth.logout()
     localStorage.removeItem('api_token')
     delete axios.defaults.headers.common['Authorization']
-    
+
     // Create form to submit to web logout route (destroys session)
     const form = document.createElement('form')
     form.method = 'POST'
     form.action = '/logout'
-    
+
     // Add CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
     if (csrfToken) {
@@ -113,7 +120,7 @@ const logout = async () => {
         csrfInput.value = csrfToken
         form.appendChild(csrfInput)
     }
-    
+
     document.body.appendChild(form)
     form.submit()
 }

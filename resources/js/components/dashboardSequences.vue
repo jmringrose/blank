@@ -1,13 +1,15 @@
 <template>
- <div class="max-w-md mx-auto bg-base-100 rounded-xl shadow-md overflow-hidden border text-gray-700 dark:text-gray-300 p-4 mt-12 align-middle">
-        <h1 class="text-xl font-bold">Sequences Dashboard</h1>
+<div class="container mx-auto p-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Sequences Dashboard -->
+        <div class="bg-base-100 rounded-xl shadow-md border p-4">
+            <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Marketing Sequences</h1>
         <div class="my-4">
             <p class="text-lg">Total Sequences: <b>{{ summary.total }}</b>
                 <button
                     :disabled="isLoading"
                     class="ml-3 px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-blue-700 text-sm float-right"
-                    @click="fetchSummary"
-                >
+                    @click="fetchSummary">
                     <LucideRefreshCw class="inline w-4 h-4 mr-1"/>
                     Refresh
                 </button>
@@ -20,21 +22,23 @@
         <div>
             <table class="min-w-96 border border-gray-200 mx-auto">
                 <thead>
-                <tr class="bg-base-200">
+                <tr class="bg-base-100">
                     <th class="px-2 py-1 border w-1/2">Step</th>
                     <th class="px-2 py-1 border">Count</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="(count, step) in summary.steps" :key="step" class="bg-neutral-700">
-                    <td class="px-2 py-1 border">{{ step }}</td>
+                <tr v-for="(count, step) in summary.steps" :key="step" class="bg-neutral-500 text-gray-100">
+                    <td class="px-2 py-1 border">{{ getStepName(step) }}</td>
                     <td class="px-2 py-1 border">{{ count }}</td>
                 </tr>
                 </tbody>
             </table>
+            </div>
         </div>
-    </div>
-    <div class="max-w-md mx-auto bg-base-100 rounded-xl shadow-md overflow-hidden border text-gray-200 p-4 mt-12 align-middle">
+
+        <!-- Queue Status -->
+        <div class="bg-base-100 rounded-xl shadow-md border p-4">
 
         <div class="flex px-4 mb-6">
 
@@ -46,7 +50,7 @@
            </div>
 
             <div class="font-bold text-md">
-                Queue Worker: <span :class="queueStatus.running ? 'text-green-600' : 'text-red-600'">{{ queueStatus.running ? 'Running' : 'Not Running' }}</span>
+                <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Queue Worker: <span :class="queueStatus.running ? 'text-green-600' : 'text-red-500'">{{ queueStatus.running ? 'Running' : 'Not Running' }}</span></h1>
             </div>
 
             <div class="flex-1 text-right w-32">
@@ -89,10 +93,75 @@
                 </td>
             </tr>
             </tbody>
-        </table>
+            </table>
+        </div>
+
+        <!-- WordPress Forms -->
+        <div class="bg-base-100 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 p-4">
+            <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Pre-Trip Survey Forms</h1>
+        <div class="my-4">
+            <p class="text-lg">Total Form Entries: <b>{{ formCount.total }}</b>
+                <button
+                    :disabled="isLoading"
+                    class="ml-3 px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-blue-700 text-sm float-right"
+                    @click="fetchFormCount"
+                >
+                    <LucideRefreshCw class="inline w-4 h-4 mr-1"/>
+                    Refresh
+                </button>
+            </p>
+        </div>
+
+        <div class="mt-6">
+            <h3 class="text-md font-semibold mb-3">User Forms Summary</h3>
+            <div class="overflow-x-auto">
+                <table class="table table-sm w-full">
+                    <thead>
+                        <tr>
+                            <th class="text-left">Name</th>
+                            <th class="text-left">Forms</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="user in userFormsSummary" :key="user.name">
+                            <td class="text-sm">{{ user.name }}</td>
+                            <td>
+                                <span v-for="n in user.forms_completed" :key="n" class="text-green-500 mr-1">✓</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+
+        <!-- Newsletter Sequences -->
+        <div class="bg-base-100 rounded-xl shadow-md border text-gray-700 dark:text-gray-50 p-4">
+            <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Customer Update Newsletter Sequences</h1>
+        <div class="mt-6">
+            <div class="overflow-x-auto">
+                <table class="table table-sm w-full">
+                    <thead>
+                        <tr>
+                            <th class="text-left">Name</th>
+                            <th class="text-left">Step</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="user in newsletterSummary" :key="user.name">
+                            <td class="text-sm">{{ user.name }}</td>
+                            <td class="text-sm">
+                                <span v-if="user.current_step === 0" class="badge badge-error badge-sm">Unsubscribed</span>
+                                <span v-else>{{ user.current_step }}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
     </div>
-
-
+</div>
 </template>
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
@@ -127,7 +196,27 @@ const toast = useToast()
 const loading = ref(true)
 const error = ref('')
 const summary = ref({ total: 0, steps: {} })
+
+// Step lookup array
+const stepNames = {
+    0: 'Unsubscribed',
+    1: 'Introduction',
+    2: 'Why Costa Rica',
+    3: 'TBD',
+    4: 'TBD',
+    5: 'TBD',
+    6: 'TBD',
+    7: 'TBD',
+    8: 'TBD',
+    9: 'TBD',
+    10: 'TBD'
+}
+
+const getStepName = (step) => stepNames[step] || `Step ${step}`
 const queueStatus = ref({ running: false, last_seen: null })
+const formCount = ref({ total: 0 })
+const userFormsSummary = ref([])
+const newsletterSummary = ref([])
 const lastChecked = ref(null)
 const isLoading = ref(false)
 let intervalId = null
@@ -139,6 +228,7 @@ async function fetchSummary() {
         const { data } = await api.get('/email-sequence/summary')
         summary.value = data
         lastChecked.value = new Date()
+        toast.success('Marketing sequences refreshed')
     } catch (e) {
         console.error('Error fetching summary:', e)
         toast.error('Failed to fetch summary')
@@ -157,6 +247,39 @@ async function getStatus() {
     } catch (e) {
         console.error('Error fetching queue status:', e)
         toast.error('Failed to fetch queue status')
+    }
+}
+
+// --- Load form count ---
+async function fetchFormCount() {
+    try {
+        const { data } = await api.get('/forms/count')
+        formCount.value = data
+    } catch (e) {
+        console.error('Error fetching form count:', e)
+        toast.error('Failed to fetch form count')
+    }
+}
+
+// --- Load user forms summary ---
+async function fetchUserFormsSummary() {
+    try {
+        const { data } = await api.get('/forms/user-summary')
+        userFormsSummary.value = data
+    } catch (e) {
+        console.error('Error fetching user forms summary:', e)
+        toast.error('Failed to fetch user forms summary')
+    }
+}
+
+// --- Load newsletter summary ---
+async function fetchNewsletterSummary() {
+    try {
+        const { data } = await api.get('/newsletter-sequences/summary')
+        newsletterSummary.value = data
+    } catch (e) {
+        console.error('Error fetching newsletter summary:', e)
+        toast.error('Failed to fetch newsletter summary')
     }
 }
 
@@ -207,6 +330,9 @@ async function initialLoad() {
     try {
         await fetchSummary()
         await getStatus()
+        await fetchFormCount()
+        await fetchUserFormsSummary()
+        await fetchNewsletterSummary()
     } catch (e) {
         error.value = e?.message || 'Failed to load data'
     } finally {
@@ -219,6 +345,9 @@ onMounted(() => {
     intervalId = setInterval(() => {
         fetchSummary()
         getStatus()
+        fetchFormCount()
+        fetchUserFormsSummary()
+        fetchNewsletterSummary()
     }, 2 * 60 * 1000)
 })
 

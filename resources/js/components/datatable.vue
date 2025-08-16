@@ -428,8 +428,8 @@ const toggleColumnVisibility = (columnValue: string) => {
     --easy-table-body-row-height: 20px;
     --easy-table-body-row-font-size: 14px;
 
-    --easy-table-body-row-hover-font-color: #2d3a4f;
-    --easy-table-body-row-hover-background-color: rgba(202, 217, 232, 0.8);
+    --easy-table-body-row-hover-font-color: #c9cfd9 !important;
+    --easy-table-body-row-hover-background-color: #626d80 !important;
     --easy-table-body-item-padding: 10px 15px;
 
     --easy-table-footer-background-color: #2d3a4f;

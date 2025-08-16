@@ -4,42 +4,54 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\EmailSequence;
-use App\Mail\FollowUpStep;
+use App\Mail\MarketingEmail;
 use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 
 class marketingEmails extends Command
 {
-    protected $signature = 'emails:followup';
-    protected $description = 'Send follow-up emails based on sequence steps';
+    protected $signature = 'marketing:send';
+    protected $description = 'Send marketing email sequence steps';
 
     public function handle()
     {
-        $sent = 0;
-        $seconds = 5;
-        $totalEmails = EmailSequence::count();
-        $this->info("Target: ". now());
+        $this->info('Starting marketing email processing...');
+        
+        $sequences = EmailSequence::where('next_send_at', '<=', Carbon::now())
+            ->where('current_step', '>', 0)
+            ->get();
 
-        // for test force a specific record
-        //$sequences = EmailSequence::where('id', 82)->get();
-        $sequences = EmailSequence::where('next_send_at', '<=', now())->where('current','>', 0)->get();
-        $this->info('Sending follow-up emails: ' . count($sequences) . " of ".  $totalEmails);
-        $this->info(asset('img/emails/small/wide__DSC9054.jpg'));
+        $this->info("Found {$sequences->count()} sequences ready to send.");
 
         foreach ($sequences as $sequence) {
-            $this->info("Target: ". now()." - Next: ".$sequence->next_send_at);
-            Mail::to($sequence->email)->send(new FollowUpStep($sequence));
-            if ($sequence->current_step < 5) {
-                $sequence->current_step++;
-                $sequence->next_send_at = now()->addDays(2);
-                $sequence->save();
-                $this->info('Sent follow-up email to ' . $sequence->email);
-                $sent++;
-
-            } else {
-                //$sequence->delete();
-            }
-            sleep($seconds);
+            $this->processSequence($sequence);
         }
-        $this->info('Follow-up emails processed. '.$sent.' emails sent.');
+
+        $this->info('Marketing email processing completed.');
+    }
+
+    private function processSequence($sequence)
+    {
+        if ($sequence->current_step <= 0) {
+            $this->warn("Sequence {$sequence->id} is unsubscribed (step {$sequence->current_step})");
+            return;
+        }
+
+        if ($sequence->current_step >= 5) {
+            $this->warn("Sequence {$sequence->id} has completed all steps.");
+            return;
+        }
+
+        try {
+            Mail::to($sequence->email)->send(new MarketingEmail($sequence));
+            
+            $sequence->current_step += 1;
+            $sequence->next_send_at = Carbon::now()->addDays(7);
+            $sequence->save();
+            
+            $this->info("Sent marketing email step {$sequence->current_step} to {$sequence->email}");
+        } catch (\Exception $e) {
+            $this->error("Failed to send marketing email to {$sequence->email}: {$e->getMessage()}");
+        }
     }
 }

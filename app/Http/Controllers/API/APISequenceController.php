@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\EmailSequence;
 use App\Mail\AdminSequenceNotification;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -92,7 +92,7 @@ class APISequenceController extends Controller
         // Notify admin
         \Mail::to(env('ADMIN_EMAIL'))->queue(new \App\Mail\AdminSequenceNotification('unsubscribed', $sequence));
 
-        return view('email-sequences.unsubscribed');
+        return view('marketing.legacy-unsubscribed');
     }
     //=====================================================================================================
     /**
@@ -150,10 +150,10 @@ class APISequenceController extends Controller
     public function dashboardSummary()
     {
         // Get total count
-        $total = \App\Models\EmailSequence::count();
+        $total = EmailSequence::count();
 
         // Count per current_step
-        $byStep = \App\Models\EmailSequence::select('current_step', \DB::raw('count(*) as count'))
+        $byStep = EmailSequence::select('current_step', DB::raw('count(*) as count'))
             ->groupBy('current_step')
             ->orderBy('current_step')
             ->get();

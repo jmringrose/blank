@@ -39,6 +39,45 @@ class APIFormController extends Controller
 
         return response()->json(array_values($forms));
     }
+    //=====================================================================================================
+    public function formCount()
+    {
+        $count = DB::connection('wordpress')
+            ->table('wp_frmt_form_entry_meta')
+            ->distinct('entry_id')
+            ->count('entry_id');
+
+        return response()->json(['total' => $count]);
+    }
+
+    public function userFormsSummary()
+    {
+        $entries = DB::connection('wordpress')
+            ->table('wp_frmt_form_entry_meta')
+            ->select('entry_id', 'meta_value')
+            ->where('meta_key', 'name-1')
+            ->get();
+
+        $userForms = [];
+        foreach ($entries as $entry) {
+            $name = $entry->meta_value;
+            if (!isset($userForms[$name])) {
+                $userForms[$name] = [];
+            }
+            $userForms[$name][] = $entry->entry_id;
+        }
+
+        $summary = [];
+        foreach ($userForms as $name => $entryIds) {
+            $summary[] = [
+                'name' => $name,
+                'forms_completed' => count($entryIds),
+                'entry_ids' => $entryIds
+            ];
+        }
+
+        return response()->json($summary);
+    }
    //=====================================================================================================
     public function addToSequence(Request $request)
     {
@@ -87,7 +126,7 @@ class APIFormController extends Controller
         // Notify admin
         \Mail::to(env('ADMIN_EMAIL'))->queue(new \App\Mail\AdminSequenceNotification('unsubscribed', $sequence));
 
-        return view('email-sequences.unsubscribed');
+        return view('marketing.legacy-unsubscribed');
     }
     //=====================================================================================================
     /**

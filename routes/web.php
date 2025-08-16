@@ -9,6 +9,9 @@ use App\Http\Controllers\HomeController;
 
 // public pages
 // show that they are unsubscribed
+Route::get('/unsubscribe/marketing/{token}', [\App\Http\Controllers\MarketingUnsubscribeController::class, 'unsubscribe']);
+Route::get('/unsubscribe/newsletter/{token}', [\App\Http\Controllers\NewsletterUnsubscribeController::class, 'unsubscribe']);
+// legacy route
 Route::get('/unsbscribe',  [SequenceController::class, 'unsubscribe']);
 
 
@@ -31,6 +34,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // display and or edit the marketing emails
     Route::get('/email-sequence/{id}/edit', [SequenceController::class, 'edit'])->name('email-sequences.edit');
+    
+    // newsletter sequences
+    Route::get('/newsletter-sequences', [\App\Http\Controllers\NewsletterSequenceController::class, 'index'])->name('newsletter-sequences.index');
+    Route::get('/newsletter-sequence/{id}/edit', [\App\Http\Controllers\NewsletterSequenceController::class, 'edit'])->name('newsletter-sequences.edit');
+    Route::put('/newsletter-sequence/{id}', [\App\Http\Controllers\NewsletterSequenceController::class, 'update'])->name('newsletter-sequences.update');
+    
+    // newsletter steps
+    Route::get('/newsletter-steps', [\App\Http\Controllers\NewsletterStepController::class, 'index'])->name('newsletter-steps.index');
 
 });
 

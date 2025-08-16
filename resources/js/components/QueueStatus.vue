@@ -16,7 +16,7 @@ let timer = null
 
 async function checkQueue() {
     try {
-        const res = await fetch('/api/health/queue?ts=' + Date.now(), {
+        const res = await fetch('/health/queue?ts=' + Date.now(), {
             headers: { 'Accept': 'application/json' },
             cache: 'no-store',
             credentials: 'same-origin'

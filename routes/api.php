@@ -7,6 +7,9 @@ use App\Models\User;
 
 use App\Http\Controllers\API\APISequenceController;
 use App\Http\Controllers\API\APIFormController;
+use App\Http\Controllers\API\APINewsletterSequenceController;
+use App\Http\Controllers\API\NewsletterStepController;
+use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Auth\ApiLoginController;
 use App\Http\Controllers\ProfileController;
 
@@ -37,50 +40,19 @@ if (app()->environment('local')) {
 | Public
 |--------------------------------------------------------------------------
 */
-Route::post('/login', function (Request $request) {
-    $data = $request->validate([
-        'email'       => ['required', 'email'],
-        'password'    => ['required'],
-        'device_name' => ['nullable', 'string'],
-    ]);
-
-    $user = User::where('email', $data['email'])->first();
-
-    if (! $user || ! Hash::check($data['password'], $user->password)) {
-        return response()->json(['message' => 'Invalid credentials'], 401);
-    }
-
-    // Create API token
-    $token = $user->createToken($data['device_name'] ?? 'api')->plainTextToken;
-
-    // Also log in via session for web routes
-    auth()->login($user);
-    $request->session()->regenerate();
-
-    return response()->json([
-        'token' => $token,
-        'user' => $user
-    ], 200);
-})->middleware('web');
-
+Route::post('/login', [AuthController::class, 'login'])->middleware('web');
 /*
 |--------------------------------------------------------------------------
 | Protected (Sanctum)
 |--------------------------------------------------------------------------
 */
-Route::post('/logout', function (Request $request) {
-    $request->user()->currentAccessToken()->delete();
-    return response()->json(['message' => 'Logged out']);
-})->middleware('auth:sanctum');
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->group(function () {
     // session-ish helpers
     Route::post('/logout', [ApiLoginController::class, 'logout']);
-    Route::get('/me', fn () => auth()->user());
+    Route::get('/me', [AuthController::class, 'me']);
 
     // queue and sequence management
     Route::get('/getsequence/{id}', [APISequenceController::class, 'getSequence']);
@@ -98,6 +70,19 @@ Route::middleware('auth:sanctum')->group(function () {
     // data tables
     Route::get('/sequences/data', [APISequenceController::class, 'sequencedata']);
     Route::get('/forms/data', [APIFormController::class, 'formdata']);
+    Route::get('/forms/count', [APIFormController::class, 'formCount']);
+    Route::get('/forms/user-summary', [APIFormController::class, 'userFormsSummary']);
+    Route::get('/newsletter-sequences/data', [APINewsletterSequenceController::class, 'sequencedata']);
+    Route::get('/newsletter-sequences/summary', [APINewsletterSequenceController::class, 'summary']);
+    
+    // newsletter sequence management
+    Route::get('/newsletter-sequence/{id}', [APINewsletterSequenceController::class, 'getSequence']);
+    Route::put('/newsletter-sequence/{id}', [APINewsletterSequenceController::class, 'updateSequence']);
+    Route::delete('/newsletter-sequence/{id}', [APINewsletterSequenceController::class, 'destroy']);
+    Route::post('/newsletter-sequence/bulk-delete', [APINewsletterSequenceController::class, 'bulkDelete']);
+    
+    // newsletter steps management
+    Route::apiResource('newsletter-steps', NewsletterStepController::class);
 
     Route::post('/theme', [ProfileController::class, 'theme']);
 });

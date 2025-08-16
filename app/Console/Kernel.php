@@ -13,6 +13,7 @@ class Kernel extends ConsoleKernel
         // Register custom commands here
         \App\Console\Commands\marketingEmails::class,
         \App\Console\Commands\SendTestEmail::class,
+        \App\Console\Commands\NewsletterEmails::class,
     ];
     /**
      * Define the application's command schedule.
@@ -23,7 +24,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // Define scheduled tasks here
-        $schedule->command('emails:followup')->everyTenMinutes();
+        $schedule->command('marketing:send')->everyTenMinutes();
+        $schedule->command('newsletters:send')->everyTenMinutes();
 
     }
     /**

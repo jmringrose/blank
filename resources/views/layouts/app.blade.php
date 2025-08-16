@@ -42,17 +42,20 @@
                           name="{{ Auth()->user()->name}}"
                           id="{{ Auth()->user()->id }}"
 
-                          link1="Dashboard"
-                          url1="/dashboard"
+                          {{--link1="Dashboard"
+                          url1="/dashboard"--}}
 
-                          link2="Form Data"
+                          link2="Survey Data"
                           url2="/formdata"
 
-                          link3="Sequences"
+                          link3="Pre Sales"
                           url3="/sequences"
 
-                          link4=""
-                          url4="/test4"
+                          link5="Newsletters"
+                          url5="/newsletter-steps"
+
+                          link4="Newletter Sequences"
+                          url4="/newsletter-sequences"
 
                           theme="{{ Auth()->user()->theme }}"
             ></headingsmall>

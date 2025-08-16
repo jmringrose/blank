@@ -165,7 +165,7 @@ onMounted(() => {
 
 const loadEmailSequence = async () => {
     try {
-        const response = await axios.get(`/api/getsequence/${emailSequenceId.value}`);
+        const response = await axios.get(`/getsequence/${emailSequenceId.value}`);
         const data = response.data;
         form.first = data.first || '';
         form.last = data.last || '';
@@ -188,7 +188,7 @@ const updateEmailSequence = async () => {
     errors.value = {};
 
     try {
-        const response = await axios.put(`/api/updatesequence/${emailSequenceId.value}`, form);
+        const response = await axios.put(`/updatesequence/${emailSequenceId.value}`, form);
         toast.success('Email sequence updated successfully!');
 
         // Optionally redirect or update form with returned data
