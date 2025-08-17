@@ -34,6 +34,8 @@
         <!-- Scripts -->
        {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        @stack('head')
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen" id="app">
@@ -42,8 +44,8 @@
                           name="{{ Auth()->user()->name}}"
                           id="{{ Auth()->user()->id }}"
 
-                          {{--link1="Dashboard"
-                          url1="/dashboard"--}}
+                          link1="Dashboard"
+                          url1="/dashboard"
 
                           link2="Survey Data"
                           url2="/formdata"
@@ -72,5 +74,7 @@
                 @yield('content')
             </main>
         </div>
+        
+        @stack('scripts')
     </body>
 </html>

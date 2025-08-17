@@ -74,15 +74,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/forms/user-summary', [APIFormController::class, 'userFormsSummary']);
     Route::get('/newsletter-sequences/data', [APINewsletterSequenceController::class, 'sequencedata']);
     Route::get('/newsletter-sequences/summary', [APINewsletterSequenceController::class, 'summary']);
-    
+
     // newsletter sequence management
     Route::get('/newsletter-sequence/{id}', [APINewsletterSequenceController::class, 'getSequence']);
     Route::put('/newsletter-sequence/{id}', [APINewsletterSequenceController::class, 'updateSequence']);
     Route::delete('/newsletter-sequence/{id}', [APINewsletterSequenceController::class, 'destroy']);
     Route::post('/newsletter-sequence/bulk-delete', [APINewsletterSequenceController::class, 'bulkDelete']);
-    
+
     // newsletter steps management
     Route::apiResource('newsletter-steps', NewsletterStepController::class);
 
     Route::post('/theme', [ProfileController::class, 'theme']);
+    Route::post('/send-test-email', [APISequenceController::class, 'sendTestEmail']);
 });

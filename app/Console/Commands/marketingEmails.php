@@ -16,7 +16,7 @@ class marketingEmails extends Command
     public function handle()
     {
         $this->info('Starting marketing email processing...');
-        
+
         $sequences = EmailSequence::where('next_send_at', '<=', Carbon::now())
             ->where('current_step', '>', 0)
             ->get();
@@ -37,19 +37,21 @@ class marketingEmails extends Command
             return;
         }
 
-        if ($sequence->current_step >= 5) {
+        if ($sequence->current_step >= 6) {
             $this->warn("Sequence {$sequence->id} has completed all steps.");
             return;
         }
 
         try {
             Mail::to($sequence->email)->send(new MarketingEmail($sequence));
-            
+            $this->info("Sent marketing email step {$sequence->current_step} to {$sequence->email}");
+
             $sequence->current_step += 1;
             $sequence->next_send_at = Carbon::now()->addDays(7);
             $sequence->save();
             
-            $this->info("Sent marketing email step {$sequence->current_step} to {$sequence->email}");
+            sleep(2); // Rate limit delay
+
         } catch (\Exception $e) {
             $this->error("Failed to send marketing email to {$sequence->email}: {$e->getMessage()}");
         }

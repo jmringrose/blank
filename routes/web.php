@@ -11,9 +11,16 @@ use App\Http\Controllers\HomeController;
 // show that they are unsubscribed
 Route::get('/unsubscribe/marketing/{token}', [\App\Http\Controllers\MarketingUnsubscribeController::class, 'unsubscribe']);
 Route::get('/unsubscribe/newsletter/{token}', [\App\Http\Controllers\NewsletterUnsubscribeController::class, 'unsubscribe']);
-// legacy route
+// legacy routes
+Route::get('/unsubscribe', [SequenceController::class, 'unsubscribe']);
 Route::get('/unsbscribe',  [SequenceController::class, 'unsubscribe']);
 
+
+// email previews (auth required)
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/preview/marketing/{step?}', [\App\Http\Controllers\EmailPreviewController::class, 'marketing'])->name('email.preview.marketing');
+    Route::get('/preview/newsletter/{step?}', [\App\Http\Controllers\EmailPreviewController::class, 'newsletter'])->name('email.preview.newsletter');
+});
 
 // auth pages
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -42,6 +49,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // newsletter steps
     Route::get('/newsletter-steps', [\App\Http\Controllers\NewsletterStepController::class, 'index'])->name('newsletter-steps.index');
+    
+    // newsletter editor
+    Route::get('/newsletter-editor', [\App\Http\Controllers\NewsletterEditorController::class, 'index'])->name('newsletter-editor.index');
+    Route::get('/newsletter-editor/create', [\App\Http\Controllers\NewsletterEditorController::class, 'create'])->name('newsletter-editor.create');
+    Route::get('/newsletter-editor/{id}/edit', [\App\Http\Controllers\NewsletterEditorController::class, 'edit'])->name('newsletter-editor.edit');
+    Route::post('/newsletter-editor', [\App\Http\Controllers\NewsletterEditorController::class, 'store'])->name('newsletter-editor.store');
+    Route::put('/newsletter-editor/{id}', [\App\Http\Controllers\NewsletterEditorController::class, 'update'])->name('newsletter-editor.update');
+    
+    // marketing editor
+    Route::get('/marketing-editor', [\App\Http\Controllers\MarketingEditorController::class, 'index'])->name('marketing-editor.index');
+    Route::get('/marketing-editor/create', [\App\Http\Controllers\MarketingEditorController::class, 'create'])->name('marketing-editor.create');
+    Route::get('/marketing-editor/{id}/edit', [\App\Http\Controllers\MarketingEditorController::class, 'edit'])->name('marketing-editor.edit');
+    Route::post('/marketing-editor', [\App\Http\Controllers\MarketingEditorController::class, 'store'])->name('marketing-editor.store');
+    Route::put('/marketing-editor/{id}', [\App\Http\Controllers\MarketingEditorController::class, 'update'])->name('marketing-editor.update');
 
 });
 

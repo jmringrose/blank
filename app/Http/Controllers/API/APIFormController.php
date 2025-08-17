@@ -126,7 +126,7 @@ class APIFormController extends Controller
         // Notify admin
         \Mail::to(env('ADMIN_EMAIL'))->queue(new \App\Mail\AdminSequenceNotification('unsubscribed', $sequence));
 
-        return view('marketing.legacy-unsubscribed');
+        return view('generic-unsubscribe.legacy-unsubscribed');
     }
     //=====================================================================================================
     /**

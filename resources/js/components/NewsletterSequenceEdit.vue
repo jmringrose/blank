@@ -37,6 +37,12 @@
                 </div>
             </div>
             
+            <div>
+                <label class="block text-sm font-medium mb-2">Unsubscribe Token</label>
+                <input v-model="form.unsub_token" type="text" 
+                       class="input input-bordered w-full" />
+            </div>
+            
             <div class="flex justify-end space-x-4">
                 <a href="/newsletter-sequences" class="btn btn-secondary">Cancel</a>
                 <button type="submit" :disabled="saving" class="btn btn-primary">
@@ -68,7 +74,8 @@ const form = ref({
     last: '',
     email: '',
     current_step: 1,
-    next_send_at: ''
+    next_send_at: '',
+    unsub_token: ''
 })
 
 const loadSequence = async () => {
@@ -79,7 +86,8 @@ const loadSequence = async () => {
             last: data.last,
             email: data.email,
             current_step: data.current_step,
-            next_send_at: data.next_send_at ? data.next_send_at.slice(0, 16) : ''
+            next_send_at: data.next_send_at ? data.next_send_at.slice(0, 16) : '',
+            unsub_token: data.unsub_token || ''
         }
     } catch (err) {
         console.error('Error loading sequence:', err)

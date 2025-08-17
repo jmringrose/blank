@@ -14,6 +14,8 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\marketingEmails::class,
         \App\Console\Commands\SendTestEmail::class,
         \App\Console\Commands\NewsletterEmails::class,
+        \App\Console\Commands\ClearLogs::class,
+        \App\Console\Commands\SimpleTestEmail::class,
     ];
     /**
      * Define the application's command schedule.
@@ -26,6 +28,7 @@ class Kernel extends ConsoleKernel
         // Define scheduled tasks here
         $schedule->command('marketing:send')->everyTenMinutes();
         $schedule->command('newsletters:send')->everyTenMinutes();
+        $schedule->command('logs:clear')->daily();
 
     }
     /**

@@ -45,6 +45,16 @@
             </div>
         </template>
 
+        <template #item-unsub_token="{ unsub_token }">
+            <span
+                :class="unsub_token ? 'text-green-600' : 'text-red-600'"
+                :title="unsub_token ? 'Unsubscribe token exists' : 'No unsubscribe token'"
+                class="font-bold text-lg"
+            >
+                {{ unsub_token ? '✓' : '✗' }}
+            </span>
+        </template>
+
         <template #item-actions="item">
             <div class="flex justify-center">
                 <button class="btn btn-sm btn-secondary h-6 w-6 mr-1" @click.stop="confirmDeleteItem(item)">
@@ -102,6 +112,7 @@ const headers = [
     {text: "Email", value: "email", sortable: true, width: 200},
     {text: "Current Step", value: "current_step", sortable: true, width: 80},
     {text: "Next Send", value: "next_send_at", sortable: true, width: 150},
+    {text: "Unsub", value: "unsub_token", sortable: true, width: 80},
     {text: "Actions", value: "actions", width: 120}
 ]
 

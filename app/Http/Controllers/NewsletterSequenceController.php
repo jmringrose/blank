@@ -26,6 +26,7 @@ class NewsletterSequenceController extends Controller
             'email' => 'required|email|max:255',
             'current_step' => 'required|integer|min:0',
             'next_send_at' => 'nullable|date',
+            'unsub_token' => 'nullable|string|max:255',
         ]);
 
         $sequence = NewsletterSequence::findOrFail($id);

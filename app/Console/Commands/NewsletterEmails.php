@@ -17,7 +17,7 @@ class NewsletterEmails extends Command
     public function handle()
     {
         $this->info('Starting newsletter email processing...');
-        
+
         $sequences = NewsletterSequence::where('next_send_at', '<=', Carbon::now())
             ->where('current_step', '>', 0)
             ->get();
@@ -47,14 +47,21 @@ class NewsletterEmails extends Command
             return;
         }
 
+        if ($step->draft) {
+            $this->warn("Step {$sequence->current_step} for sequence {$sequence->id} is in draft - skipping");
+            return;
+        }
+
         try {
             Mail::to($sequence->email)->send(new NewsletterEmail($sequence, $step));
-            
+            $this->info("Sent newsletter '{$step->title}' to {$sequence->email}");
+
             $sequence->current_step += 1;
             $sequence->next_send_at = Carbon::now()->addDays(3);
             $sequence->save();
             
-            $this->info("Sent newsletter '{$step->title}' to {$sequence->email}");
+            sleep(2); // Rate limit delay
+
         } catch (\Exception $e) {
             $this->error("Failed to send newsletter to {$sequence->email}: {$e->getMessage()}");
         }

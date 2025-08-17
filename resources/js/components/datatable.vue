@@ -89,6 +89,11 @@
             {{ unsub_token ? '✓' : '✗' }}
           </span>
         </template>
+        <!-- Custom slot for current step column -->
+        <template #item-current_step="{ current_step }">
+            <span v-if="current_step === 0" class="badge badge-warning">Unsub</span>
+            <span v-else>{{ current_step }}</span>
+        </template>
         <template #pagination="{ prevPage, nextPage, isFirstPage, isLastPage }">
             <div class="custom-pagination">
                 <button

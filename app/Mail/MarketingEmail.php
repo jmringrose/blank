@@ -26,17 +26,18 @@ class MarketingEmail extends Mailable implements ShouldQueue
 
     public function build()
     {
-        $marketingStep = MarketingStep::where('order', $this->step)
-            ->where('draft', false)
-            ->first();
+        $marketingStep = MarketingStep::where('order', $this->step)->first();
         
         if (!$marketingStep) {
-            throw new \Exception("Marketing step {$this->step} not found or is draft");
+            // Fallback to welcome template
+            $viewName = 'emails.marketing.welcome';
+            $subject = "Marketing Email Step {$this->step}";
+        } else {
+            $viewName = 'emails.marketing.' . str_replace('.blade.php', '', $marketingStep->filename);
+            $subject = $marketingStep->title;
         }
         
-        $viewName = 'emails.marketing.' . str_replace('.blade.php', '', $marketingStep->filename);
-        
-        return $this->subject($marketingStep->title)
+        return $this->subject($subject)
             ->view($viewName)
             ->with([
                 'sequence' => $this->sequence,

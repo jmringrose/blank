@@ -160,6 +160,67 @@
             </div>
             </div>
         </div>
+        
+        <!-- Marketing Emails -->
+        <div class="bg-base-100 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 p-4">
+            <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Marketing Emails</h1>
+            <div class="space-y-2">
+                <a href="/marketing-editor" class="btn btn-primary btn-sm w-full">
+                    ✏️ Edit Marketing Emails
+                </a>
+                <a href="/preview/marketing/1" target="_blank" class="btn btn-outline btn-sm w-full">
+                    📧 Step 1 - Welcome
+                </a>
+                <a href="/preview/marketing/2" target="_blank" class="btn btn-outline btn-sm w-full">
+                    📧 Step 2 - Why Costa Rica
+                </a>
+                <a href="/preview/marketing/3" target="_blank" class="btn btn-outline btn-sm w-full">
+                    📧 Step 3 - Camera Settings
+                </a>
+                <a href="/preview/marketing/4" target="_blank" class="btn btn-outline btn-sm w-full">
+                    📧 Step 4 - Best Time to Visit
+                </a>
+                <a href="/preview/marketing/5" target="_blank" class="btn btn-outline btn-sm w-full">
+                    📧 Step 5 - What Makes Us Different
+                </a>
+                <a href="/preview/marketing/6" target="_blank" class="btn btn-outline btn-sm w-full">
+                    📧 Step 6 - Last Chance
+                </a>
+            </div>
+        </div>
+        
+        <!-- Newsletter Emails -->
+        <div class="bg-base-100 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 p-4">
+            <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Newsletter Emails</h1>
+            <div class="space-y-2">
+                <a href="/newsletter-editor" class="btn btn-primary btn-sm w-full">
+                    ✏️ Edit Newsletters
+                </a>
+                <a href="/preview/newsletter/1" target="_blank" class="btn btn-outline btn-sm w-full">
+                    📰 Step 1 - Welcome Email
+                </a>
+                <a href="/preview/newsletter/2" target="_blank" class="btn btn-outline btn-sm w-full">
+                    📰 Step 2 - Getting Started
+                </a>
+            </div>
+        </div>
+        
+        <!-- Quick Links -->
+        <div class="bg-base-100 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 p-4">
+            <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Quick Links</h1>
+            <div class="space-y-2">
+                <button 
+                    type="button"
+                    @click="sendTestEmail" 
+                    :disabled="testEmailLoading"
+                    class="btn btn-primary btn-sm w-full"
+                >
+                    <LucideRefreshCw v-if="testEmailLoading" class="inline w-4 h-4 mr-1 animate-spin"/>
+                    <span v-else class="material-symbols-outlined text-sm mr-1">email</span>
+                    {{ testEmailLoading ? 'Sending...' : 'Send Test Email' }}
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 </template>
@@ -219,6 +280,7 @@ const userFormsSummary = ref([])
 const newsletterSummary = ref([])
 const lastChecked = ref(null)
 const isLoading = ref(false)
+const testEmailLoading = ref(false)
 let intervalId = null
 
 // --- Load summary ---
@@ -283,16 +345,30 @@ async function fetchNewsletterSummary() {
     }
 }
 
+// --- Send test email ---
+async function sendTestEmail() {
+    testEmailLoading.value = true
+    try {
+        await api.post('/send-test-email')
+        toast.success('Test email sent successfully!')
+    } catch (e) {
+        console.error('Error sending test email:', e)
+        toast.error('Failed to send test email')
+    } finally {
+        testEmailLoading.value = false
+    }
+}
+
 // --- Refresh button ---
 async function notifyAndRefreshSummary() {
     if (isLoading.value) return
     let close
     try {
-        close = toast.info('Refreshing summary…', { timeout: 1200 })
-        await fetchSummary()
-        toast.success('Summary refreshed')
+        close = toast.info('Refreshing queue status…', { timeout: 1200 })
+        await getStatus()
+        toast.success('Queue status refreshed')
     } catch {
-        toast.error('Failed to refresh summary')
+        toast.error('Failed to refresh queue status')
     } finally {
         if (typeof close === 'function') close()
     }

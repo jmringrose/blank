@@ -92,7 +92,7 @@ class APISequenceController extends Controller
         // Notify admin
         \Mail::to(env('ADMIN_EMAIL'))->queue(new \App\Mail\AdminSequenceNotification('unsubscribed', $sequence));
 
-        return view('marketing.legacy-unsubscribed');
+        return view('generic-unsubscribe.legacy-unsubscribed');
     }
     //=====================================================================================================
     /**
@@ -202,5 +202,15 @@ class APISequenceController extends Controller
             'checked_at' => now()->toIso8601String(),
         ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
           ->header('Pragma', 'no-cache');
+    }
+
+    public function sendTestEmail()
+    {
+        try {
+            \Artisan::call('email:simple-test');
+            return response()->json(['message' => 'Test email sent successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to send test email'], 500);
+        }
     }
 }
