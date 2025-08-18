@@ -97,15 +97,11 @@ class MarketingEditorController extends Controller
         if (file_exists($filePath)) {
             $content = file_get_contents($filePath);
             
-            // For complex HTML templates, extract everything inside body
-            if (preg_match('/<body[^>]*>\s*(.+?)\s*<\/body>/s', $content, $matches)) {
-                return trim($matches[1]);
-            }
+            // Remove everything before and after our content
+            $content = preg_replace('/.*<div style="max-width: 600px[^>]*>/s', '', $content);
+            $content = preg_replace('/<hr style="margin: 30px 0.*$/s', '', $content);
             
-            // Fallback for simple templates
-            if (preg_match('/<div[^>]*>\s*(.+?)\s*<hr/s', $content, $matches)) {
-                return trim($matches[1]);
-            }
+            return trim($content);
         }
         return '';
     }
@@ -116,6 +112,19 @@ class MarketingEditorController extends Controller
         if (strpos($content, '<!DOCTYPE') !== false || strpos($content, '<html') !== false) {
             $template = $content;
         } else {
+            // Check if unsubscribe link already exists
+            $hasUnsubscribe = strpos($content, '$unsubscribeUrl') !== false || strpos($content, 'unsubscribe') !== false;
+            
+            $unsubscribeSection = '';
+            if (!$hasUnsubscribe) {
+                $unsubscribeSection = '
+        
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+        <p style="font-size: 12px; color: #666;">
+            <a href="{{ $unsubscribeUrl }}" style="color: #666;">Unsubscribe</a>
+        </p>';
+            }
+            
             // Simple template wrapper for basic content
             $template = '<!DOCTYPE html>
 <html>
@@ -125,12 +134,7 @@ class MarketingEditorController extends Controller
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        ' . $content . '
-        
-        <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
-        <p style="font-size: 12px; color: #666;">
-            <a href="{{ $unsubscribeUrl }}" style="color: #666;">Unsubscribe</a>
-        </p>
+        ' . $content . $unsubscribeSection . '
     </div>
 </body>
 </html>';

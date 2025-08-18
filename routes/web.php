@@ -7,13 +7,9 @@ use App\Http\Controllers\SequenceController;
 use App\Http\Controllers\FormDataController;
 use App\Http\Controllers\HomeController;
 
-// public pages
-// show that they are unsubscribed
+// public pages - unsubscribe routes
 Route::get('/unsubscribe/marketing/{token}', [\App\Http\Controllers\MarketingUnsubscribeController::class, 'unsubscribe']);
 Route::get('/unsubscribe/newsletter/{token}', [\App\Http\Controllers\NewsletterUnsubscribeController::class, 'unsubscribe']);
-// legacy routes
-Route::get('/unsubscribe', [SequenceController::class, 'unsubscribe']);
-Route::get('/unsbscribe',  [SequenceController::class, 'unsubscribe']);
 
 
 // email previews (auth required)
@@ -25,8 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // auth pages
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::get('/', [TestController::class, 'test'])->name('home');
-    Route::get('/home', [TestController::class, 'test'])->name('home');
+    Route::get('/', [HomeController::class, 'dashboard']);
     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
 
     // user stuff
@@ -41,24 +36,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // display and or edit the marketing emails
     Route::get('/email-sequence/{id}/edit', [SequenceController::class, 'edit'])->name('email-sequences.edit');
-    
+
     // newsletter sequences
     Route::get('/newsletter-sequences', [\App\Http\Controllers\NewsletterSequenceController::class, 'index'])->name('newsletter-sequences.index');
     Route::get('/newsletter-sequence/{id}/edit', [\App\Http\Controllers\NewsletterSequenceController::class, 'edit'])->name('newsletter-sequences.edit');
     Route::put('/newsletter-sequence/{id}', [\App\Http\Controllers\NewsletterSequenceController::class, 'update'])->name('newsletter-sequences.update');
-    
+
     // newsletter steps
     Route::get('/newsletter-steps', [\App\Http\Controllers\NewsletterStepController::class, 'index'])->name('newsletter-steps.index');
     Route::post('/newsletter-steps', [\App\Http\Controllers\NewsletterStepController::class, 'store'])->name('newsletter-steps.store');
     Route::delete('/newsletter-steps/{id}', [\App\Http\Controllers\NewsletterStepController::class, 'destroy'])->name('newsletter-steps.destroy');
-    
+
     // marketing steps
     Route::get('/marketing-steps', [\App\Http\Controllers\MarketingStepController::class, 'index'])->name('marketing-steps.index');
     Route::post('/marketing-steps', [\App\Http\Controllers\MarketingStepController::class, 'store'])->name('marketing-steps.store');
     Route::get('/marketing-steps/toggle/{id}', [\App\Http\Controllers\MarketingStepController::class, 'toggle'])->name('marketing-steps.toggle');
     Route::put('/marketing-steps/{id}', [\App\Http\Controllers\MarketingStepController::class, 'update'])->name('marketing-steps.update');
     Route::delete('/marketing-steps/{id}', [\App\Http\Controllers\MarketingStepController::class, 'destroy'])->name('marketing-steps.destroy');
-    
+
     // API routes for dashboard
     Route::get('/marketing-steps/data', function() {
         return App\Models\MarketingStep::orderBy('order')->get();
@@ -66,17 +61,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/newsletter-steps/data', function() {
         return App\Models\NewsletterStep::orderBy('order')->get();
     });
-    
-    // unsubscribe route
-    Route::get('/unsubscribe', function() {
-        return view('unsubscribe');
-    })->name('unsubscribe');
-    
+
+
+
     // storage images API
     Route::get('/storage-images', function() {
         $images = [];
         $storagePath = storage_path('app/public/images');
-        
+
         if (is_dir($storagePath)) {
             $files = glob($storagePath . '/*.{jpg,jpeg,png,gif,webp}', GLOB_BRACE);
             foreach ($files as $file) {
@@ -87,10 +79,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ];
             }
         }
-        
+
         return response()->json($images);
     });
-    
+
     // newsletter editor
     Route::get('/newsletter-editor/create', [\App\Http\Controllers\NewsletterEditorController::class, 'create'])->name('newsletter-editor.create');
     Route::get('/newsletter-editor/{id}/edit', [\App\Http\Controllers\NewsletterEditorController::class, 'edit'])->name('newsletter-editor.edit');
@@ -98,7 +90,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/newsletter-editor/{id}', [\App\Http\Controllers\NewsletterEditorController::class, 'update'])->name('newsletter-editor.update');
     Route::get('/newsletter-editor/toggle/{id}', [\App\Http\Controllers\NewsletterEditorController::class, 'toggle'])->name('newsletter-editor.toggle');
     Route::delete('/newsletter-editor/{id}', [\App\Http\Controllers\NewsletterEditorController::class, 'destroy'])->name('newsletter-editor.destroy');
-    
+
     // marketing editor
     Route::get('/marketing-editor/create', [\App\Http\Controllers\MarketingEditorController::class, 'create'])->name('marketing-editor.create');
     Route::get('/marketing-editor/toggle/{id}', [\App\Http\Controllers\MarketingEditorController::class, 'toggle'])->name('marketing-editor.toggle');
@@ -106,7 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/marketing-editor', [\App\Http\Controllers\MarketingEditorController::class, 'store'])->name('marketing-editor.store');
     Route::put('/marketing-editor/{id}', [\App\Http\Controllers\MarketingEditorController::class, 'update'])->name('marketing-editor.update');
     Route::delete('/marketing-editor/{id}', [\App\Http\Controllers\MarketingEditorController::class, 'destroy'])->name('marketing-editor.destroy');
-    
+
 
 
 });

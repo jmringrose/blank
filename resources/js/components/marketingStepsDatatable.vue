@@ -4,7 +4,7 @@
             <h1 class="text-2xl font-bold ml-4">Marketing Steps</h1>
             <div class="space-x-2">
                 <a href="/dashboard" class="btn btn-outline">← Back to Dashboard</a>
-                <a href="/marketing-editor/create" class="btn btn-primary">Create New Marketing Step</a>
+                <button @click="createStep" class="btn btn-primary">Create New Marketing Step</button>
             </div>
         </div>
 
@@ -80,7 +80,7 @@
         <!-- Edit Modal -->
         <div v-if="showEditModal" class="modal modal-open">
             <div class="modal-box max-w-md">
-                <h3 class="font-bold text-lg mb-4">Edit Marketing Step</h3>
+                <h3 class="font-bold text-lg mb-4">{{ editingStep ? 'Edit' : 'Create' }} Marketing Step</h3>
 
                 <form @submit.prevent="saveStep" class="space-y-4">
                     <div class="form-control w-full">
@@ -258,10 +258,23 @@ export default {
             showEditModal.value = true
         }
 
+        const createStep = () => {
+            editingStep.value = null
+            formData.value = { order: '', title: '', filename: '', draft: true }
+            showEditModal.value = true
+        }
+
         const saveStep = async () => {
             try {
-                await axios.put(window.location.origin + `/marketing-steps/${editingStep.value.id}`, formData.value)
-                toast.success('Marketing step updated successfully')
+                if (editingStep.value) {
+                    // Update existing step
+                    await axios.put(window.location.origin + `/marketing-steps/${editingStep.value.id}`, formData.value)
+                    toast.success('Marketing step updated successfully')
+                } else {
+                    // Create new step
+                    await axios.post(window.location.origin + '/marketing-steps', formData.value)
+                    toast.success('Marketing step created successfully')
+                }
                 closeModal()
                 fetchSteps()
             } catch (error) {
@@ -288,6 +301,7 @@ export default {
             toggleStep,
             deleteStep,
             duplicateStep,
+            createStep,
             editStep,
             saveStep,
             closeModal,

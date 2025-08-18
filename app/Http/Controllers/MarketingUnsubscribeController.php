@@ -20,6 +20,11 @@ class MarketingUnsubscribeController extends Controller
         $sequence->current_step = 0;
         $sequence->save();
 
-        return view('generic-unsubscribe.unsubscribed', compact('sequence'));
+        return view('generic-unsubscribe.unsubscribed', [
+            'sequence' => $sequence,
+            'firstName' => $sequence->first,
+            'lastName' => $sequence->last,
+            'fullName' => $sequence->first . ' ' . $sequence->last
+        ]);
     }
 }

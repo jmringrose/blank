@@ -19,7 +19,7 @@
                     <label class="label">
                         <span class="label-text">Title</span>
                     </label>
-                    <input type="text" name="title" class="input input-bordered" 
+                    <input type="text" name="title" class="input input-bordered"
                            value="{{ old('title', $step->title ?? '') }}" required>
                     @error('title')
                         <span class="text-error text-sm">{{ $message }}</span>
@@ -31,7 +31,7 @@
                     <label class="label">
                         <span class="label-text">Step Number</span>
                     </label>
-                    <input type="number" name="order" class="input input-bordered" 
+                    <input type="number" name="order" class="input input-bordered"
                            value="{{ old('order', 1) }}" required min="1" max="6">
                     @error('order')
                         <span class="text-error text-sm">{{ $message }}</span>
@@ -69,13 +69,13 @@
 <script>
 tinymce.init({
     selector: '#content',
-    height: 400,
+    height: 600,
     plugins: 'lists link image code table',
-    toolbar: 'undo redo | formatselect styleselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image | table | code',
-    
+    toolbar: 'undo redo | formatselect styleselect | bold italic | removeformat | alignleft aligncenter alignright | bullist numlist | link image | table | code',
+
     // Enable extended valid elements for styling
     extended_valid_elements: 'span[style|class],div[style|class],p[style|class]',
-    
+
     // Style formats dropdown
     style_formats: [
         {title: 'Text Colors', items: [
@@ -92,14 +92,14 @@ tinymce.init({
             {title: 'Gray Background', block: 'div', styles: {'background-color': '#f5f5f5', 'padding': '10px'}}
         ]}
     ],
-    
+
     // Enable custom style formats
     style_formats_merge: true,
-    
+
     menubar: false,
     branding: false,
     content_style: 'body { font-family: Arial, sans-serif; font-size: 14px; }',
-    
+
     // Image options
     image_title: true,
     image_description: false,
@@ -109,7 +109,7 @@ tinymce.init({
         {title: 'Rounded', value: 'rounded'},
         {title: 'Shadow', value: 'shadow'}
     ],
-    
+
     // File picker for images
     file_picker_callback: function(callback, value, meta) {
         if (meta.filetype === 'image') {
@@ -129,15 +129,15 @@ tinymce.init({
             input.click();
         }
     },
-    
+
     // Preserve Blade variables
     protect: [
         /\{\{.*?\}\}/g
     ],
-    
+
     // Don't encode entities for our variables
     entity_encoding: 'named',
-    
+
     setup: function(editor) {
         editor.on('BeforeSetContent', function(e) {
             // Protect Blade variables during content setting
@@ -145,7 +145,7 @@ tinymce.init({
                 return '<span class="blade-var">' + match + '</span>';
             });
         });
-        
+
         editor.on('GetContent', function(e) {
             // Restore Blade variables when getting content
             e.content = e.content.replace(/<span class="blade-var">(\{\{[^}]+\}\})<\/span>/g, function(match, variable) {

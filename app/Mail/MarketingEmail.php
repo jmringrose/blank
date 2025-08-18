@@ -21,7 +21,7 @@ class MarketingEmail extends Mailable implements ShouldQueue
     {
         $this->sequence = $sequence;
         $this->step = $sequence->current_step;
-        $this->unsubscribeUrl = url('/unsubscribe?token=' . $sequence->unsub_token);
+        $this->unsubscribeUrl = url('/unsubscribe/marketing/' . $sequence->unsub_token);
     }
 
     public function build()

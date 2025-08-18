@@ -21,7 +21,7 @@ class NewsletterEmail extends Mailable implements ShouldQueue
     {
         $this->sequence = $sequence;
         $this->step = $step;
-        $this->unsubscribeUrl = url('/unsubscribe?token=' . $sequence->unsub_token);
+        $this->unsubscribeUrl = url('/unsubscribe/newsletter/' . $sequence->unsub_token);
     }
 
     public function build()
