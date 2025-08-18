@@ -1,28 +1,33 @@
 <template>
-<div class="container mx-auto p-4">
+    <div class="container mt-4 max-w-5xl mx-auto text-base bg-base-300 p-1 md:p-3 rounded-lg shadow-lg border">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+
         <!-- Sequences Dashboard -->
-        <div class="bg-base-100 rounded-xl shadow-md border p-4">
-            <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Marketing Sequences</h1>
-        <div class="my-4">
-            <p class="text-lg">Total Sequences: <b>{{ summary.total }}</b>
+        <div class="bg-base-200 rounded-xl shadow-md border border-stone-500 p-4">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100">Pre Sales
+                    Marketing Sequences</h1>
                 <button
                     :disabled="isLoading"
-                    class="ml-3 px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-blue-700 text-sm float-right"
+                    class="px-3 py-2 bg-blue-400 hover:bg-blue-200 rounded text-blue-700 text-sm"
                     @click="fetchSummary">
                     <LucideRefreshCw class="inline w-4 h-4 mr-1"/>
                     Refresh
                 </button>
+            </div>
+        <div class="my-4">
+            <p class="text-lg">Total Sequences: <b>{{ summary.total }}</b>
             </p>
-            <div v-if="lastChecked" class="text-xs text-gray-500 mb-2 mt-2">
+            <div v-if="lastChecked" class="text-xs text-gray-200 mb-2 mt-2">
                 Last checked: {{ lastCheckedFormatted }} ({{ lastCheckedAgo }})
             </div>
         </div>
 
         <div>
-            <table class="min-w-96 border border-gray-200 mx-auto">
+            <table class="min-w-96 border border-gray-600 mx-auto">
                 <thead>
-                <tr class="bg-base-100">
+                <tr class="bg-base-200">
                     <th class="px-2 py-1 border w-1/2">Step</th>
                     <th class="px-2 py-1 border">Count</th>
                 </tr>
@@ -37,8 +42,11 @@
             </div>
         </div>
 
+
+
+
         <!-- Queue Status -->
-        <div class="bg-base-100 rounded-xl shadow-md border p-4">
+        <div class="bg-base-200 rounded-xl shadow-md border border-stone-500  p-4">
 
         <div class="flex px-4 mb-6">
 
@@ -55,7 +63,7 @@
 
             <div class="flex-1 text-right w-32">
             <button
-                class="px-3 py-2 bg-blue-100 hover:bg-blue-400 rounded text-blue-700 text-sm"
+                class="px-3 py-2 bg-blue-400 hover:bg-blue-400 rounded text-blue-700 text-sm"
                 @click="notifyAndRefreshSummary">
                 <LucideRefreshCw class="inline w-4 h-4 mr-1"/>
                 Refresh
@@ -67,8 +75,8 @@
         <table class="min-w-full">
             <tbody>
             <tr>
-                <td class="px-6 py-2 font-medium border-b border-gray-200">Status</td>
-                <td class="px-6 py-2 border-b border-gray-200">
+                <td class="px-6 py-2 font-medium border-b border-gray-600">Status</td>
+                <td class="px-6 py-2 border-b border-gray-600">
             <span
                 :class="[
                 'inline-flex items-center px-2 py-1 rounded text-xs font-semibold',
@@ -97,18 +105,20 @@
         </div>
 
         <!-- WordPress Forms -->
-        <div class="bg-base-100 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 p-4">
-            <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Pre-Trip Survey Forms</h1>
-        <div class="my-4">
-            <p class="text-lg">Total Form Entries: <b>{{ formCount.total }}</b>
+        <div class="bg-base-200 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 border-stone-500  p-4">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100">Pre-Trip Survey Forms</h1>
                 <button
                     :disabled="isLoading"
-                    class="ml-3 px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-blue-700 text-sm float-right"
+                    class="px-3 py-2 bg-blue-400 hover:bg-blue-200 rounded text-blue-700 text-sm"
                     @click="fetchFormCount"
                 >
                     <LucideRefreshCw class="inline w-4 h-4 mr-1"/>
                     Refresh
                 </button>
+            </div>
+        <div class="my-4">
+            <p class="text-lg">Total Form Entries: <b>{{ formCount.total }}</b>
             </p>
         </div>
 
@@ -136,7 +146,7 @@
         </div>
 
         <!-- Newsletter Sequences -->
-        <div class="bg-base-100 rounded-xl shadow-md border text-gray-700 dark:text-gray-50 p-4">
+        <div class="bg-base-200 rounded-xl shadow-md border text-gray-700 dark:text-gray-50 border-stone-500  p-4">
             <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Customer Update Newsletter Sequences</h1>
         <div class="mt-6">
             <div class="overflow-x-auto">
@@ -160,58 +170,44 @@
             </div>
             </div>
         </div>
-        
+
         <!-- Marketing Emails -->
-        <div class="bg-base-100 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 p-4">
+        <div class="bg-base-200 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 border-stone-500  p-4">
             <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Marketing Emails</h1>
             <div class="space-y-2">
-                <a href="/marketing-editor" class="btn btn-primary btn-sm w-full">
+                <a href="/marketing-steps" class="btn btn-primary btn-sm w-full">
                     ✏️ Edit Marketing Emails
                 </a>
-                <a href="/preview/marketing/1" target="_blank" class="btn btn-outline btn-sm w-full">
-                    📧 Step 1 - Welcome
+
+                <a v-for="step in marketingSteps" :key="step.order" :href="`/preview/marketing/${step.order}`" target="_blank" class="btn btn-outline border-gray-500 btn-sm w-full">
+                    📧 Step {{ step.order }} - {{ step.title }}
+                    <span v-if="step.draft" class="badge badge-warning badge-sm ml-2">Draft</span>
                 </a>
-                <a href="/preview/marketing/2" target="_blank" class="btn btn-outline btn-sm w-full">
-                    📧 Step 2 - Why Costa Rica
-                </a>
-                <a href="/preview/marketing/3" target="_blank" class="btn btn-outline btn-sm w-full">
-                    📧 Step 3 - Camera Settings
-                </a>
-                <a href="/preview/marketing/4" target="_blank" class="btn btn-outline btn-sm w-full">
-                    📧 Step 4 - Best Time to Visit
-                </a>
-                <a href="/preview/marketing/5" target="_blank" class="btn btn-outline btn-sm w-full">
-                    📧 Step 5 - What Makes Us Different
-                </a>
-                <a href="/preview/marketing/6" target="_blank" class="btn btn-outline btn-sm w-full">
-                    📧 Step 6 - Last Chance
-                </a>
+
             </div>
         </div>
-        
+
         <!-- Newsletter Emails -->
-        <div class="bg-base-100 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 p-4">
+        <div class="bg-base-200 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 border-stone-500  p-4">
             <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Newsletter Emails</h1>
             <div class="space-y-2">
-                <a href="/newsletter-editor" class="btn btn-primary btn-sm w-full">
+                <a href="/newsletter-steps" class="btn btn-primary btn-sm w-full">
                     ✏️ Edit Newsletters
                 </a>
-                <a href="/preview/newsletter/1" target="_blank" class="btn btn-outline btn-sm w-full">
-                    📰 Step 1 - Welcome Email
-                </a>
-                <a href="/preview/newsletter/2" target="_blank" class="btn btn-outline btn-sm w-full">
-                    📰 Step 2 - Getting Started
+                <a v-for="step in newsletterSteps" :key="step.order" :href="`/preview/newsletter/${step.order}`" target="_blank" class="btn btn-outline border-gray-500 btn-sm w-full">
+                    📰 Step {{ step.order }} - {{ step.title }}
+                    <span v-if="step.draft" class="badge badge-warning badge-sm ml-2">Draft</span>
                 </a>
             </div>
         </div>
-        
+
         <!-- Quick Links -->
-        <div class="bg-base-100 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 p-4">
-            <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Quick Links</h1>
+        <div class="bg-base-200 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 border-stone-500 p-4">
+            <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Quick Actions</h1>
             <div class="space-y-2">
-                <button 
+                <button
                     type="button"
-                    @click="sendTestEmail" 
+                    @click="sendTestEmail"
                     :disabled="testEmailLoading"
                     class="btn btn-primary btn-sm w-full"
                 >
@@ -220,7 +216,38 @@
                     {{ testEmailLoading ? 'Sending...' : 'Send Test Email' }}
                 </button>
             </div>
+
+            <div class="space-y-2 mt-2">
+                <a
+                    href="/logs-viewer"
+                    target="_blank"
+                    class="btn btn-primary btn-sm w-full"
+                >
+                    <span class="material-symbols-outlined text-sm mr-1">open_in_new</span>
+                    See Logs
+                </a>
+            </div>
         </div>
+
+
+
+        <!-- Site Links -->
+        <div class="bg-base-200 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 border-stone-500 p-4">
+
+            <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Site Links</h1>
+            <div class="space-y-2">
+                <a
+                    href="https://www.realcoolphototours.com"
+                    target="_blank"
+                    class="btn btn-primary btn-sm w-full"
+                >
+                    <span class="material-symbols-outlined text-sm mr-1">open_in_new</span>
+                    Visit RCPT
+                </a>
+            </div>
+        </div>
+
+
     </div>
 </div>
 </template>
@@ -278,13 +305,15 @@ const queueStatus = ref({ running: false, last_seen: null })
 const formCount = ref({ total: 0 })
 const userFormsSummary = ref([])
 const newsletterSummary = ref([])
+const newsletterSteps = ref([])
+const marketingSteps = ref([])
 const lastChecked = ref(null)
 const isLoading = ref(false)
 const testEmailLoading = ref(false)
 let intervalId = null
 
 // --- Load summary ---
-async function fetchSummary() {
+async function fetchSummary() {0
     isLoading.value = true
     try {
         const { data } = await api.get('/email-sequence/summary')
@@ -342,6 +371,26 @@ async function fetchNewsletterSummary() {
     } catch (e) {
         console.error('Error fetching newsletter summary:', e)
         toast.error('Failed to fetch newsletter summary')
+    }
+}
+
+// --- Load newsletter steps ---
+async function fetchNewsletterSteps() {
+    try {
+        const { data } = await api.get(window.location.origin + '/newsletter-steps/data')
+        newsletterSteps.value = data.sort((a, b) => a.order - b.order)
+    } catch (e) {
+        console.error('Error fetching newsletter steps:', e)
+    }
+}
+
+// --- Load marketing steps ---
+async function fetchMarketingSteps() {
+    try {
+        const { data } = await api.get(window.location.origin + '/marketing-steps/data')
+        marketingSteps.value = data.sort((a, b) => a.order - b.order)
+    } catch (e) {
+        console.error('Error fetching marketing steps:', e)
     }
 }
 
@@ -409,6 +458,8 @@ async function initialLoad() {
         await fetchFormCount()
         await fetchUserFormsSummary()
         await fetchNewsletterSummary()
+        await fetchNewsletterSteps()
+        await fetchMarketingSteps()
     } catch (e) {
         error.value = e?.message || 'Failed to load data'
     } finally {
@@ -424,6 +475,8 @@ onMounted(() => {
         fetchFormCount()
         fetchUserFormsSummary()
         fetchNewsletterSummary()
+        fetchNewsletterSteps()
+        fetchMarketingSteps()
     }, 2 * 60 * 1000)
 })
 

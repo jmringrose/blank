@@ -22,7 +22,19 @@ class NewsletterStepController extends Controller
             'draft' => 'boolean'
         ]);
 
-        return NewsletterStep::create($request->all());
+        $step = NewsletterStep::create($request->all());
+        
+        // Copy file if duplicating
+        if ($request->original_filename && $request->filename) {
+            $originalPath = resource_path('views/emails/newsletters/' . $request->original_filename);
+            $newPath = resource_path('views/emails/newsletters/' . $request->filename);
+            
+            if (file_exists($originalPath)) {
+                copy($originalPath, $newPath);
+            }
+        }
+        
+        return $step;
     }
 
     public function show(NewsletterStep $newsletterStep)
@@ -45,6 +57,13 @@ class NewsletterStepController extends Controller
 
     public function destroy(NewsletterStep $newsletterStep)
     {
+        // Delete the file
+        $filePath = resource_path('views/emails/newsletters/' . $newsletterStep->filename);
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+        
+        // Delete the database record
         $newsletterStep->delete();
         return response()->json(['message' => 'Newsletter step deleted']);
     }

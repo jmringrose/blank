@@ -8,12 +8,6 @@ use Illuminate\Support\Str;
 
 class NewsletterEditorController extends Controller
 {
-    public function index()
-    {
-        $steps = NewsletterStep::orderBy('order')->get();
-        return view('newsletter-editor.index', compact('steps'));
-    }
-
     public function create()
     {
         return view('newsletter-editor.edit');
@@ -78,7 +72,33 @@ class NewsletterEditorController extends Controller
 
         $this->saveEmailTemplate($step->filename, $request->content, $request->title);
 
-        return redirect()->route('newsletter-editor.index')->with('success', 'Newsletter updated successfully');
+        return redirect()->route('newsletter-steps.index')->with('success', 'Newsletter updated successfully');
+    }
+
+    public function toggle($id)
+    {
+        $step = NewsletterStep::findOrFail($id);
+        $step->draft = !$step->draft;
+        $step->save();
+        
+        $status = $step->draft ? 'draft' : 'published';
+        return redirect()->back()->with('success', "Newsletter set as {$status}");
+    }
+
+    public function destroy($id)
+    {
+        $step = NewsletterStep::findOrFail($id);
+        
+        // Delete the file
+        $filePath = resource_path('views/emails/newsletters/' . $step->filename);
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+        
+        // Delete the database record
+        $step->delete();
+        
+        return redirect()->route('newsletter-editor.index')->with('success', 'Newsletter deleted successfully');
     }
 
     private function saveEmailTemplate($filename, $content, $title)

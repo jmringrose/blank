@@ -4,7 +4,7 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">{{ isset($step) ? 'Edit Marketing Email' : 'Create Marketing Email' }}</h1>
-        <a href="{{ route('marketing-editor.index') }}" class="btn btn-outline">← Back to List</a>
+        <a href="{{ route('marketing-steps.index') }}" class="btn btn-outline">← Back to Marketing Steps</a>
     </div>
 
     <div class="bg-base-100 rounded-lg shadow p-6">
@@ -40,19 +40,21 @@
                 @endif
             </div>
 
-            <div class="form-control mb-6">
+            <div class="form-control mb-6" v-pre>
                 <label class="label">
                     <span class="label-text">Content</span>
                 </label>
-                <div id="editor" style="height: 400px;"></div>
-                <textarea name="content" id="content" style="display: none;" required>{{ old('content', $currentContent ?? '') }}</textarea>
+                <textarea name="content" id="content">{{ old('content', $currentContent ?? '') }}</textarea>
                 @error('content')
                     <span class="text-error text-sm">{{ $message }}</span>
                 @enderror
             </div>
 
             <div class="flex justify-end space-x-2">
-                <a href="{{ route('marketing-editor.index') }}" class="btn btn-outline">Cancel</a>
+                <a href="{{ route('marketing-steps.index') }}" class="btn btn-outline">Cancel</a>
+                @if(isset($step))
+                    <a href="{{ route('email.preview.marketing', $step->order) }}" class="btn btn-info" target="_blank">👁️ View</a>
+                @endif
                 <button type="submit" class="btn btn-primary">{{ isset($step) ? 'Update' : 'Create' }} Marketing Email</button>
             </div>
         </form>
@@ -60,58 +62,109 @@
 </div>
 
 @push('head')
-<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-<style>
-.ql-editor {
-    background-color: white !important;
-    color: black !important;
-}
-.ql-toolbar {
-    background-color: #8B7355 !important;
-    color: #FDE047 !important;
-    border-bottom: 1px solid #6B5B47 !important;
-}
-.ql-toolbar .ql-stroke {
-    stroke: #FDE047 !important;
-}
-.ql-toolbar .ql-fill {
-    fill: #FDE047 !important;
-}
-.ql-toolbar button:hover {
-    background-color: #6B5B47 !important;
-}
-</style>
+<script src="https://unpkg.com/tinymce@5/tinymce.min.js"></script>
 @endpush
 
 @push('scripts')
 <script>
-window.addEventListener('load', function() {
-    if (typeof Quill !== 'undefined') {
-        var quill = new Quill('#editor', {
-            theme: 'snow',
-            modules: {
-                toolbar: [
-                    [{ 'header': [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline'],
-                    ['link', 'image'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    ['clean']
-                ]
-            }
-        });
-
-        // Set initial content
-        var content = document.getElementById('content').value;
-        
-        if (content && content.trim()) {
-            quill.root.innerHTML = content;
+tinymce.init({
+    selector: '#content',
+    height: 400,
+    plugins: 'lists link image code table',
+    toolbar: 'undo redo | formatselect styleselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image | table | code',
+    
+    // Enable extended valid elements for styling
+    extended_valid_elements: 'span[style|class],div[style|class],p[style|class]',
+    
+    // Style formats dropdown
+    style_formats: [
+        {title: 'Text Colors', items: [
+            {title: 'Red Text', inline: 'span', styles: {color: '#ff0000'}},
+            {title: 'Blue Text', inline: 'span', styles: {color: '#0066cc'}},
+            {title: 'Green Text', inline: 'span', styles: {color: '#008000'}}
+        ]},
+        {title: 'Text Sizes', items: [
+            {title: 'Large Text', inline: 'span', styles: {'font-size': '18px'}},
+            {title: 'Small Text', inline: 'span', styles: {'font-size': '12px'}}
+        ]},
+        {title: 'Backgrounds', items: [
+            {title: 'Yellow Highlight', inline: 'span', styles: {'background-color': '#ffff00'}},
+            {title: 'Gray Background', block: 'div', styles: {'background-color': '#f5f5f5', 'padding': '10px'}}
+        ]}
+    ],
+    
+    // Enable custom style formats
+    style_formats_merge: true,
+    
+    menubar: false,
+    branding: false,
+    content_style: 'body { font-family: Arial, sans-serif; font-size: 14px; }',
+    
+    // Image options
+    image_title: true,
+    image_description: false,
+    image_dimensions: false,
+    image_class_list: [
+        {title: 'Responsive', value: 'img-responsive'},
+        {title: 'Rounded', value: 'rounded'},
+        {title: 'Shadow', value: 'shadow'}
+    ],
+    
+    // File picker for images
+    file_picker_callback: function(callback, value, meta) {
+        if (meta.filetype === 'image') {
+            var input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.setAttribute('accept', 'image/*');
+            input.onchange = function() {
+                var file = this.files[0];
+                var reader = new FileReader();
+                reader.onload = function() {
+                    callback(reader.result, {
+                        alt: file.name
+                    });
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
         }
-
-        // Update hidden textarea on form submit
-        document.querySelector('form').addEventListener('submit', function() {
-            document.getElementById('content').value = quill.root.innerHTML;
+    },
+    
+    // Preserve Blade variables
+    protect: [
+        /\{\{.*?\}\}/g
+    ],
+    
+    // Don't encode entities for our variables
+    entity_encoding: 'named',
+    
+    setup: function(editor) {
+        editor.on('BeforeSetContent', function(e) {
+            // Protect Blade variables during content setting
+            e.content = e.content.replace(/\{\{([^}]+)\}\}/g, function(match, variable) {
+                return '<span class="blade-var">' + match + '</span>';
+            });
         });
+        
+        editor.on('GetContent', function(e) {
+            // Restore Blade variables when getting content
+            e.content = e.content.replace(/<span class="blade-var">(\{\{[^}]+\}\})<\/span>/g, function(match, variable) {
+                // Create a temporary element to decode HTML entities
+                var temp = document.createElement('div');
+                temp.innerHTML = variable;
+                return temp.textContent || temp.innerText;
+            });
+        });
+    }
+});
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    var content = tinymce.get('content').getContent();
+    if (!content || content.trim() === '') {
+        e.preventDefault();
+        alert('Please enter some content for the email.');
+        return false;
     }
 });
 </script>

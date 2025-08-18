@@ -49,20 +49,65 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // newsletter steps
     Route::get('/newsletter-steps', [\App\Http\Controllers\NewsletterStepController::class, 'index'])->name('newsletter-steps.index');
+    Route::post('/newsletter-steps', [\App\Http\Controllers\NewsletterStepController::class, 'store'])->name('newsletter-steps.store');
+    Route::delete('/newsletter-steps/{id}', [\App\Http\Controllers\NewsletterStepController::class, 'destroy'])->name('newsletter-steps.destroy');
+    
+    // marketing steps
+    Route::get('/marketing-steps', [\App\Http\Controllers\MarketingStepController::class, 'index'])->name('marketing-steps.index');
+    Route::post('/marketing-steps', [\App\Http\Controllers\MarketingStepController::class, 'store'])->name('marketing-steps.store');
+    Route::get('/marketing-steps/toggle/{id}', [\App\Http\Controllers\MarketingStepController::class, 'toggle'])->name('marketing-steps.toggle');
+    Route::put('/marketing-steps/{id}', [\App\Http\Controllers\MarketingStepController::class, 'update'])->name('marketing-steps.update');
+    Route::delete('/marketing-steps/{id}', [\App\Http\Controllers\MarketingStepController::class, 'destroy'])->name('marketing-steps.destroy');
+    
+    // API routes for dashboard
+    Route::get('/marketing-steps/data', function() {
+        return App\Models\MarketingStep::orderBy('order')->get();
+    });
+    Route::get('/newsletter-steps/data', function() {
+        return App\Models\NewsletterStep::orderBy('order')->get();
+    });
+    
+    // unsubscribe route
+    Route::get('/unsubscribe', function() {
+        return view('unsubscribe');
+    })->name('unsubscribe');
+    
+    // storage images API
+    Route::get('/storage-images', function() {
+        $images = [];
+        $storagePath = storage_path('app/public/images');
+        
+        if (is_dir($storagePath)) {
+            $files = glob($storagePath . '/*.{jpg,jpeg,png,gif,webp}', GLOB_BRACE);
+            foreach ($files as $file) {
+                $filename = basename($file);
+                $images[] = [
+                    'name' => $filename,
+                    'url' => '/storage/images/' . $filename
+                ];
+            }
+        }
+        
+        return response()->json($images);
+    });
     
     // newsletter editor
-    Route::get('/newsletter-editor', [\App\Http\Controllers\NewsletterEditorController::class, 'index'])->name('newsletter-editor.index');
     Route::get('/newsletter-editor/create', [\App\Http\Controllers\NewsletterEditorController::class, 'create'])->name('newsletter-editor.create');
     Route::get('/newsletter-editor/{id}/edit', [\App\Http\Controllers\NewsletterEditorController::class, 'edit'])->name('newsletter-editor.edit');
     Route::post('/newsletter-editor', [\App\Http\Controllers\NewsletterEditorController::class, 'store'])->name('newsletter-editor.store');
     Route::put('/newsletter-editor/{id}', [\App\Http\Controllers\NewsletterEditorController::class, 'update'])->name('newsletter-editor.update');
+    Route::get('/newsletter-editor/toggle/{id}', [\App\Http\Controllers\NewsletterEditorController::class, 'toggle'])->name('newsletter-editor.toggle');
+    Route::delete('/newsletter-editor/{id}', [\App\Http\Controllers\NewsletterEditorController::class, 'destroy'])->name('newsletter-editor.destroy');
     
     // marketing editor
-    Route::get('/marketing-editor', [\App\Http\Controllers\MarketingEditorController::class, 'index'])->name('marketing-editor.index');
     Route::get('/marketing-editor/create', [\App\Http\Controllers\MarketingEditorController::class, 'create'])->name('marketing-editor.create');
+    Route::get('/marketing-editor/toggle/{id}', [\App\Http\Controllers\MarketingEditorController::class, 'toggle'])->name('marketing-editor.toggle');
     Route::get('/marketing-editor/{id}/edit', [\App\Http\Controllers\MarketingEditorController::class, 'edit'])->name('marketing-editor.edit');
     Route::post('/marketing-editor', [\App\Http\Controllers\MarketingEditorController::class, 'store'])->name('marketing-editor.store');
     Route::put('/marketing-editor/{id}', [\App\Http\Controllers\MarketingEditorController::class, 'update'])->name('marketing-editor.update');
+    Route::delete('/marketing-editor/{id}', [\App\Http\Controllers\MarketingEditorController::class, 'destroy'])->name('marketing-editor.destroy');
+    
+
 
 });
 

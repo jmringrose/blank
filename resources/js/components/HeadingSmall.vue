@@ -9,48 +9,84 @@
                         <span class="material-symbols-outlined">Menu</span>
                     </button>
                     <ul class="menu menu-sm dropdown-content bg-base-300  rounded-box z-1 mt-3 w-52 p-2 shadow-lg border">
-                        <li>
+<!--                        <li>
                             <a class="mt-1 mr-2" href="/dashboard"><span class="material-symbols-outlined align-top">home</span> Dashboard</a>
-                        </li>
-                        <li v-if="link1 > ''" class="mt-1 mr-2 ">
+                        </li>-->
+                        <li v-if="link1 !== ''" class="mt-1 mr-2 ">
                             <a :href="url1" class=""><span class="material-symbols-outlined">Palette</span> {{ link1 }}</a>
                         </li>
 
-                        <li v-if="link2 > ''" class="mt-1 mr-2">
+                        <li v-if="link2 !== ''" class="mt-1 mr-2">
                             <a :href="url2" class=""><span class="material-symbols-outlined">Database</span> {{ link2 }}</a>
                         </li>
 
-                        <li v-if="link3 > ''" class="mt-1 mr-2 ">
-                            <a :href="url3" class=""><span class="material-symbols-outlined">Table</span> {{ link3 }}</a>
+                        <li v-if="link3 !== ''" class="mt-1 mr-2">
+                            <details>
+                                <summary><span class="material-symbols-outlined">Table</span> {{ link3 }}</summary>
+                                <ul>
+                                    <li><a href="/newsletter-sequences">Newsletter Sequences</a></li>
+                                    <li><a href="/newsletter-steps">Newsletter Steps</a></li>
+                                    <li><a href="/newsletter-editor">Edit Newsletters</a></li>
+                                </ul>
+                            </details>
                         </li>
 
-                        <li v-if="link4 > ''" class="mt-1 mr-2 ">
-                            <a :href="url4" class=""><span class="material-symbols-outlined">Ballot</span> {{ link4 }}</a>
+                        <li v-if="link4 !== ''" class="mt-1 mr-2">
+                            <details>
+                                <summary><span class="material-symbols-outlined">Ballot</span> {{ link4 }}</summary>
+                                <ul>
+                                    <li><a href="/sequences">Marketing Sequences</a></li>
+                                    <li><a href="/marketing-editor">Edit Marketing Emails</a></li>
+                                </ul>
+                            </details>
                         </li>
-                        <li v-if="link5 > ''" class="mt-1 mr-2 ">
+                        <li v-if="link5 !== ''" class="mt-1 mr-2 ">
                             <a :href="url5" class=""><span class="material-symbols-outlined">mail</span> {{ link5 }}</a>
                         </li>
                     </ul>
                 </div>
             </div>
+
             <div class="navbar-center hidden md:flex">
                 <ul class="menu menu-horizontal px-1 text-primary-content ">
-                    <li v-if="link1 > ''" class="mt-1 mr-2 ">
+<!--
+          <li v-if="link1 > ''" class="mt-1 mr-2 ">
                         <a :href="url1" class=""><span class="material-symbols-outlined">Palette</span> {{ link1 }}</a>
-                    </li>
-                    <li v-if="link2 > ''" class="mt-1 mr-2 ">
-                        <a :href="url2" class=""><span class="material-symbols-outlined">Database</span> {{ link2 }}</a>
+                    </li>-->
+
+                    <li v-if="link4 !== ''" class="dropdown dropdown-hover">
+                        <div tabindex="0" role="button" class="btn btn-ghost">
+                            <span class="material-symbols-outlined">Email</span> {{ link4 }}
+                        </div>
+                        <ul tabindex="0" class="dropdown-content menu bg-base-300 rounded-box z-[1] w-52 p-2 shadow border border-primary-content">
+                            <li><a href="/sequences">Marketing Sequences</a></li>
+                            <li><a href="/marketing-steps">Marketing Steps</a></li>
+                        </ul>
                     </li>
 
-                    <li v-if="link3 > ''" class="mt-1 mr-2 ">
-                        <a :href="url3" class=""><span class="material-symbols-outlined">Table</span> {{ link3 }}</a>
+
+                    <li v-if="link2 !== ''" class="mt-1 mr-2 ">
+                        <a :href="url2" class=""><span class="material-symbols-outlined">Table</span> {{ link2 }}</a>
                     </li>
-                    <li v-if="link4 > ''" class="mt-1 mr-2 ">
-                        <a :href="url4" class=""><span class="material-symbols-outlined">Ballot</span> {{ link4 }}</a>
+
+
+                    <li v-if="link3 !== ''" class="dropdown dropdown-hover">
+                        <div tabindex="0" role="button" class="btn btn-ghost">
+                            <span class="material-symbols-outlined">Email</span> {{ link3 }}
+                        </div>
+                        <ul tabindex="0" class="dropdown-content menu bg-base-300 rounded-box z-[1] w-52 p-2 shadow border border-primary-content">
+                            <li><a href="/newsletter-sequences">Newsletter Sequences</a></li>
+                            <li><a href="/newsletter-steps">Newsletter Steps</a></li>
+                        </ul>
                     </li>
-                    <li v-if="link5 > ''" class="mt-1 mr-2 ">
-                        <a :href="url5" class=""><span class="material-symbols-outlined">mail</span> {{ link5 }}</a>
+
+
+                    <li v-if="link5 !== ''" class="mt-1 mr-2 ">
+
                     </li>
+
+
+
                 </ul>
             </div>
             <div class="navbar-end text-accent">

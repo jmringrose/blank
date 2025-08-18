@@ -41,6 +41,7 @@ class MarketingEmail extends Mailable implements ShouldQueue
             ->view($viewName)
             ->with([
                 'sequence' => $this->sequence,
+                'record' => $this->sequence,
                 'firstName' => $this->sequence->first,
                 'lastName' => $this->sequence->last,
                 'email' => $this->sequence->email,

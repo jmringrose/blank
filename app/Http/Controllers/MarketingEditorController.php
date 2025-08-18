@@ -8,12 +8,6 @@ use Illuminate\Support\Str;
 
 class MarketingEditorController extends Controller
 {
-    public function index()
-    {
-        $steps = MarketingStep::orderBy('order')->get();
-        return view('marketing-editor.index', compact('steps'));
-    }
-
     public function create()
     {
         return view('marketing-editor.edit');
@@ -28,6 +22,8 @@ class MarketingEditorController extends Controller
 
     public function store(Request $request)
     {
+        \Log::info('Marketing store called', $request->all());
+        
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
@@ -42,6 +38,8 @@ class MarketingEditorController extends Controller
             'order' => $request->order,
             'draft' => true
         ]);
+
+        \Log::info('Marketing step created', ['id' => $step->id]);
 
         $this->saveEmailTemplate($filename, $request->content, $request->title);
 
@@ -60,7 +58,37 @@ class MarketingEditorController extends Controller
 
         $this->saveEmailTemplate($step->filename, $request->content, $request->title);
 
-        return redirect()->route('marketing-editor.index')->with('success', 'Marketing email updated successfully');
+        return redirect()->route('marketing-steps.index')->with('success', 'Marketing email updated successfully');
+    }
+
+    public function toggle($id)
+    {
+        $step = MarketingStep::findOrFail($id);
+        \Log::info('Toggle called', ['id' => $id, 'current_draft' => $step->draft]);
+        
+        $step->draft = !$step->draft;
+        $step->save();
+        
+        \Log::info('After toggle', ['new_draft' => $step->draft]);
+        
+        $status = $step->draft ? 'draft' : 'published';
+        return redirect()->back()->with('success', "Marketing email set as {$status}");
+    }
+
+    public function destroy($id)
+    {
+        $step = MarketingStep::findOrFail($id);
+        
+        // Delete the file
+        $filePath = resource_path('views/emails/marketing/' . $step->filename);
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+        
+        // Delete the database record
+        $step->delete();
+        
+        return redirect()->route('marketing-editor.index')->with('success', 'Marketing email deleted successfully');
     }
 
     private function getEmailContent($filename)
@@ -68,12 +96,15 @@ class MarketingEditorController extends Controller
         $filePath = resource_path('views/emails/marketing/' . $filename);
         if (file_exists($filePath)) {
             $content = file_get_contents($filePath);
+            
+            // For complex HTML templates, extract everything inside body
+            if (preg_match('/<body[^>]*>\s*(.+?)\s*<\/body>/s', $content, $matches)) {
+                return trim($matches[1]);
+            }
+            
+            // Fallback for simple templates
             if (preg_match('/<div[^>]*>\s*(.+?)\s*<hr/s', $content, $matches)) {
-                $extracted = trim($matches[1]);
-                $extracted = preg_replace('/\n\s+/', '\n', $extracted);
-                $extracted = preg_replace('/\s+/', ' ', $extracted);
-                $extracted = str_replace(['> <', '>\n<'], ['><', '><'], $extracted);
-                return $extracted;
+                return trim($matches[1]);
             }
         }
         return '';
@@ -81,7 +112,12 @@ class MarketingEditorController extends Controller
 
     private function saveEmailTemplate($filename, $content, $title)
     {
-        $template = '<!DOCTYPE html>
+        // If content already contains DOCTYPE, save as-is (complex template)
+        if (strpos($content, '<!DOCTYPE') !== false || strpos($content, '<html') !== false) {
+            $template = $content;
+        } else {
+            // Simple template wrapper for basic content
+            $template = '<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -98,6 +134,7 @@ class MarketingEditorController extends Controller
     </div>
 </body>
 </html>';
+        }
 
         $filePath = resource_path('views/emails/marketing/' . $filename);
         

@@ -182,6 +182,10 @@
     .label {
         @apply text-base-content text-sm;
     }
+    .btn-outline {
+        --btn-color: #9999a1 !important;
+        color: #99aeaf;
+    }
 
 }
 
@@ -207,6 +211,11 @@
     .label {
         @apply text-base-content text-sm;
     }
+    .btn-outline {
+        --btn-color: #9999a1 !important;
+        color: #99aeaf;
+    }
+
 
 }
 

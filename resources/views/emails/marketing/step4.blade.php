@@ -6,34 +6,28 @@
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h1 style="color: #2563eb;">Best Time to Visit Costa Rica</h1>
+        <h1>Best Time to Visit Costa Rica for Photography</h1>
+        <p>Hello {{ $firstName }},</p>
+        <p>Costa Rica offers great photography opportunities year-round, but timing can make a huge difference in what you'll capture!</p>
         
-        <p>Hi {{ $firstName }},</p>
-        
-        <p>Timing is everything in photography, and Costa Rica has distinct seasons that offer different opportunities:</p>
-        
-        <p><strong>Dry Season (December - April):</strong></p>
+        <h3>Dry Season (December - April):</h3>
         <ul>
-            <li>Perfect for landscapes and beach photography</li>
-            <li>Clear skies and dramatic sunsets</li>
-            <li>Wildlife congregates around water sources</li>
+            <li><strong>Best for:</strong> Landscapes, clear skies, beach photography</li>
+            <li><strong>Wildlife:</strong> Animals gather at water sources</li>
+            <li><strong>Weather:</strong> Sunny days, minimal rain</li>
+            <li><strong>Crowds:</strong> Peak tourist season</li>
         </ul>
         
-        <p><strong>Green Season (May - November):</strong></p>
+        <h3>Green Season (May - November):</h3>
         <ul>
-            <li>Lush, vibrant landscapes</li>
-            <li>Fewer crowds, better prices</li>
-            <li>Afternoon storms create dramatic lighting</li>
+            <li><strong>Best for:</strong> Lush landscapes, waterfalls, bird photography</li>
+            <li><strong>Wildlife:</strong> More active, nesting season for many birds</li>
+            <li><strong>Weather:</strong> Afternoon showers, dramatic clouds</li>
+            <li><strong>Crowds:</strong> Fewer tourists, better prices</li>
         </ul>
         
-        <p><strong>My Recommendation:</strong> Both seasons are incredible! It depends on what you want to capture.</p>
-        
-        <p>Want to know which season is best for your photography goals?</p>
-        
-        <p><a href="https://www.realcoolphototours.com" style="background: #007cba; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Get Personalized Advice</a></p>
-        
-        <p>Cheers,<br>
-        James</p>
+        <h3>Our Recommendation:</h3>
+        <p>March-April and September-October offer the perfect balance of good weather and active wildlife!</p>
         
         <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
         <p style="font-size: 12px; color: #666;">

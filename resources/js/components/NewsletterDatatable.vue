@@ -1,4 +1,6 @@
 <template>
+
+ <div class="container max-w-6xl">
     <div class="flex mb-4 text-base-content">
         <div class="mr-4">
             <button :disabled="!itemsSelected.length" class="btn btn-error btn-sm" @click="confirmDeleteSelected">
@@ -96,6 +98,7 @@
             </div>
         </div>
     </div>
+ </div>
 </template>
 
 <script setup>
@@ -110,7 +113,7 @@ const headers = [
     {text: "First", value: "first", sortable: true, width: 100},
     {text: "Last", value: "last", sortable: true, width: 100},
     {text: "Email", value: "email", sortable: true, width: 200},
-    {text: "Current Step", value: "current_step", sortable: true, width: 80},
+    {text: "Current Step", value: "current_step", sortable: true, width: 120},
     {text: "Next Send", value: "next_send_at", sortable: true, width: 150},
     {text: "Unsub", value: "unsub_token", sortable: true, width: 80},
     {text: "Actions", value: "actions", width: 120}

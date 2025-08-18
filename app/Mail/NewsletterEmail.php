@@ -31,6 +31,7 @@ class NewsletterEmail extends Mailable implements ShouldQueue
         return $this->subject($this->step->title)
             ->view($viewName)
             ->with([
+                'record' => $this->sequence,
                 'firstName' => $this->sequence->first,
                 'lastName' => $this->sequence->last,
                 'email' => $this->sequence->email,

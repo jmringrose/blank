@@ -1,16 +1,18 @@
 <template>
-    <div class="container mx-auto p-2">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold">Newsletter Steps</h2>
-            <button @click="showCreateModal = true" class="btn btn-primary">
-                <span class="material-symbols-outlined">add</span>
-                Add Step
-            </button>
+    <div class="container mt-4 max-w-5xl mx-auto text-base bg-base-300 p-1 md:p-3 rounded-lg shadow-lg border">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold ml-4">Marketing Steps</h1>
+            <div class="space-x-2">
+                <a href="/dashboard" class="btn btn-outline">← Back to Dashboard</a>
+                <a href="/marketing-editor/create" class="btn btn-primary">Create New Marketing Step</a>
+            </div>
         </div>
+
+        <div v-if="successMessage" class="alert alert-success mb-4">{{ successMessage }}</div>
 
         <EasyDataTable
             :headers="headers"
-            :items="items"
+            :items="steps"
             :loading="loading"
             :rows-per-page="15"
             alternating
@@ -30,27 +32,27 @@
             <template #item-actions="item">
                 <div class="flex justify-center space-x-1">
 
-                    <button class="btn btn-sm btn-secondary h-6 w-6" @click.stop="editItem(item)" title="Edit Record">
+                    <button class="btn btn-sm btn-secondary h-6 w-6" @click.stop="editStep(item)" title="Edit Record">
                         <span class="!text-base material-symbols-outlined">database</span>
                     </button>
 
-                    <button class="btn btn-sm btn-secondary h-6 w-6" @click.stop="duplicateItem(item)" title="Duplicate">
+                    <button class="btn btn-sm btn-secondary h-6 w-6" @click.stop="duplicateStep(item)" title="Duplicate">
                         <span class="!text-base material-symbols-outlined">content_copy</span>
                     </button>
 
-                    <a :href="`/newsletter-editor/${item.id}/edit`" class="btn btn-sm btn-secondary h-6 w-6" title="Edit File">
+                    <a :href="`/marketing-editor/${item.id}/edit`" class="btn btn-sm btn-secondary h-6 w-6" title="Edit File">
                         <span class="!text-base material-symbols-outlined">edit</span>
                     </a>
 
-                    <a :href="`/preview/newsletter/${item.order}`" target="_blank" class="btn btn-sm btn-secondary h-6 w-6" title="View">
+                    <a :href="`/preview/marketing/${item.order}`" target="_blank" class="btn btn-sm btn-secondary h-6 w-6" title="View">
                         <span class="!text-base material-symbols-outlined">visibility</span>
                     </a>
 
-                    <button class="btn btn-sm h-6 w-6" :class="item.draft ? 'btn-success' : 'btn-info'" @click.stop="togglePublish(item)" :title="item.draft ? 'Publish' : 'Unpublish'">
+                    <button class="btn btn-sm h-6 w-6" :class="item.draft ? 'btn-success' : 'btn-info'" @click.stop="toggleStep(item)" :title="item.draft ? 'Publish' : 'Unpublish'">
                         <span class="!text-base material-symbols-outlined">{{ item.draft ? 'check_circle' : 'cancel' }}</span>
                     </button>
 
-                    <button class="btn btn-sm btn-secondary h-6 w-6 ml-2 bg-red-400" @click.stop="deleteItem(item)" title="Delete">
+                    <button class="btn btn-sm btn-secondary h-6 w-6 ml-2 bg-red-400" @click.stop="deleteStep(item)" title="Delete">
                         <span class="!text-base material-symbols-outlined">delete</span>
                     </button>
                 </div>
@@ -75,12 +77,12 @@
             </template>
         </EasyDataTable>
 
-        <!-- Create/Edit Modal -->
-        <div v-if="showCreateModal || showEditModal" class="modal modal-open">
+        <!-- Edit Modal -->
+        <div v-if="showEditModal" class="modal modal-open">
             <div class="modal-box max-w-md">
-                <h3 class="font-bold text-lg mb-4">{{ showCreateModal ? 'Add' : 'Edit' }} Newsletter Step</h3>
+                <h3 class="font-bold text-lg mb-4">Edit Marketing Step</h3>
 
-                <form @submit.prevent="saveItem" class="space-y-4">
+                <form @submit.prevent="saveStep" class="space-y-4">
                     <div class="form-control w-full">
                         <label class="label">
                             <span class="label-text font-medium">Order</span>
@@ -89,7 +91,6 @@
                             v-model="formData.order"
                             type="number"
                             class="input input-bordered w-full"
-                            placeholder="Enter order number"
                             required
                         />
                     </div>
@@ -102,7 +103,6 @@
                             v-model="formData.title"
                             type="text"
                             class="input input-bordered w-full"
-                            placeholder="Enter newsletter title"
                             required
                         />
                     </div>
@@ -110,13 +110,11 @@
                     <div class="form-control w-full">
                         <label class="label">
                             <span class="label-text font-medium">Filename</span>
-                            <span class="label-text-alt text-gray-500">.blade.php</span>
                         </label>
                         <input
                             v-model="formData.filename"
                             type="text"
                             class="input input-bordered w-full"
-                            placeholder="welcome-email.blade.php"
                         />
                     </div>
 
@@ -125,15 +123,11 @@
                             <input v-model="formData.draft" type="checkbox" class="checkbox checkbox-primary mr-3" />
                             <span class="label-text font-medium">Save as Draft</span>
                         </label>
-                        <div class="label">
-                            <span class="label-text-alt text-gray-500">Drafts won't be sent to subscribers</span>
-                        </div>
                     </div>
                 </form>
 
                 <div class="modal-action mt-6">
-                    <button @click="saveItem" class="btn btn-primary">
-                        <span class="material-symbols-outlined mr-2">save</span>
+                    <button @click="saveStep" class="btn btn-primary">
                         Save Step
                     </button>
                     <button @click="closeModal" class="btn btn-ghost">
@@ -147,7 +141,7 @@
         <div v-if="showDeleteModal" class="modal modal-open">
             <div class="modal-box">
                 <h3 class="font-bold text-lg">Confirm Delete</h3>
-                <p class="py-4">Are you sure you want to delete "{{ itemToDelete?.title }}"? This action cannot be undone.</p>
+                <p class="py-4">Are you sure you want to delete "{{ stepToDelete?.title }}"? This action cannot be undone.</p>
                 <div class="modal-action">
                     <button @click="confirmDelete" class="btn btn-error">Delete</button>
                     <button @click="closeDeleteModal" class="btn btn-ghost">Cancel</button>
@@ -157,130 +151,151 @@
     </div>
 </template>
 
-<script setup>
+<script>
 import { ref, onMounted } from 'vue'
 import { useToast } from 'vue-toastification'
 import axios from 'axios'
 
-const toast = useToast()
-const loading = ref(false)
-const items = ref([])
-const showCreateModal = ref(false)
-const showEditModal = ref(false)
-const showDeleteModal = ref(false)
-const editingItem = ref(null)
-const itemToDelete = ref(null)
+export default {
+    name: 'MarketingStepsDatatable',
+    setup() {
+        const steps = ref([])
+        const successMessage = ref('')
+        const toast = useToast()
+        const loading = ref(false)
+        const showEditModal = ref(false)
+        const showDeleteModal = ref(false)
+        const editingStep = ref(null)
+        const stepToDelete = ref(null)
+        const formData = ref({
+            order: '',
+            title: '',
+            filename: '',
+            draft: false
+        })
 
-const formData = ref({
-    order: '',
-    title: '',
-    filename: '',
-    draft: true
-})
+        const headers = [
+            { text: "Order", value: "order", sortable: true },
+            { text: "Title", value: "title", sortable: true },
+            { text: "Filename", value: "filename", sortable: true },
+            { text: "Status", value: "draft" },
+            { text: "Actions", value: "actions" }
+        ]
 
-const headers = [
-    { text: "ID", value: "id", sortable: true },
-    { text: "Order", value: "order", sortable: true },
-    { text: "Title", value: "title", sortable: true },
-    { text: "Filename", value: "filename", sortable: true },
-    { text: "Status", value: "draft" },
-    { text: "Actions", value: "actions" }
-]
-
-const fetchData = async () => {
-    loading.value = true
-    try {
-        const response = await axios.get('/newsletter-steps')
-        items.value = response.data
-    } catch (error) {
-        toast.error('Failed to load newsletter steps')
-    } finally {
-        loading.value = false
-    }
-}
-
-const editItem = (item) => {
-    editingItem.value = item
-    formData.value = { ...item }
-    showEditModal.value = true
-}
-
-const deleteItem = (item) => {
-    itemToDelete.value = item
-    showDeleteModal.value = true
-}
-
-const confirmDelete = async () => {
-    try {
-        await axios.delete(`/newsletter-steps/${itemToDelete.value.id}`)
-        toast.success('Step deleted successfully')
-        fetchData()
-        closeDeleteModal()
-    } catch (error) {
-        toast.error('Failed to delete step')
-    }
-}
-
-const closeDeleteModal = () => {
-    showDeleteModal.value = false
-    itemToDelete.value = null
-}
-
-const saveItem = async () => {
-    try {
-        if (showCreateModal.value) {
-            await axios.post('/newsletter-steps', formData.value)
-            toast.success('Step created successfully')
-        } else {
-            await axios.put(`/newsletter-steps/${editingItem.value.id}`, formData.value)
-            toast.success('Step updated successfully')
+        const fetchSteps = async () => {
+            loading.value = true
+            try {
+                const response = await axios.get(window.location.origin + '/marketing-steps/data')
+                steps.value = response.data.sort((a, b) => a.order - b.order)
+            } catch (error) {
+                console.error('Error fetching marketing steps:', error)
+                toast.error('Failed to fetch marketing steps')
+            } finally {
+                loading.value = false
+            }
         }
-        closeModal()
-        fetchData()
-    } catch (error) {
-        toast.error('Failed to save step')
-    }
-}
 
-const duplicateItem = async (item) => {
-    try {
-        const maxOrder = Math.max(...items.value.map(i => i.order))
-        const duplicateData = {
-            order: maxOrder + 1,
-            title: `${item.title} (Copy)`,
-            filename: item.filename ? item.filename.replace('.blade.php', '-copy.blade.php') : '',
-            original_filename: item.filename,
-            draft: true
+        const toggleStep = async (step) => {
+            try {
+                await axios.get(window.location.origin + `/marketing-steps/toggle/${step.id}`)
+                const status = !step.draft ? 'draft' : 'published'
+                toast.success(`Marketing step set as ${status}`)
+                fetchSteps()
+            } catch (error) {
+                console.error('Error toggling step:', error)
+                toast.error('Failed to toggle step status')
+            }
         }
-        await axios.post('/newsletter-steps', duplicateData)
-        toast.success('Step duplicated successfully')
-        fetchData()
-    } catch (error) {
-        toast.error('Failed to duplicate step')
+
+        const duplicateStep = async (step) => {
+            try {
+                const maxOrder = Math.max(...steps.value.map(s => s.order))
+                const duplicateData = {
+                    order: maxOrder + 1,
+                    title: `${step.title} (Copy)`,
+                    filename: step.filename ? step.filename.replace('.blade.php', '-copy.blade.php') : '',
+                    original_filename: step.filename,
+                    draft: true
+                }
+                await axios.post(window.location.origin + '/marketing-steps', duplicateData)
+                toast.success('Marketing step duplicated successfully')
+                fetchSteps()
+            } catch (error) {
+                console.error('Error duplicating step:', error)
+                toast.error('Failed to duplicate marketing step')
+            }
+        }
+
+        const deleteStep = (step) => {
+            stepToDelete.value = step
+            showDeleteModal.value = true
+        }
+
+        const confirmDelete = async () => {
+            try {
+                await axios.delete(window.location.origin + `/marketing-steps/${stepToDelete.value.id}`)
+                steps.value = steps.value.filter(s => s.id !== stepToDelete.value.id)
+                toast.success('Marketing step deleted successfully')
+                closeDeleteModal()
+            } catch (error) {
+                console.error('Error deleting step:', error)
+                toast.error('Failed to delete marketing step')
+            }
+        }
+
+        const closeDeleteModal = () => {
+            showDeleteModal.value = false
+            stepToDelete.value = null
+        }
+
+        onMounted(() => {
+            fetchSteps()
+        })
+
+        const editStep = (step) => {
+            editingStep.value = step
+            formData.value = { ...step }
+            showEditModal.value = true
+        }
+
+        const saveStep = async () => {
+            try {
+                await axios.put(window.location.origin + `/marketing-steps/${editingStep.value.id}`, formData.value)
+                toast.success('Marketing step updated successfully')
+                closeModal()
+                fetchSteps()
+            } catch (error) {
+                console.error('Error saving step:', error)
+                toast.error('Failed to save marketing step')
+            }
+        }
+
+        const closeModal = () => {
+            showEditModal.value = false
+            editingStep.value = null
+            formData.value = { order: '', title: '', filename: '', draft: false }
+        }
+
+        return {
+            steps,
+            successMessage,
+            loading,
+            headers,
+            showEditModal,
+            showDeleteModal,
+            formData,
+            stepToDelete,
+            toggleStep,
+            deleteStep,
+            duplicateStep,
+            editStep,
+            saveStep,
+            closeModal,
+            confirmDelete,
+            closeDeleteModal
+        }
     }
 }
-
-const togglePublish = async (item) => {
-    try {
-        await axios.get(window.location.origin + `/newsletter-editor/toggle/${item.id}`)
-        const status = !item.draft ? 'draft' : 'published'
-        toast.success(`Newsletter set as ${status}`)
-        fetchData()
-    } catch (error) {
-        toast.error('Failed to toggle publish status')
-    }
-}
-
-const closeModal = () => {
-    showCreateModal.value = false
-    showEditModal.value = false
-    editingItem.value = null
-    formData.value = { order: '', title: '', filename: '', draft: true }
-}
-
-onMounted(() => {
-    fetchData()
-})
 </script>
 
 <style scoped>

@@ -34,14 +34,14 @@
         <!-- Scripts -->
        {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        
+
         @stack('head')
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen" id="app">
             {{--  @include('layouts.navigation')--}}
             <headingsmall title="Test page"
-                          name="{{ Auth()->user()->name}}"
+                          name="{{ htmlspecialchars(Auth()->user()->name, ENT_QUOTES) }}"
                           id="{{ Auth()->user()->id }}"
 
                           link1="Dashboard"
@@ -50,16 +50,13 @@
                           link2="Survey Data"
                           url2="/formdata"
 
-                          link3="Pre Sales"
-                          url3="/sequences"
+                          link3="Customer Newsletters"
+                          url3="/newsletter-sequences"
 
-                          link5="Newsletters"
-                          url5="/newsletter-steps"
+                          link4="Pre Sales"
+                          url4="/sequences"
 
-                          link4="Newletter Sequences"
-                          url4="/newsletter-sequences"
-
-                          theme="{{ Auth()->user()->theme }}"
+                          theme="{{ htmlspecialchars(Auth()->user()->theme ?? '', ENT_QUOTES) }}"
             ></headingsmall>
             <!-- Page Heading -->
             @isset($header)
@@ -74,7 +71,7 @@
                 @yield('content')
             </main>
         </div>
-        
+
         @stack('scripts')
     </body>
 </html>
