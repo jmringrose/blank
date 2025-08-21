@@ -15,7 +15,9 @@ class NewsletterSequence extends Model
         'email',
         'current_step',
         'unsub_token',
-        'next_send_at'
+        'next_send_at',
+        'tour_date',
+        'tour_date_str'
     ];
 
     public function getNextSendAtAttribute($value)

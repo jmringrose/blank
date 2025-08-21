@@ -39,6 +39,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // newsletter sequences
     Route::get('/newsletter-sequences', [\App\Http\Controllers\NewsletterSequenceController::class, 'index'])->name('newsletter-sequences.index');
+    Route::post('/newsletter-sequences/create', [\App\Http\Controllers\NewsletterSequenceController::class, 'store'])->name('newsletter-sequences.store');
     Route::get('/newsletter-sequence/{id}/edit', [\App\Http\Controllers\NewsletterSequenceController::class, 'edit'])->name('newsletter-sequences.edit');
     Route::put('/newsletter-sequence/{id}', [\App\Http\Controllers\NewsletterSequenceController::class, 'update'])->name('newsletter-sequences.update');
 
@@ -61,10 +62,99 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/newsletter-steps/data', function() {
         return App\Models\NewsletterStep::orderBy('order')->get();
     });
+    Route::get('/sequences/data', function() {
+        return App\Models\EmailSequence::all();
+    });
+    Route::get('/newsletter-sequences/data', function() {
+        return App\Models\NewsletterSequence::all();
+    });
+    
+    // Test email routes
+    Route::post('/send-test-email', [\App\Http\Controllers\API\APISequenceController::class, 'sendTestEmail']);
+    Route::post('/send-simple-test-email', [\App\Http\Controllers\API\APISequenceController::class, 'sendSimpleTestEmail']);
+    
+    // Image upload routes
+    Route::post('/upload-image', [\App\Http\Controllers\ImageController::class, 'upload']);
+    Route::get('/images', [\App\Http\Controllers\ImageController::class, 'list']);
+    
+    // Newsletter sequences
+    Route::get('/newsletter-sequence/{id}', [\App\Http\Controllers\NewsletterSequenceController::class, 'show']);
+    Route::post('/newsletter-sequences', [\App\Http\Controllers\NewsletterSequenceController::class, 'store']);
+    
+
 
 
 
     // storage images API
+    // API endpoint for TinyMCE image browser
+    Route::get('/api/images', function() {
+        try {
+            // Check if img directory exists
+            $imgPath = public_path('img');
+
+            if (!is_dir($imgPath)) {
+                // Try to create the directory
+                if (!mkdir($imgPath, 0755, true)) {
+                    return response()->json([
+                        'error' => 'img directory does not exist',
+                        'path' => $imgPath,
+                        'images' => []
+                    ]);
+                }
+            }
+
+            // Get all image files from public/img directory
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+            $images = [];
+
+            $files = scandir($imgPath);
+            if ($files === false) {
+                return response()->json([
+                    'error' => 'Cannot read img directory',
+                    'path' => $imgPath,
+                    'images' => []
+                ]);
+            }
+
+            foreach ($files as $file) {
+                if ($file === '.' || $file === '..') continue;
+
+                $filePath = $imgPath . '/' . $file;
+                if (!is_file($filePath)) continue;
+
+                $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                if (!in_array($extension, $allowedExtensions)) continue;
+
+                $images[] = [
+                    'name' => $file,
+                    'path' => '/img/' . $file,
+                    'url' => asset('img/' . $file),
+                    'size' => filesize($filePath),
+                    'modified' => date('Y-m-d H:i:s', filemtime($filePath))
+                ];
+            }
+
+            // Sort by name
+            usort($images, function($a, $b) {
+                return strcmp($a['name'], $b['name']);
+            });
+
+            return response()->json([
+                'success' => true,
+                'path' => $imgPath,
+                'count' => count($images),
+                'images' => $images
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Unable to load images',
+                'message' => $e->getMessage(),
+                'images' => []
+            ], 500);
+        }
+    })->name('api.images');
+
     Route::get('/storage-images', function() {
         $images = [];
         $storagePath = storage_path('app/public/images');

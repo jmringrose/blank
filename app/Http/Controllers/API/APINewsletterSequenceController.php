@@ -19,6 +19,28 @@ class APINewsletterSequenceController extends Controller
         return response()->json($sequence);
     }
 
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'first' => 'required|string|max:255',
+            'last' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'current_step' => 'required|integer|min:0',
+            'next_send_at' => 'nullable|date',
+            'tour_date' => 'nullable|date',
+            'tour_date_str' => 'nullable|string|max:255',
+            'unsub_token' => 'nullable|string|max:255',
+        ]);
+
+        $sequence = NewsletterSequence::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Newsletter sequence created successfully!',
+            'data' => $sequence
+        ]);
+    }
+
     public function updateSequence(Request $request, $id)
     {
         $validated = $request->validate([
@@ -27,6 +49,9 @@ class APINewsletterSequenceController extends Controller
             'email' => 'required|email|max:255',
             'current_step' => 'required|integer|min:0',
             'next_send_at' => 'nullable|date',
+            'tour_date' => 'nullable|date',
+            'tour_date_str' => 'nullable|string|max:255',
+            'unsub_token' => 'nullable|string|max:255',
         ]);
 
         $sequence = NewsletterSequence::findOrFail($id);

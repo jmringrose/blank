@@ -58,6 +58,10 @@ class MarketingEditorController extends Controller
 
         $this->saveEmailTemplate($step->filename, $request->content, $request->title);
 
+        if ($request->input('action') === 'save_continue') {
+            return redirect()->back()->with('success', 'Marketing email updated successfully');
+        }
+
         return redirect()->route('marketing-steps.index')->with('success', 'Marketing email updated successfully');
     }
 
@@ -112,32 +116,23 @@ class MarketingEditorController extends Controller
         if (strpos($content, '<!DOCTYPE') !== false || strpos($content, '<html') !== false) {
             $template = $content;
         } else {
+            // Clean up extra spans around variables
+            $content = $this->cleanupVariableSpans($content);
+            
             // Check if unsubscribe link already exists
             $hasUnsubscribe = strpos($content, '$unsubscribeUrl') !== false || strpos($content, 'unsubscribe') !== false;
             
             $unsubscribeSection = '';
             if (!$hasUnsubscribe) {
-                $unsubscribeSection = '
-        
-        <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
-        <p style="font-size: 12px; color: #666;">
-            <a href="{{ $unsubscribeUrl }}" style="color: #666;">Unsubscribe</a>
-        </p>';
+                $unsubscribeSection = $this->getUnsubscribeFooter();
             }
             
             // Simple template wrapper for basic content
-            $template = '<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>' . htmlspecialchars($title) . '</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        ' . $content . $unsubscribeSection . '
-    </div>
-</body>
-</html>';
+            $template = view('email-templates.wrapper', [
+                'title' => $title,
+                'emailContent' => $content,
+                'hasUnsubscribe' => $hasUnsubscribe
+            ])->render();
         }
 
         $filePath = resource_path('views/emails/marketing/' . $filename);
@@ -148,5 +143,21 @@ class MarketingEditorController extends Controller
         }
         
         file_put_contents($filePath, $template);
+    }
+    
+    private function cleanupVariableSpans($content)
+    {
+        // Remove multiple nested spans around Laravel variables
+        $content = preg_replace('/<span[^>]*>\s*(<span[^>]*>)*\s*(\{\{[^}]+\}\})\s*(<\/span>)*\s*<\/span>/', '$2', $content);
+        
+        // Clean up any remaining nested spans around variables
+        $content = preg_replace('/<span[^>]*>(\{\{[^}]+\}\})<\/span>/', '$1', $content);
+        
+        return $content;
+    }
+    
+    private function getUnsubscribeFooter()
+    {
+        return config('email-templates.unsubscribe_footer');
     }
 }

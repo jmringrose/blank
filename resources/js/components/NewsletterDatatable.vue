@@ -2,11 +2,6 @@
 
  <div class="container max-w-6xl">
     <div class="flex mb-4 text-base-content">
-        <div class="mr-4">
-            <button :disabled="!itemsSelected.length" class="btn btn-error btn-sm" @click="confirmDeleteSelected">
-                Delete
-            </button>
-        </div>
         <span class="mr-2 mt-2 text-sm">Search specific field:</span>
         <select v-model="searchField" class="ml-2 mr-4 select bg-secondary select-sm w-36">
             <option selected value="">Pick Something</option>
@@ -24,7 +19,6 @@
     </div>
 
     <EasyDataTable
-        v-model:items-selected="itemsSelected"
         :headers="headers"
         :items="items"
         :rows-per-page="15"
@@ -33,8 +27,8 @@
         alternating
         body-text-direction="left"
         header-text-direction="left"
-        sort-by="id"
-        sort-type="desc"
+        sort-by="first"
+        sort-type="asc"
         table-class-name="customize-table"
         theme-color="#1d90ff"
         hide-rows-per-page
@@ -47,13 +41,19 @@
             </div>
         </template>
 
+        <template #item-tour_date="{ tour_date }">
+            <div class="text-center">
+                {{ tour_date || 'Not Set' }}
+            </div>
+        </template>
+
         <template #item-unsub_token="{ unsub_token }">
             <span
-                :class="unsub_token ? 'text-green-600' : 'text-red-600'"
-                :title="unsub_token ? 'Unsubscribe token exists' : 'No unsubscribe token'"
+                :class="(unsub_token && unsub_token.length > 0) ? 'text-green-600' : 'text-red-600'"
+                :title="(unsub_token && unsub_token.length > 0) ? 'Unsubscribe token exists' : 'No unsubscribe token'"
                 class="font-bold text-lg"
             >
-                {{ unsub_token ? '✓' : '✗' }}
+                {{ (unsub_token && unsub_token.length > 0) ? '✓' : '✗' }}
             </span>
         </template>
 
@@ -87,6 +87,75 @@
         </template>
     </EasyDataTable>
 
+    <!-- Add User Modal -->
+    <div v-if="showAddUserModal" class="modal modal-open">
+        <div class="modal-box max-w-md">
+            <h3 class="font-bold text-lg mb-4">Add Newsletter User</h3>
+
+            <form @submit.prevent="addUser" class="space-y-4">
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-medium">First Name</span>
+                    </label>
+                    <input
+                        v-model="userFormData.first"
+                        type="text"
+                        class="input input-bordered w-full"
+                        placeholder="Enter first name"
+                        required
+                    />
+                </div>
+
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-medium">Last Name</span>
+                    </label>
+                    <input
+                        v-model="userFormData.last"
+                        type="text"
+                        class="input input-bordered w-full"
+                        placeholder="Enter last name"
+                        required
+                    />
+                </div>
+
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-medium">Email</span>
+                    </label>
+                    <input
+                        v-model="userFormData.email"
+                        type="email"
+                        class="input input-bordered w-full"
+                        placeholder="Enter email address"
+                        required
+                    />
+                </div>
+
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-medium">Tour Date (optional)</span>
+                    </label>
+                    <input
+                        v-model="userFormData.tour_date"
+                        type="date"
+                        class="input input-bordered w-full"
+                    />
+                </div>
+            </form>
+
+            <div class="modal-action mt-6">
+                <button @click="addUser" class="btn btn-primary">
+                    <span class="material-symbols-outlined mr-2">person_add</span>
+                    Add User
+                </button>
+                <button @click="closeAddUserModal" class="btn btn-ghost">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Delete Confirmation Modal -->
     <div v-if="showDeleteModal" class="modal modal-open">
         <div class="modal-box">
@@ -109,12 +178,12 @@ import { useToast } from 'vue-toastification'
 const toast = useToast()
 
 const headers = [
-    {text: "ID", value: "id", sortable: true, width: 100},
     {text: "First", value: "first", sortable: true, width: 100},
     {text: "Last", value: "last", sortable: true, width: 100},
     {text: "Email", value: "email", sortable: true, width: 200},
-    {text: "Current Step", value: "current_step", sortable: true, width: 120},
+    {text: "Step", value: "current_step", sortable: true, width: 120},
     {text: "Next Send", value: "next_send_at", sortable: true, width: 150},
+    {text: "Tour", value: "tour_date_str", sortable: true, width: 150},
     {text: "Unsub", value: "unsub_token", sortable: true, width: 80},
     {text: "Actions", value: "actions", width: 120}
 ]
@@ -125,8 +194,16 @@ const itemsSelected = ref([])
 const items = ref([])
 const loading = ref(false)
 const showDeleteModal = ref(false)
+const showAddUserModal = ref(false)
 const deleteModalMessage = ref("")
 const pendingDeleteAction = ref(null)
+
+const userFormData = ref({
+    first: '',
+    last: '',
+    email: '',
+    tour_date: ''
+})
 
 const formatDate = (dateString) => {
     if (!dateString) return 'Not scheduled'
@@ -210,6 +287,29 @@ const cancelDelete = () => {
     pendingDeleteAction.value = null
 }
 
+const addUser = async () => {
+    try {
+        const userData = {
+            ...userFormData.value,
+            current_step: 1
+        }
+        console.log('Sending user data:', userData)
+        const response = await axios.post('/newsletter-sequences', userData)
+        console.log('Response:', response.data)
+        toast.success('User added to newsletter successfully')
+        closeAddUserModal()
+        getHistory() // Refresh the list
+    } catch (error) {
+        console.error('Error adding user:', error.response?.data || error.message)
+        toast.error('Failed to add user: ' + (error.response?.data?.message || error.message))
+    }
+}
+
+const closeAddUserModal = () => {
+    showAddUserModal.value = false
+    userFormData.value = { first: '', last: '', email: '', tour_date: '' }
+}
+
 const clearSearch = () => {
     searchField.value = ""
     searchValue.value = ""
@@ -217,6 +317,11 @@ const clearSearch = () => {
 
 onMounted(() => {
     getHistory()
+    
+    // Add click handler for the Add User button
+    document.getElementById('addUserBtn')?.addEventListener('click', () => {
+        showAddUserModal.value = true
+    })
 })
 </script>
 

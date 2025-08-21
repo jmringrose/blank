@@ -76,7 +76,7 @@
             <div class="flex justify-center">
                 <button class="btn btn-sm btn-secondary h-6 w-6 mr-1" @click.stop="confirmDeleteItem(item)"><span class="!text-base material-symbols-outlined">delete</span></button>
                 <button class="btn btn-sm btn-secondary h-6 w-6  mr-1" @click.stop="editItem(item)"><span class="!text-base material-symbols-outlined">edit</span></button>
-                <!--                <button class="btn btn-sm btn-secondary" @click.stop="deleteItem(item)"><span class="!text-base material-symbols-outlined">file_copy</span></button>-->
+                <button class="btn btn-sm btn-info h-6 w-6 mr-1" @click.stop="copyToNewsletter(item)" title="Copy to Newsletter"><span class="!text-base material-symbols-outlined">forward_to_inbox</span></button>
             </div>
         </template>
         <!-- Custom slot for unsub_token column -->
@@ -340,6 +340,40 @@ const getRelativeDate = (dateString: string | null) => {
 
 const editItem = (item: Item) => {
     window.location.href = `/email-sequence/${item.id}/edit`;
+};
+
+const copyToNewsletter = async (item: Item) => {
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        
+        const response = await fetch('/newsletter-sequences/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken || '',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                first: item.first,
+                last: item.last,
+                email: item.email,
+                current_step: 0,
+                unsub_token: item.unsub_token || '',
+                next_send_at: null,
+                tour_date: null,
+                tour_date_str: null
+            })
+        });
+        
+        if (response.ok) {
+            toast.success(`${item.first} ${item.last} copied to newsletter successfully`);
+        } else {
+            throw new Error('Failed to copy user');
+        }
+    } catch (error) {
+        console.error('Error copying to newsletter:', error);
+        toast.error('Failed to copy user to newsletter');
+    }
 };
 
 const deleteSelected = async () => {

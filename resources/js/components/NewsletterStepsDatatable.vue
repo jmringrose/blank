@@ -46,6 +46,10 @@
                         <span class="!text-base material-symbols-outlined">visibility</span>
                     </a>
 
+                    <button class="btn btn-sm btn-warning h-6 w-6" @click.stop="sendTestEmail(item)" :disabled="sendingEmails.has(item.id)" :class="{'opacity-50 cursor-not-allowed': sendingEmails.has(item.id)}" title="Send Test Email">
+                        <span class="!text-base material-symbols-outlined">mail</span>
+                    </button>
+
                     <button class="btn btn-sm h-6 w-6" :class="item.draft ? 'btn-success' : 'btn-info'" @click.stop="togglePublish(item)" :title="item.draft ? 'Publish' : 'Unpublish'">
                         <span class="!text-base material-symbols-outlined">{{ item.draft ? 'check_circle' : 'cancel' }}</span>
                     </button>
@@ -190,7 +194,7 @@ const headers = [
 const fetchData = async () => {
     loading.value = true
     try {
-        const response = await axios.get('/newsletter-steps')
+        const response = await axios.get(window.location.origin + '/newsletter-steps/data')
         items.value = response.data
     } catch (error) {
         toast.error('Failed to load newsletter steps')
@@ -268,6 +272,48 @@ const togglePublish = async (item) => {
         fetchData()
     } catch (error) {
         toast.error('Failed to toggle publish status')
+    }
+}
+
+const sendingEmails = ref(new Set())
+
+const sendTestEmail = async (step) => {
+    if (sendingEmails.value.has(step.id)) {
+        return // Already sending
+    }
+    
+    try {
+        sendingEmails.value.add(step.id)
+        toast.info(`Sending test email for step ${step.order}...`)
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+        
+        const response = await fetch('/send-test-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken || '',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                type: 'newsletter',
+                step: step.order
+            })
+        })
+        
+        if (response.ok) {
+            const result = await response.json()
+            toast.success(`Test email sent for step ${step.order}: ${step.title}`)
+        } else {
+            const errorData = await response.text()
+            console.error('API Error:', response.status, errorData)
+            throw new Error(`API Error: ${response.status} - ${errorData}`)
+        }
+    } catch (error) {
+        console.error('Error sending test email:', error)
+        toast.error('Failed to send test email')
+    } finally {
+        sendingEmails.value.delete(step.id)
     }
 }
 

@@ -56,12 +56,7 @@
         hide-rows-per-page
     >
 
-        <template #item-actions="item">
-            <div class="flex justify-center">
-                <button class="btn btn-sm btn-secondary h-6 w-6 mr-1" @click.stop="confirmDeleteItem(item)"><span class="!text-base material-symbols-outlined">delete</span></button>
-                <button class="btn btn-sm btn-secondary h-6 w-6  mr-1" @click.stop="editItem(item)"><span class="!text-base material-symbols-outlined">edit</span></button>
-            </div>
-        </template>
+
 
 
         <template #item-date_created="{ date_created }">
@@ -195,8 +190,7 @@ const headers = [
     {text: "Tour Date", value: "fields.select-1", sortable: true, width: 180},
     {text: "Name", value: "fields.name-1", sortable: true, width: 180},
     {text: "Email", value: "fields.email-1", sortable: true, width: 200},
-    {text: "Created", value: "date_created", sortable: true, width: 180},
-    {text: "Actions", value: "actions", width: 80}
+    {text: "Created", value: "date_created", sortable: true, width: 180}
 ];
 
 // =====================

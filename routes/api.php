@@ -78,12 +78,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // newsletter sequence management
     Route::get('/newsletter-sequence/{id}', [APINewsletterSequenceController::class, 'getSequence']);
     Route::put('/newsletter-sequence/{id}', [APINewsletterSequenceController::class, 'updateSequence']);
+    Route::post('/newsletter-sequences', [APINewsletterSequenceController::class, 'store']);
     Route::delete('/newsletter-sequence/{id}', [APINewsletterSequenceController::class, 'destroy']);
     Route::post('/newsletter-sequence/bulk-delete', [APINewsletterSequenceController::class, 'bulkDelete']);
 
     // newsletter steps management
-    Route::apiResource('newsletter-steps', NewsletterStepController::class);
+    Route::apiResource('api-newsletter-steps', NewsletterStepController::class);
 
     Route::post('/theme', [ProfileController::class, 'theme']);
     Route::post('/send-test-email', [APISequenceController::class, 'sendTestEmail']);
+    Route::post('/send-simple-test-email', [APISequenceController::class, 'sendSimpleTestEmail']);
+    
+    // Image routes
+    Route::get('/images', [\App\Http\Controllers\ImageController::class, 'list']);
+    Route::post('/upload-image', [\App\Http\Controllers\ImageController::class, 'upload']);
 });

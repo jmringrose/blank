@@ -204,13 +204,33 @@ class APISequenceController extends Controller
           ->header('Pragma', 'no-cache');
     }
 
-    public function sendTestEmail()
+    public function sendSimpleTestEmail()
     {
         try {
             \Artisan::call('email:simple-test');
             return response()->json(['message' => 'Test email sent successfully']);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Failed to send test email'], 500);
+            return response()->json(['message' => 'Failed to send test email: ' . $e->getMessage()], 500);
+        }
+    }
+    
+    public function sendTestEmail(Request $request)
+    {
+        $validated = $request->validate([
+            'type' => 'required|in:marketing,newsletter',
+            'step' => 'required|integer|min:1'
+        ]);
+        
+        try {
+            if ($validated['type'] === 'marketing') {
+                \Artisan::call('email:test-marketing', ['step' => $validated['step']]);
+            } else {
+                \Artisan::call('email:test-newsletter', ['step' => $validated['step']]);
+            }
+            
+            return response()->json(['message' => 'Test email sent successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to send test email: ' . $e->getMessage()], 500);
         }
     }
 }

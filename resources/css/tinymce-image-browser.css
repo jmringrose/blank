@@ -1,0 +1,43 @@
+/* TinyMCE Image Browser Styles */
+#imageBrowserModal {
+    z-index: 9999;
+}
+
+#imageBrowserModal .bg-white {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+#imageGrid img {
+    transition: all 0.2s ease;
+}
+
+#imageGrid > div:hover img {
+    transform: scale(1.05);
+}
+
+#imageGrid > div:hover {
+    background-color: #f8fafc;
+}
+
+#imageGrid > div.selected {
+    border-color: #3b82f6 !important;
+    background-color: #eff6ff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #imageBrowserModal .max-w-4xl {
+        max-width: 95vw;
+    }
+
+    #imageGrid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    #imageGrid {
+        grid-template-columns: 1fr;
+    }
+}
