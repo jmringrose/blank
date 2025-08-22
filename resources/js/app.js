@@ -41,8 +41,14 @@ const pinia = createPinia();
 app.use(pinia);
 
 // Set axios defaults
-axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
 axios.defaults.headers.common['Accept'] = 'application/json';
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+// Set CSRF token
+const token = document.head.querySelector('meta[name="csrf-token"]');
+if (token) {
+    axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+}
 
 // Initialize auth store after pinia is set up
 const auth = useAuthStore();

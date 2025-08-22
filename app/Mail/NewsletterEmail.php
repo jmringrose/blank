@@ -39,6 +39,15 @@ class NewsletterEmail extends Mailable implements ShouldQueue
         // Add name property to sequence for template compatibility
         $this->sequence->name = trim($this->sequence->first . ' ' . $this->sequence->last);
         
+        // Log the email send with detailed info
+        \Log::info('Newsletter email sent', [
+            'recipient_name' => trim($this->sequence->first . ' ' . $this->sequence->last),
+            'recipient_email' => $this->sequence->email,
+            'step_number' => $this->sequence->current_step,
+            'step_title' => $this->step->title,
+            'sent_at' => now()->toDateTimeString()
+        ]);
+        
         return $this->subject($this->step->title)
             ->view($viewName)
             ->with([

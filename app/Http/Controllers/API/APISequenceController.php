@@ -218,14 +218,20 @@ class APISequenceController extends Controller
     {
         $validated = $request->validate([
             'type' => 'required|in:marketing,newsletter',
-            'step' => 'required|integer|min:1'
+            'step' => 'required|integer|min:1',
+            'email' => 'nullable|email'
         ]);
         
         try {
+            $params = ['step' => $validated['step']];
+            if (isset($validated['email'])) {
+                $params['--email'] = $validated['email'];
+            }
+            
             if ($validated['type'] === 'marketing') {
-                \Artisan::call('email:test-marketing', ['step' => $validated['step']]);
+                \Artisan::call('email:test-marketing', $params);
             } else {
-                \Artisan::call('email:test-newsletter', ['step' => $validated['step']]);
+                \Artisan::call('email:test-newsletter', $params);
             }
             
             return response()->json(['message' => 'Test email sent successfully']);

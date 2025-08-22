@@ -12,7 +12,7 @@ use Carbon\Carbon;
 
 class TestNewsletterEmail extends Command
 {
-    protected $signature = 'email:test-newsletter {step}';
+    protected $signature = 'email:test-newsletter {step} {--email= : Email address to send test to}';
     protected $description = 'Send test newsletter email for specified step';
 
     public function handle()
@@ -32,7 +32,8 @@ class TestNewsletterEmail extends Command
         $testSequence = new NewsletterSequence();
         $testSequence->first = 'Test';
         $testSequence->last = 'User';
-        $testSequence->email = config('mail.from.address', 'admin@example.com');
+        $testEmail = $this->option('email') ?: config('mail.from.address', 'admin@example.com');
+        $testSequence->email = $testEmail;
         $testSequence->current_step = $stepNumber;
         $testSequence->unsub_token = Str::random(32);
         $testSequence->tour_date = Carbon::now()->addDays(30)->format('Y-m-d');
@@ -40,10 +41,22 @@ class TestNewsletterEmail extends Command
         $testSequence->id = 999999; // Fake ID for test
         
         try {
-            Mail::to(config('mail.from.address', 'admin@example.com'))
+            \Log::info("Sending test newsletter email", [
+                'step' => $stepNumber,
+                'title' => $step->title,
+                'recipient' => $testEmail,
+                'time' => now()->toDateTimeString()
+            ]);
+            
+            Mail::to($testEmail)
                 ->sendNow(new NewsletterEmail($testSequence, $step));
                 
-            $this->info("Test newsletter email sent for step {$stepNumber}: {$step->title}");
+            \Log::info("Test newsletter email sent successfully", [
+                'step' => $stepNumber,
+                'recipient' => $testEmail
+            ]);
+            
+            $this->info("Test newsletter email sent to {$testEmail} for step {$stepNumber}: {$step->title}");
             return 0;
         } catch (\Exception $e) {
             \Log::error("Failed to send test newsletter email: {$e->getMessage()}");

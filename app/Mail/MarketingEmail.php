@@ -37,6 +37,15 @@ class MarketingEmail extends Mailable implements ShouldQueue
             $subject = $marketingStep->title;
         }
         
+        // Log the email send with detailed info
+        \Log::info('Marketing email sent', [
+            'recipient_name' => trim($this->sequence->first . ' ' . $this->sequence->last),
+            'recipient_email' => $this->sequence->email,
+            'step_number' => $this->step,
+            'step_title' => $subject,
+            'sent_at' => now()->toDateTimeString()
+        ]);
+        
         return $this->subject($subject)
             ->view($viewName)
             ->with([

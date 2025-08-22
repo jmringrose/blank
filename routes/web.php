@@ -12,6 +12,8 @@ Route::get('/unsubscribe/marketing/{token}', [\App\Http\Controllers\MarketingUns
 Route::get('/unsubscribe/newsletter/{token}', [\App\Http\Controllers\NewsletterUnsubscribeController::class, 'unsubscribe']);
 
 
+
+
 // email previews (auth required)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/preview/marketing/{step?}', [\App\Http\Controllers\EmailPreviewController::class, 'marketing'])->name('email.preview.marketing');
@@ -44,6 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/newsletter-sequence/{id}', [\App\Http\Controllers\NewsletterSequenceController::class, 'update'])->name('newsletter-sequences.update');
 
     // newsletter steps
+    Route::get('/newsletter-steps/data', [\App\Http\Controllers\NewsletterStepController::class, 'data']);
     Route::get('/newsletter-steps', [\App\Http\Controllers\NewsletterStepController::class, 'index'])->name('newsletter-steps.index');
     Route::post('/newsletter-steps', [\App\Http\Controllers\NewsletterStepController::class, 'store'])->name('newsletter-steps.store');
     Route::delete('/newsletter-steps/{id}', [\App\Http\Controllers\NewsletterStepController::class, 'destroy'])->name('newsletter-steps.destroy');
@@ -59,9 +62,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/marketing-steps/data', function() {
         return App\Models\MarketingStep::orderBy('order')->get();
     });
-    Route::get('/newsletter-steps/data', function() {
-        return App\Models\NewsletterStep::orderBy('order')->get();
-    });
     Route::get('/sequences/data', function() {
         return App\Models\EmailSequence::all();
     });
@@ -72,6 +72,89 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Test email routes
     Route::post('/send-test-email', [\App\Http\Controllers\API\APISequenceController::class, 'sendTestEmail']);
     Route::post('/send-simple-test-email', [\App\Http\Controllers\API\APISequenceController::class, 'sendSimpleTestEmail']);
+    
+    // Email logs
+    // Forms routes (moved from API to avoid auth)
+    Route::get('/forms/data', [\App\Http\Controllers\API\APIFormController::class, 'formdata']);
+    Route::get('/forms/count', [\App\Http\Controllers\API\APIFormController::class, 'formCount']);
+    Route::get('/forms/user-summary', [\App\Http\Controllers\API\APIFormController::class, 'userFormsSummary']);
+    
+    // Queue health route (moved from API to avoid auth)
+    Route::get('/health/queue', [\App\Http\Controllers\API\APISequenceController::class, 'queueHealth']);
+    
+    Route::get('/email-logs', function() {
+        $logFile = storage_path('logs/laravel.log');
+        if (!file_exists($logFile)) {
+            return response()->json([]);
+        }
+        
+        // Use tail to get last 1000 lines efficiently
+        $output = shell_exec("tail -1000 {$logFile}");
+        if (!$output) {
+            return response()->json([]);
+        }
+        
+        $lines = explode("\n", $output);
+        $logs = [];
+        
+        for ($i = 0; $i < count($lines) - 2; $i++) {
+            $line1 = $lines[$i] ?? '';
+            $line2 = $lines[$i + 1] ?? '';
+            $line3 = $lines[$i + 2] ?? '';
+            
+            // Look for the 3-line pattern: Building -> Sequence data -> Built successfully
+            if (strpos($line1, 'Building newsletter email') !== false && 
+                strpos($line2, 'Sequence data:') !== false && 
+                strpos($line3, 'Newsletter email built successfully') !== false) {
+                
+                preg_match('/\[(.*?)\]/', $line3, $timeMatch);
+                preg_match('/"first":"(.*?)"/', $line2, $firstMatch);
+                preg_match('/"last":"(.*?)"/', $line2, $lastMatch);
+                preg_match('/"email":"(.*?)"/', $line2, $emailMatch);
+                preg_match('/"current_step":(\d+)/', $line2, $stepMatch);
+                
+                if ($timeMatch && $firstMatch && $emailMatch) {
+                    $logs[] = [
+                        'time' => $timeMatch[1],
+                        'who' => trim(($firstMatch[1] ?? '') . ' ' . ($lastMatch[1] ?? '')),
+                        'email' => $emailMatch[1] ?? '',
+                        'what' => 'Newsletter Step ' . ($stepMatch[1] ?? '?'),
+                        'when' => \Carbon\Carbon::parse($timeMatch[1])->diffForHumans()
+                    ];
+                }
+            }
+        }
+        
+        // Look for newsletter and marketing email send logs
+        foreach ($lines as $line) {
+            if (strpos($line, 'Newsletter email sent') !== false || strpos($line, 'Marketing email sent') !== false) {
+                preg_match('/\[(.*?)\]/', $line, $timeMatch);
+                preg_match('/"recipient_name":"(.*?)"/', $line, $nameMatch);
+                preg_match('/"recipient_email":"(.*?)"/', $line, $emailMatch);
+                preg_match('/"step_number":(\d+)/', $line, $stepMatch);
+                preg_match('/"step_title":"(.*?)"/', $line, $titleMatch);
+                
+                $type = strpos($line, 'Newsletter') !== false ? 'Newsletter' : 'Marketing';
+                
+                if ($timeMatch && $nameMatch && $emailMatch && $stepMatch && $titleMatch) {
+                    $logs[] = [
+                        'time' => $timeMatch[1],
+                        'who' => $nameMatch[1],
+                        'email' => $emailMatch[1],
+                        'what' => $type . ' Step ' . $stepMatch[1] . ': ' . $titleMatch[1],
+                        'when' => \Carbon\Carbon::parse($timeMatch[1])->diffForHumans()
+                    ];
+                }
+            }
+        }
+        
+        // Sort by time and return last 10
+        usort($logs, function($a, $b) {
+            return strtotime($b['time']) - strtotime($a['time']);
+        });
+        
+        return response()->json(array_slice($logs, 0, 10)); // Last 10 emails
+    });
     
     // Image upload routes
     Route::post('/upload-image', [\App\Http\Controllers\ImageController::class, 'upload']);

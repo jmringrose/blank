@@ -3,11 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\NewsletterStep;
+use App\Services\EmailTemplateService;
+use App\Services\InputSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class NewsletterEditorController extends Controller
 {
+    protected EmailTemplateService $templateService;
+    protected InputSanitizer $sanitizer;
+
+    public function __construct(EmailTemplateService $templateService, InputSanitizer $sanitizer)
+    {
+        $this->templateService = $templateService;
+        $this->sanitizer = $sanitizer;
+    }
     public function create()
     {
         return view('newsletter-editor.edit');
@@ -22,17 +32,7 @@ class NewsletterEditorController extends Controller
 
     private function getEmailContent($filename)
     {
-        $filePath = resource_path('views/emails/newsletters/' . $filename);
-        if (file_exists($filePath)) {
-            $content = file_get_contents($filePath);
-
-            // Remove everything before and after our content
-            $content = preg_replace('/.*<div style="max-width: 600px[^>]*>/s', '', $content);
-            $content = preg_replace('/<hr style="margin: 30px 0.*$/s', '', $content);
-
-            return trim($content);
-        }
-        return '';
+        return $this->templateService->extractEmailContent($filename, 'newsletter');
     }
 
     public function store(Request $request)
@@ -43,16 +43,19 @@ class NewsletterEditorController extends Controller
             'order' => 'required|integer'
         ]);
 
-        $filename = Str::slug($request->title) . '.blade.php';
+        // Use validated data as-is to preserve TinyMCE content
+        $sanitized = $validated;
+
+        $filename = Str::slug($sanitized['title']) . '.blade.php';
 
         $step = NewsletterStep::create([
-            'title' => $request->title,
+            'title' => $sanitized['title'],
             'filename' => $filename,
-            'order' => $request->order,
+            'order' => $sanitized['order'],
             'draft' => true
         ]);
 
-        $this->saveEmailTemplate($filename, $validated['content'], $validated['title']);
+        $this->saveEmailTemplate($filename, $sanitized['content'], $sanitized['title']);
 
         return redirect()->route('newsletter-editor.index')->with('success', 'Newsletter created successfully');
     }
@@ -64,10 +67,13 @@ class NewsletterEditorController extends Controller
             'content' => 'required|string'
         ]);
 
-        $step = NewsletterStep::findOrFail($id);
-        $step->update(['title' => $validated['title']]);
+        // Use validated data as-is to preserve TinyMCE content
+        $sanitized = $validated;
 
-        $this->saveEmailTemplate($step->filename, $validated['content'], $validated['title']);
+        $step = NewsletterStep::findOrFail($id);
+        $step->update(['title' => $sanitized['title']]);
+
+        $this->saveEmailTemplate($step->filename, $sanitized['content'], $sanitized['title']);
 
         if ($request->input('action') === 'save_continue') {
             return redirect()->back()->with('success', 'Newsletter updated successfully');
@@ -104,49 +110,18 @@ class NewsletterEditorController extends Controller
 
     private function saveEmailTemplate($filename, $content, $title)
     {
-        // Clean up extra spans around variables
-        $content = $this->cleanupVariableSpans($content);
+        // Pass dummy variables for template generation
+        $variables = [
+            'unsubscribeUrl' => '{{ $unsubscribeUrl }}',
+            'record' => (object)['unsub_token' => '{{ $record->unsub_token }}']
+        ];
         
-        // Check if unsubscribe link already exists
-        $hasUnsubscribe = strpos($content, '$unsubscribeUrl') !== false || strpos($content, 'unsubscribe') !== false;
-
-        $unsubscribeSection = '';
-        if (!$hasUnsubscribe) {
-            $unsubscribeSection = $this->getUnsubscribeFooter();
+        $templateView = $this->templateService->generateTemplate($content, $title, 'newsletter', $variables);
+        $template = $templateView->render();
+        
+        if (!$this->templateService->saveTemplate($filename, $template, 'newsletter')) {
+            throw new \RuntimeException('Failed to save email template');
         }
-
-        $template = view('email-templates.wrapper', [
-            'title' => $title,
-            'emailContent' => $content,
-            'hasUnsubscribe' => $hasUnsubscribe
-        ])->render();
-
-        $filePath = resource_path('views/emails/newsletters/' . $filename);
-
-        // Ensure directory exists
-        $directory = dirname($filePath);
-        if (!is_dir($directory)) {
-            if (!mkdir($directory, 0755, true) && !is_dir($directory)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $directory));
-            }
-        }
-
-        file_put_contents($filePath, $template);
     }
-    
-    private function cleanupVariableSpans($content)
-    {
-        // Remove multiple nested spans around Laravel variables
-        $content = preg_replace('/<span[^>]*>\s*(<span[^>]*>)*\s*(\{\{[^}]+\}\})\s*(<\/span>)*\s*<\/span>/', '$2', $content);
-        
-        // Clean up any remaining nested spans around variables
-        $content = preg_replace('/<span[^>]*>(\{\{[^}]+\}\})<\/span>/', '$1', $content);
-        
-        return $content;
-    }
-    
-    private function getUnsubscribeFooter()
-    {
-        return config('email-templates.unsubscribe_footer');
-    }
+
 }

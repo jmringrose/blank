@@ -12,9 +12,7 @@ class NewsletterUnsubscribeController extends Controller
         $sequence = NewsletterSequence::where('unsub_token', $token)->first();
 
         if (!$sequence) {
-            return response()->json([
-                'message' => 'Newsletter unsubscribe failed - invalid token',
-            ], 404);
+            return view('generic-unsubscribe.invalid-token');
         }
 
         $sequence->current_step = 0;

@@ -2,53 +2,50 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">
-            {{ isset($step) ? 'Edit Newsletter' : 'Create Newsletter' }}
+    <div class="bg-base-100 rounded-lg shadow p-6 relative">
+        <a href="{{ route('newsletter-steps.index') }}" class="btn btn-outline absolute top-4 right-4">Cancel</a>
+        
+        <div class="mb-6">
             @if(isset($step))
-                <small class="text-sm text-gray-500 block">File: {{ $step->filename }}</small>
+                <h1 class="text-2xl font-bold mb-2">{{ $step->title }}</h1>
+                <small class="text-sm text-gray-500">File: {{ $step->filename }}</small>
+            @else
+                <h1 class="text-2xl font-bold">Create Newsletter</h1>
             @endif
-        </h1>
-        <a href="{{ route('newsletter-steps.index') }}" class="btn btn-outline">← Back to Newsletter Steps</a>
-    </div>
-
-    <div class="bg-base-100 rounded-lg shadow p-6">
+        </div>
         <form method="POST" action="{{ isset($step) ? route('newsletter-editor.update', $step->id) : route('newsletter-editor.store') }}">
             @csrf
             @if(isset($step))
                 @method('PUT')
             @endif
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text mr-2">Title: </span>
-                    </label>
-                    <input type="text" name="title" class="input input-bordered"
-                           value="{{ old('title', $step->title ?? '') }}" required>
-                    @error('title')
-                        <span class="text-error text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                @if(!isset($step))
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">Order</span>
-                    </label>
-                    <input type="number" name="order" class="input input-bordered"
-                           value="{{ old('order', 1) }}" required min="1">
-                    @error('order')
-                        <span class="text-error text-sm">{{ $message }}</span>
-                    @enderror
-                </div
-                @endif
+            @if(!isset($step))
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text mr-2">Title: </span>
+                </label>
+                <input type="text" name="title" class="input input-bordered"
+                       value="{{ old('title', $step->title ?? '') }}" required>
+                @error('title')
+                    <span class="text-error text-sm">{{ $message }}</span>
+                @enderror
             </div>
+            
+            <div class="form-control mb-6">
+                <label class="label">
+                    <span class="label-text">Order</span>
+                </label>
+                <input type="number" name="order" class="input input-bordered"
+                       value="{{ old('order', 1) }}" required min="1">
+                @error('order')
+                    <span class="text-error text-sm">{{ $message }}</span>
+                @enderror
+            </div>
+            @else
+            <input type="hidden" name="title" value="{{ $step->title }}">
+            @endif
 
             <div class="form-control mb-6 mx-auto" v-pre>
-                <label class="label">
-                    <span class="label-text mb-2">Content</span>
-                </label>
                 <textarea name="content" id="content">{{ old('content', $currentContent ?? '') }}</textarea>
                 @error('content')
                     <span class="text-error text-sm">{{ $message }}</span>
@@ -56,10 +53,12 @@
             </div>
 
             <div class="flex justify-end space-x-1">
-                <a href="{{ route('newsletter-steps.index') }}" class="btn btn-outline">Cancel</a>
-                <button type="submit" name="action" value="save" class="btn btn-primary">{{ isset($step) ? 'Update' : 'Create' }} Newsletter</button>
                 @if(isset($step))
+                    <a href="{{ route('email.preview.newsletter', $step->order) }}" class="btn btn-info" target="_blank">👁️ View</a>
                     <button type="submit" name="action" value="save_continue" class="btn btn-success">Save & Continue</button>
+                    <button type="submit" name="action" value="save" class="btn btn-primary">Update Newsletter</button>
+                @else
+                    <button type="submit" name="action" value="save" class="btn btn-primary">Create Newsletter</button>
                 @endif
             </div>
         </form>

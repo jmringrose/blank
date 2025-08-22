@@ -57,6 +57,11 @@ class NewsletterStepController extends Controller
         //
     }
 
+    public function data()
+    {
+        return \App\Models\NewsletterStep::orderBy('order')->get();
+    }
+
     public function destroy(string $id)
     {
         $step = \App\Models\NewsletterStep::findOrFail($id);

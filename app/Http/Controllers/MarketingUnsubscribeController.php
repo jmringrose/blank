@@ -12,9 +12,7 @@ class MarketingUnsubscribeController extends Controller
         $sequence = EmailSequence::where('unsub_token', $token)->first();
 
         if (!$sequence) {
-            return response()->json([
-                'message' => 'Marketing unsubscribe failed - invalid token',
-            ], 404);
+            return view('generic-unsubscribe.invalid-token');
         }
 
         $sequence->current_step = 0;

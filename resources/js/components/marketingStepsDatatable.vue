@@ -152,6 +152,27 @@
                 </div>
             </div>
         </div>
+
+        <!-- Test Email Modal -->
+        <div v-if="showTestEmailModal" class="modal modal-open">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg">Send Test Email</h3>
+                <p class="py-2">Send test email for: <strong>{{ testEmailStep?.title }}</strong></p>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Email Address</span>
+                    </label>
+                    <div class="flex gap-2">
+                        <input v-model="testEmailAddress" type="email" class="input input-bordered flex-1" placeholder="Enter email address" required>
+                        <button @click="useTestRecipient" class="btn btn-outline btn-sm">Use Test Recipient</button>
+                    </div>
+                </div>
+                <div class="modal-action">
+                    <button @click="confirmSendTestEmail" class="btn btn-primary" :disabled="!testEmailAddress">Send Test Email</button>
+                    <button @click="closeTestEmailModal" class="btn btn-ghost">Cancel</button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -169,8 +190,11 @@ export default {
         const loading = ref(false)
         const showEditModal = ref(false)
         const showDeleteModal = ref(false)
+        const showTestEmailModal = ref(false)
         const editingStep = ref(null)
         const stepToDelete = ref(null)
+        const testEmailStep = ref(null)
+        const testEmailAddress = ref('')
         const formData = ref({
             order: '',
             title: '',
@@ -289,44 +313,47 @@ export default {
 
         const sendingEmails = ref(new Set())
         
-        const sendTestEmail = async (step) => {
-            if (sendingEmails.value.has(step.id)) {
-                return // Already sending
+        const sendTestEmail = (step) => {
+            testEmailStep.value = step
+            testEmailAddress.value = ''
+            showTestEmailModal.value = true
+        }
+
+        const confirmSendTestEmail = async () => {
+            const step = testEmailStep.value
+            if (sendingEmails.value.has(step.id) || !testEmailAddress.value) {
+                return
             }
             
             try {
                 sendingEmails.value.add(step.id)
                 toast.info(`Sending test email for step ${step.order}...`)
                 
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-                
-                const response = await fetch('/send-test-email', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken || '',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        type: 'marketing',
-                        step: step.order
-                    })
+                const response = await axios.post('/send-test-email', {
+                    type: 'marketing',
+                    step: step.order,
+                    email: testEmailAddress.value
                 })
                 
-                if (response.ok) {
-                    const result = await response.json()
-                    toast.success(`Test email sent for step ${step.order}: ${step.title}`)
-                } else {
-                    const errorData = await response.text()
-                    console.error('API Error:', response.status, errorData)
-                    throw new Error(`API Error: ${response.status} - ${errorData}`)
-                }
+                toast.success(`Test email sent to ${testEmailAddress.value} for step ${step.order}: ${step.title}`)
+                closeTestEmailModal()
             } catch (error) {
                 console.error('Error sending test email:', error)
-                toast.error('Failed to send test email')
+                toast.error(`Error sending test email: ${error.response?.data?.message || error.message}`)
             } finally {
                 sendingEmails.value.delete(step.id)
             }
+        }
+
+        const useTestRecipient = () => {
+            testEmailAddress.value = window.Laravel?.env?.ADMIN_EMAIL || 'james@jringrose.com'
+            confirmSendTestEmail() // Also submit immediately
+        }
+
+        const closeTestEmailModal = () => {
+            showTestEmailModal.value = false
+            testEmailStep.value = null
+            testEmailAddress.value = ''
         }
 
         const closeModal = () => {
@@ -342,8 +369,11 @@ export default {
             headers,
             showEditModal,
             showDeleteModal,
+            showTestEmailModal,
             formData,
             stepToDelete,
+            testEmailStep,
+            testEmailAddress,
             sendingEmails,
             toggleStep,
             deleteStep,
@@ -352,6 +382,9 @@ export default {
             editStep,
             saveStep,
             sendTestEmail,
+            confirmSendTestEmail,
+            useTestRecipient,
+            closeTestEmailModal,
             closeModal,
             confirmDelete,
             closeDeleteModal
