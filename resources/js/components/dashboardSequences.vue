@@ -5,14 +5,23 @@
             <div class="bg-base-200 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 border-stone-500  p-4">
                 <div class="flex justify-between items-center mb-2">
                     <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100">Pre-Trip Survey Forms</h1>
-                    <button
-                        :disabled="isLoading"
-                        class="px-3 py-2 bg-blue-400 hover:bg-blue-200 rounded text-blue-700 text-sm"
-                        @click="fetchFormCount"
-                    >
-                        <LucideRefreshCw class="inline w-4 h-4 mr-1"/>
-                        Refresh
-                    </button>
+                    <div class="flex gap-2">
+                        <button
+                            :disabled="isLoading"
+                            class="px-3 py-2 bg-blue-400 hover:bg-blue-200 rounded text-blue-700 text-sm"
+                            @click="fetchFormCount"
+                        >
+                            <LucideRefreshCw class="inline w-4 h-4 mr-1"/>
+                            Refresh
+                        </button>
+                        <button
+                            v-if="pollingPaused"
+                            class="px-3 py-2 bg-green-400 hover:bg-green-200 rounded text-green-700 text-sm"
+                            @click="restartPolling"
+                        >
+                            ▶ Restart
+                        </button>
+                    </div>
                 </div>
                 <div class="my-2">
                     <p class="text-lg">Total Form Entries: <b>{{ formCount.total }}</b>
@@ -97,13 +106,22 @@
                 <div class="flex justify-between items-center mb-4">
                     <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100">Pre Sales
                         Marketing Sequences</h1>
-                    <button
-                        :disabled="isLoading"
-                        class="px-3 py-2 bg-blue-400 hover:bg-blue-200 rounded text-blue-700 text-sm"
-                        @click="fetchSummary">
-                        <LucideRefreshCw class="inline w-4 h-4 mr-1"/>
-                        Refresh
-                    </button>
+                    <div class="flex gap-2">
+                        <button
+                            :disabled="isLoading"
+                            class="px-3 py-2 bg-blue-400 hover:bg-blue-200 rounded text-blue-700 text-sm"
+                            @click="fetchSummary">
+                            <LucideRefreshCw class="inline w-4 h-4 mr-1"/>
+                            Refresh
+                        </button>
+                        <button
+                            v-if="pollingPaused"
+                            class="px-3 py-2 bg-green-400 hover:bg-green-200 rounded text-green-700 text-sm"
+                            @click="restartPolling"
+                        >
+                            ▶ Restart
+                        </button>
+                    </div>
                 </div>
                 <div class="my-4">
                     <p class="text-lg">Total Sequences: <b>{{ summary.total }}</b>
@@ -284,6 +302,9 @@ const nextMarketingSend = ref(null)
 const nextNewsletterSend = ref(null)
 const emailLogs = ref([])
 let intervalId = null
+const pollCount = ref(0)
+const maxPolls = 20
+const pollingPaused = ref(false)
 
 // --- Load summary ---
 async function fetchSummary(silent = false) {
@@ -472,17 +493,38 @@ async function initialLoad() {
     }
 }
 
-onMounted(() => {
-    initialLoad()
+function startPolling() {
+    if (intervalId) clearInterval(intervalId)
+    pollCount.value = 0
+    pollingPaused.value = false
+    
     intervalId = setInterval(() => {
-        fetchSummary()
+        pollCount.value++
+        
+        if (pollCount.value >= maxPolls) {
+            clearInterval(intervalId)
+            pollingPaused.value = true
+            toast.warning(`Auto-refresh paused after ${maxPolls} polls. Click restart to continue.`)
+            return
+        }
+        
+        fetchSummary(true) // Silent to avoid toast spam
         getStatus()
-        // Removed auto-fetch for forms - only on manual refresh
         fetchNewsletterSummary()
         fetchNewsletterSteps()
         fetchMarketingSteps()
         fetchEmailLogs()
     }, 2 * 60 * 1000)
+}
+
+function restartPolling() {
+    startPolling()
+    toast.success('Auto-refresh restarted')
+}
+
+onMounted(() => {
+    initialLoad()
+    startPolling()
 })
 onUnmounted(() => {
     if (intervalId) clearInterval(intervalId)

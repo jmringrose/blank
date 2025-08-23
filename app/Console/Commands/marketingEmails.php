@@ -50,7 +50,7 @@ class marketingEmails extends Command
             $sequence->next_send_at = Carbon::now()->addDays(7);
             $sequence->save();
             
-            sleep(2); // Rate limit delay
+            sleep(5); // Rate limit delay
 
         } catch (\Exception $e) {
             $this->error("Failed to send marketing email to {$sequence->email}: {$e->getMessage()}");

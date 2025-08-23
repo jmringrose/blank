@@ -1,11 +1,20 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// Your scheduled tasks
+
+Schedule::command('marketing:send')->everyTenMinutes();
+
+Schedule::command('newsletters:send')->everyTenMinutes();
+
+// test task: writes to storage/logs/schedule-test.log every minute
+Schedule::command('inspire')
+    ->everyMinute()
+    ->appendOutputTo(storage_path('logs/schedule-test.log'));
+
+Schedule::command('logs:clear')->daily();
+
+
 
 

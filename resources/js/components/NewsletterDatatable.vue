@@ -35,8 +35,11 @@
     >
         <template #item-next_send_at="{ next_send_at }">
             <div class="text-center">
-                <span :title="next_send_at ? new Date(next_send_at).toLocaleString() : 'Not scheduled'">
-                    {{ formatDate(next_send_at) }}
+                <span
+                    :class="getRelativeDate(next_send_at).class"
+                    :title="next_send_at ? new Date(next_send_at).toLocaleString() : 'Not scheduled'"
+                >
+                    {{ getRelativeDate(next_send_at).display }}
                 </span>
             </div>
         </template>
@@ -205,14 +208,71 @@ const userFormData = ref({
     tour_date: ''
 })
 
-const formatDate = (dateString) => {
-    if (!dateString) return 'Not scheduled'
-    return new Date(dateString).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit'
-    })
+const getRelativeDate = (dateString) => {
+    if (!dateString) return {display: 'Not scheduled', class: 'text-gray-400'}
+    
+    try {
+        const date = new Date(dateString)
+        const now = new Date()
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        const target = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+        const diffInMs = target.getTime() - today.getTime()
+        const diffInDays = Math.round(diffInMs / (1000 * 60 * 60 * 24))
+        
+        const weekdays = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat']
+        const dayName = weekdays[date.getDay()]
+        
+        // Today
+        if (diffInDays === 0) {
+            return {display: 'Today', class: 'text-blue-600 font-semibold'}
+        }
+        // Tomorrow
+        if (diffInDays === 1) {
+            return {display: 'Tomorrow', class: 'text-green-600'}
+        }
+        // Yesterday
+        if (diffInDays === -1) {
+            return {display: 'Yesterday', class: 'text-orange-600'}
+        }
+        
+        // This week or last week
+        const sameWeek = Math.abs(diffInDays) <= 6
+        if (sameWeek) {
+            if (diffInDays > 0) {
+                return {display: `This ${dayName}`, class: 'text-green-600'}
+            } else {
+                return {display: `Last ${dayName}`, class: 'text-orange-600'}
+            }
+        }
+        
+        // Next week
+        if (diffInDays > 6 && diffInDays <= 13) {
+            return {display: `Next ${dayName}`, class: 'text-green-600'}
+        }
+        
+        // Last week
+        if (diffInDays < -6 && diffInDays >= -13) {
+            return {display: `Last ${dayName}`, class: 'text-orange-600'}
+        }
+        
+        // Future dates
+        if (diffInDays > 13) {
+            const month = date.toLocaleDateString('en-US', {month: 'short'})
+            return {display: `${month} ${date.getDate()}`, class: 'text-green-600'}
+        }
+        
+        // Past dates
+        if (diffInDays < -13) {
+            const month = date.toLocaleDateString('en-US', {month: 'short'})
+            return {display: `${month} ${date.getDate()}`, class: 'text-red-600'}
+        }
+        
+        // Fallback
+        const month = date.toLocaleDateString('en-US', {month: 'short'})
+        return {display: `${month} ${date.getDate()}`, class: 'text-gray-600'}
+    } catch (e) {
+        return {display: 'Invalid date', class: 'text-red-600'}
+    }
 }
 
 const getHistory = () => {

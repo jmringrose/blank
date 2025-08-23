@@ -64,13 +64,13 @@ class APISequenceController extends Controller
         $sequence->next_send_at = Carbon::now('America/New_York'); // Set the current time as the next send time
         $sequence->save();
 
-        // Notify admin
+        // Notify adminFirst_Name
         Mail::to(env('ADMIN_EMAIL'))->queue(new AdminSequenceNotification('subscribed', $sequence));
 
         // Return a success response
         return response()->json([
             'message' => 'Sequence added successfully',
-            'sequence' => $sequence,
+            //'sequence' => $sequence,
         ], 200);
     }
     //=====================================================================================================
@@ -213,7 +213,7 @@ class APISequenceController extends Controller
             return response()->json(['message' => 'Failed to send test email: ' . $e->getMessage()], 500);
         }
     }
-    
+
     public function sendTestEmail(Request $request)
     {
         $validated = $request->validate([
@@ -221,19 +221,19 @@ class APISequenceController extends Controller
             'step' => 'required|integer|min:1',
             'email' => 'nullable|email'
         ]);
-        
+
         try {
             $params = ['step' => $validated['step']];
             if (isset($validated['email'])) {
                 $params['--email'] = $validated['email'];
             }
-            
+
             if ($validated['type'] === 'marketing') {
                 \Artisan::call('email:test-marketing', $params);
             } else {
                 \Artisan::call('email:test-newsletter', $params);
             }
-            
+
             return response()->json(['message' => 'Test email sent successfully']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to send test email: ' . $e->getMessage()], 500);

@@ -60,7 +60,7 @@ class NewsletterEmails extends Command
             $sequence->next_send_at = Carbon::now()->addDays(3);
             $sequence->save();
             
-            sleep(2); // Rate limit delay
+            sleep(5); // Rate limit delay
 
         } catch (\Exception $e) {
             $this->error("Failed to send newsletter to {$sequence->email}: {$e->getMessage()}");

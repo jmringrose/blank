@@ -76,7 +76,7 @@
             <div class="flex justify-center">
                 <button class="btn btn-sm btn-secondary h-6 w-6 mr-1" @click.stop="confirmDeleteItem(item)"><span class="!text-base material-symbols-outlined">delete</span></button>
                 <button class="btn btn-sm btn-secondary h-6 w-6  mr-1" @click.stop="editItem(item)"><span class="!text-base material-symbols-outlined">edit</span></button>
-                <button class="btn btn-sm btn-info h-6 w-6 mr-1" @click.stop="copyToNewsletter(item)" title="Copy to Newsletter"><span class="!text-base material-symbols-outlined">forward_to_inbox</span></button>
+                <button class="btn btn-sm btn-info h-6 w-6 mr-1" title="Copy to Newsletter" @click.stop="copyToNewsletter(item)"><span class="!text-base material-symbols-outlined">forward_to_inbox</span></button>
             </div>
         </template>
         <!-- Custom slot for unsub_token column -->
@@ -91,8 +91,10 @@
         </template>
         <!-- Custom slot for current step column -->
         <template #item-current_step="{ current_step }">
-            <span v-if="current_step === 0" class="badge badge-warning">Unsub</span>
-            <span v-else>{{ current_step }}</span>
+            <div class="justify-center">
+                <span v-if="current_step === 0" class="badge badge-warning">Unsub</span>
+                <span v-else>{{ current_step }}</span>
+            </div>
         </template>
         <template #pagination="{ prevPage, nextPage, isFirstPage, isLastPage }">
             <div class="custom-pagination">
@@ -149,13 +151,13 @@ const toast = useToast();
 // Table Headers
 // =====================
 const headers = [
-    {text: "ID", value: "id", sortable: true, width: 100},
-    {text: "First", value: "first", sortable: true, width: 100},
-    {text: "Last", value: "last", sortable: true, width: 100},
-    {text: "Email", value: "email", sortable: true, width: 100},
+    {text: "ID", value: "id", sortable: true, width: 50},
+    {text: "First", value: "first", sortable: true, width: 150},
+    {text: "Last", value: "last", sortable: true, width: 150},
+    {text: "Email", value: "email", sortable: true, width: 150},
     {text: "Current", value: "current_step", sortable: true, width: 80},
-    {text: "Next", value: "next_send_at", sortable: true, width: 100},
-    {text: "Unsub", value: "unsub_token", sortable: true, width: 100},
+    {text: "Next", value: "next_send_at", sortable: true, width: 120},
+    {text: "Unsub", value: "unsub_token", sortable: true, width: 50},
     {text: "Actions", value: "actions", width: 80}
 ];
 
@@ -345,7 +347,7 @@ const editItem = (item: Item) => {
 const copyToNewsletter = async (item: Item) => {
     try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-        
+
         const response = await fetch('/newsletter-sequences/create', {
             method: 'POST',
             headers: {
@@ -364,7 +366,7 @@ const copyToNewsletter = async (item: Item) => {
                 tour_date_str: null
             })
         });
-        
+
         if (response.ok) {
             toast.success(`${item.first} ${item.last} copied to newsletter successfully`);
         } else {

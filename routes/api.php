@@ -41,6 +41,10 @@ if (app()->environment('local')) {
 |--------------------------------------------------------------------------
 */
 Route::post('/login', [AuthController::class, 'login'])->middleware('web');
+Route::post('/sequence/add', [APISequenceController::class, 'saveSequence']);
+
+
+https://cr.jringrose.com/api/sequence/add
 /*
 |--------------------------------------------------------------------------
 | Protected (Sanctum)
@@ -64,7 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/sequence/reset', [APISequenceController::class, 'resetSequence']);
     Route::delete('/sequence/{id}', [APISequenceController::class, 'destroy']);
-    Route::delete('/sequence/bulk', [APISequenceController::class, 'bulkDestroy']);
+    Route::delete('/sequence/bulk', [APISequenceController::class, 'bulkDelete']);
     Route::post('/sequence/bulk-delete', [APISequenceController::class, 'bulkDelete']);
 
     // data tables
@@ -88,7 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/theme', [ProfileController::class, 'theme']);
     Route::post('/send-test-email', [APISequenceController::class, 'sendTestEmail']);
     Route::post('/send-simple-test-email', [APISequenceController::class, 'sendSimpleTestEmail']);
-    
+
     // Image routes
     Route::get('/images', [\App\Http\Controllers\ImageController::class, 'list']);
     Route::post('/upload-image', [\App\Http\Controllers\ImageController::class, 'upload']);

@@ -55,23 +55,35 @@ class NewsletterSequenceController extends Controller
     
     public function store(Request $request)
     {
-        $request->validate([
-            'first' => 'required|string|max:255',
-            'last' => 'required|string|max:255',
-            'email' => 'required|email|unique:newsletter_sequences,email',
-            'tour_date' => 'nullable|date',
-            'current_step' => 'nullable|integer'
-        ]);
+        // Debug: log all request data
+        \Log::info('Newsletter store request data:', $request->all());
+        
+        // Get all possible field variations
+        $first = $request->first ?? $request->input('data.first') ?? $request->input('First_Name');
+        $last = $request->last ?? $request->input('data.last') ?? $request->input('Last_Name');
+        $email = $request->email ?? $request->input('data.email') ?? $request->input('Email');
+        
+        \Log::info('Extracted fields:', ['first' => $first, 'last' => $last, 'email' => $email]);
+        
+        // Minimal validation - just check if we have the basic fields
+        if (!$first || !$last || !$email) {
+            \Log::error('Missing required fields');
+            return response()->json(['message' => 'Missing required fields: first, last, email', 'debug' => ['first' => $first, 'last' => $last, 'email' => $email]], 422);
+        }
+        
+        // Check for duplicates - return success if already exists
+        if (NewsletterSequence::where('email', $email)->exists()) {
+            \Log::info('User already exists in newsletter: ' . $email);
+            return response()->json(['message' => 'User already exists in newsletter (no action needed)'], 200);
+        }
 
         $sequence = NewsletterSequence::create([
-            'first' => $request->first,
-            'last' => $request->last,
-            'email' => $request->email,
-            'current_step' => $request->current_step ?? 1,
-            'next_send_at' => Carbon::now()->addMinutes(5), // Start in 5 minutes
-            'unsub_token' => Str::random(32),
-            'tour_date' => $request->tour_date,
-            'tour_date_str' => $request->tour_date ? Carbon::parse($request->tour_date)->format('j M y') : null
+            'first' => $first,
+            'last' => $last,
+            'email' => $email,
+            'current_step' => 1,
+            'next_send_at' => Carbon::now()->addMinutes(5),
+            'unsub_token' => Str::random(32)
         ]);
 
         return response()->json([
