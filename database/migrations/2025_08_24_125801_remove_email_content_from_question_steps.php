@@ -1,0 +1,22 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('question_steps', function (Blueprint $table) {
+            $table->dropColumn('email_content');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('question_steps', function (Blueprint $table) {
+            $table->text('email_content')->nullable()->after('title');
+        });
+    }
+};

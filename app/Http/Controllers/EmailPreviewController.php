@@ -6,8 +6,11 @@ use App\Models\EmailSequence;
 use App\Models\NewsletterSequence;
 use App\Models\NewsletterStep;
 use App\Models\MarketingStep;
+use App\Models\QuestionSequence;
+use App\Models\QuestionStep;
 use App\Mail\MarketingEmail;
 use App\Mail\NewsletterEmail;
+use App\Mail\QuestionEmail;
 use Illuminate\Http\Request;
 
 class EmailPreviewController extends Controller
@@ -71,6 +74,45 @@ class EmailPreviewController extends Controller
         }
 
         $mailable = new NewsletterEmail($sequence, $step);
+        return $mailable->render();
+    }
+
+    public function question($stepOrder = 1, Request $request)
+    {
+        // Use specific questioner if provided
+        if ($request->has('questioner_id')) {
+            $sequence = QuestionSequence::findOrFail($request->questioner_id);
+        } else {
+            $sequence = QuestionSequence::first();
+            if (!$sequence) {
+                $sequence = new QuestionSequence([
+                    'first' => 'Alex',
+                    'last' => 'Johnson',
+                    'email' => 'alex@example.com',
+                    'question_step_id' => null,
+                    'unsub_token' => 'preview-token'
+                ]);
+            }
+        }
+        $sequence->name = ($sequence->first ?? 'Alex') . ' ' . ($sequence->last ?? 'Johnson');
+        
+        // Set unsubscribe URL
+        $sequence->unsubscribeUrl = url('/unsubscribe/question/' . $sequence->unsub_token);
+
+        $step = QuestionStep::where('order', $stepOrder)->first();
+
+        if (!$step) {
+            return response('Question step not found', 404);
+        }
+
+        if ($step->draft) {
+            return response(view('emails.draft-message', [
+                'stepTitle' => $step->title,
+                'stepOrder' => $stepOrder
+            ]), 200);
+        }
+
+        $mailable = new QuestionEmail($sequence, $step);
         return $mailable->render();
     }
 }

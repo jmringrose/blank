@@ -44,7 +44,7 @@
                         <span class="!text-base material-symbols-outlined">edit</span>
                     </a>
 
-                    <a :href="`/preview/marketing/${item.order}`" target="_blank" class="btn btn-sm btn-secondary h-6 w-6" title="View">
+                    <a :href="`/preview/marketing/${item.order}`" target="_blank" class="btn btn-sm btn-info h-6 w-6" title="View">
                         <span class="!text-base material-symbols-outlined">visibility</span>
                     </a>
 

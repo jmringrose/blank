@@ -56,6 +56,9 @@
                           link4="Pre Sales"
                           url4="/sequences"
 
+                          link5="Questions"
+                          url5="/question-sequences"
+
                           theme="{{ htmlspecialchars(Auth()->user()->theme ?? '', ENT_QUOTES) }}"
             ></headingsmall>
             <!-- Page Heading -->

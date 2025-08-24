@@ -10,12 +10,14 @@ use App\Http\Controllers\HomeController;
 // public pages - unsubscribe routes
 Route::get('/unsubscribe/marketing/{token}', [\App\Http\Controllers\MarketingUnsubscribeController::class, 'unsubscribe']);
 Route::get('/unsubscribe/newsletter/{token}', [\App\Http\Controllers\NewsletterUnsubscribeController::class, 'unsubscribe']);
+Route::get('/unsubscribe/question/{token}', [\App\Http\Controllers\QuestionUnsubscribeController::class, 'unsubscribe'])->name('unsubscribe');
 
 
 // email previews (auth required)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/preview/marketing/{step?}', [\App\Http\Controllers\EmailPreviewController::class, 'marketing'])->name('email.preview.marketing');
     Route::get('/preview/newsletter/{step?}', [\App\Http\Controllers\EmailPreviewController::class, 'newsletter'])->name('email.preview.newsletter');
+    Route::get('/preview/question/{step?}', [\App\Http\Controllers\EmailPreviewController::class, 'question'])->name('email.preview.question');
 });
 
 // auth pages
@@ -85,6 +87,35 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Queue health route (moved from API to avoid auth)
     Route::get('/health/queue', [\App\Http\Controllers\API\APISequenceController::class, 'queueHealth']);
+    
+    // Question steps data route
+    Route::get('/question-steps/data', [\App\Http\Controllers\QuestionStepController::class, 'data']);
+    
+    // Question preview route
+    Route::get('/preview/question/{step}', function($step) {
+        $questionStep = \App\Models\QuestionStep::where('order', $step)->first();
+        
+        if (!$questionStep) {
+            abort(404, 'Question step not found');
+        }
+        
+        // Create a sample questioner for preview
+        $questioner = (object) [
+            'id' => request('questioner_id', 1),
+            'first' => 'Sample',
+            'last' => 'User',
+            'email' => 'sample@example.com'
+        ];
+        
+        $viewName = 'emails.questions.' . str_replace('.blade.php', '', $questionStep->filename);
+        
+        return view($viewName, [
+            'questioner' => $questioner,
+            'step' => $questionStep,
+            'firstName' => $questioner->first,
+            'lastName' => $questioner->last
+        ]);
+    });
 
     Route::get('/email-logs', function() {
         $logFile = storage_path('logs/laravel.log');
@@ -275,6 +306,32 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/marketing-editor', [\App\Http\Controllers\MarketingEditorController::class, 'store'])->name('marketing-editor.store');
     Route::put('/marketing-editor/{id}', [\App\Http\Controllers\MarketingEditorController::class, 'update'])->name('marketing-editor.update');
     Route::delete('/marketing-editor/{id}', [\App\Http\Controllers\MarketingEditorController::class, 'destroy'])->name('marketing-editor.destroy');
+
+    // question sequences
+    Route::get('/question-sequences', [\App\Http\Controllers\QuestionSequenceController::class, 'index'])->name('question-sequences.index');
+    Route::post('/question-sequences', [\App\Http\Controllers\QuestionSequenceController::class, 'store'])->name('question-sequences.store');
+    Route::post('/question-sequences/send', [\App\Http\Controllers\QuestionSequenceController::class, 'send']);
+    Route::get('/question-sequence/{id}', [\App\Http\Controllers\QuestionSequenceController::class, 'show']);
+    Route::put('/question-sequence/{id}', [\App\Http\Controllers\QuestionSequenceController::class, 'update']);
+    Route::delete('/question-sequence/{id}', [\App\Http\Controllers\QuestionSequenceController::class, 'destroy']);
+    Route::post('/question-sequence/bulk-delete', [\App\Http\Controllers\QuestionSequenceController::class, 'bulkDelete']);
+    Route::get('/question-sequences/data', [\App\Http\Controllers\QuestionSequenceController::class, 'data']);
+
+    // question steps
+    Route::get('/question-steps', [\App\Http\Controllers\QuestionStepController::class, 'index'])->name('question-steps.index');
+    Route::post('/question-steps', [\App\Http\Controllers\QuestionStepController::class, 'store'])->name('question-steps.store');
+    Route::put('/question-steps/{id}', [\App\Http\Controllers\QuestionStepController::class, 'update']);
+    Route::delete('/question-steps/{id}', [\App\Http\Controllers\QuestionStepController::class, 'destroy']);
+    Route::get('/question-steps/toggle/{id}', [\App\Http\Controllers\QuestionStepController::class, 'toggle']);
+    Route::get('/question-steps/data', [\App\Http\Controllers\QuestionStepController::class, 'data']);
+
+    // question editor
+    Route::get('/question-editor/create', [\App\Http\Controllers\QuestionEditorController::class, 'create'])->name('question-editor.create');
+    Route::get('/question-editor/{id}/edit', [\App\Http\Controllers\QuestionEditorController::class, 'edit'])->name('question-editor.edit');
+    Route::post('/question-editor', [\App\Http\Controllers\QuestionEditorController::class, 'store'])->name('question-editor.store');
+    Route::put('/question-editor/{id}', [\App\Http\Controllers\QuestionEditorController::class, 'update'])->name('question-editor.update');
+    Route::get('/question-editor/toggle/{id}', [\App\Http\Controllers\QuestionEditorController::class, 'toggle'])->name('question-editor.toggle');
+    Route::delete('/question-editor/{id}', [\App\Http\Controllers\QuestionEditorController::class, 'destroy'])->name('question-editor.destroy');
 
 
 

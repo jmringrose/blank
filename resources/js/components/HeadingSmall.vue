@@ -40,8 +40,14 @@
                                 </ul>
                             </details>
                         </li>
-                        <li v-if="link5 !== ''" class="mt-1 mr-2 ">
-                            <a :href="url5" class=""><span class="material-symbols-outlined">mail</span> {{ link5 }}</a>
+                        <li v-if="link5 !== ''" class="mt-1 mr-2">
+                            <details>
+                                <summary><span class="material-symbols-outlined">Help</span> {{ link5 }}</summary>
+                                <ul>
+                                    <li><a href="/question-sequences">Questioners</a></li>
+                                    <li><a href="/question-steps">Question Emails</a></li>
+                                </ul>
+                            </details>
                         </li>
                     </ul>
                 </div>
@@ -81,8 +87,14 @@
                     </li>
 
 
-                    <li v-if="link5 !== ''" class="mt-1 mr-2 ">
-
+                    <li v-if="link5 !== ''" class="dropdown dropdown-hover">
+                        <div tabindex="0" role="button" class="btn btn-ghost">
+                            <span class="material-symbols-outlined">Help</span> {{ link5 }}
+                        </div>
+                        <ul tabindex="0" class="dropdown-content menu bg-base-300 rounded-box z-[1] w-52 p-2 shadow border border-primary-content">
+                            <li><a href="/question-sequences">Questioners</a></li>
+                            <li><a href="/question-steps">Question Emails</a></li>
+                        </ul>
                     </li>
 
 
