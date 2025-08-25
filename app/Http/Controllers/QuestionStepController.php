@@ -20,11 +20,12 @@ class QuestionStepController extends Controller
             'draft' => 'boolean'
         ]);
 
-        // Auto-assign next order number
-        $validated['order'] = QuestionStep::max('order') + 1;
+        // Auto-assign next order number (same as ID)
+        $nextOrder = QuestionStep::max('order') + 1;
+        $validated['order'] = $nextOrder;
         
-        // Auto-generate filename
-        $validated['filename'] = 'question' . $validated['order'] . '.blade.php';
+        // Auto-generate filename as questionX.blade.php
+        $validated['filename'] = 'question' . $nextOrder . '.blade.php';
 
         $step = QuestionStep::create($validated);
         
@@ -36,7 +37,7 @@ class QuestionStepController extends Controller
                 mkdir($directory, 0755, true);
             }
             
-            $content = "@extends('emails.layouts.question')\n\n@section('content')\n    <h2>{{ \$validated['title'] }}</h2>\n    <p>Question content goes here...</p>\n@endsection";
+            $content = "<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"utf-8\">\n    <title>{$validated['title']}</title>\n</head>\n<body style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #333;\">\n    <div style=\"max-width: 600px; margin: 0 auto; padding: 20px;\">\n        <h1 style=\"color: #2c3e50; font-size: 24px; margin-bottom: 20px;\">{$validated['title']}</h1>\n        <p style=\"font-size: 16px; line-height: 1.6; color: #333;\">Hi {{ \$firstName }},</p>\n        <p style=\"font-size: 16px; line-height: 1.6; color: #333;\">Your question content goes here...</p>\n        <p style=\"font-size: 16px; line-height: 1.6; color: #333;\">Best regards,<br />The Real Cool Photo Tours Team</p>\n    </div>\n</body>\n</html>";
             file_put_contents($filePath, $content);
         }
 
@@ -51,11 +52,24 @@ class QuestionStepController extends Controller
         $step = QuestionStep::findOrFail($id);
         
         $validated = $request->validate([
-            'order' => 'required|integer',
+            'order' => 'required|integer|unique:question_steps,order,' . $id,
             'title' => 'required|string|max:255',
             'notes' => 'nullable|string',
             'draft' => 'boolean'
         ]);
+        
+        // Update filename if order changed
+        if ($step->order != $validated['order']) {
+            $oldFilename = $step->filename;
+            $validated['filename'] = 'question' . $validated['order'] . '.blade.php';
+            
+            // Rename the file
+            $oldPath = resource_path('views/emails/questions/' . $oldFilename);
+            $newPath = resource_path('views/emails/questions/' . $validated['filename']);
+            if (file_exists($oldPath)) {
+                rename($oldPath, $newPath);
+            }
+        }
 
         $step->update($validated);
 
@@ -68,6 +82,15 @@ class QuestionStepController extends Controller
     public function destroy($id)
     {
         $step = QuestionStep::findOrFail($id);
+        
+        // Delete the blade file
+        if ($step->filename) {
+            $filePath = resource_path('views/emails/questions/' . $step->filename);
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
+        
         $step->delete();
 
         return response()->json([

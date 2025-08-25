@@ -96,8 +96,8 @@ class EmailPreviewController extends Controller
         }
         $sequence->name = ($sequence->first ?? 'Alex') . ' ' . ($sequence->last ?? 'Johnson');
         
-        // Set unsubscribe URL
-        $sequence->unsubscribeUrl = url('/unsubscribe/question/' . $sequence->unsub_token);
+        // Set unsubscribe URL for template
+        $unsubscribeUrl = url('/unsubscribe/question/' . $sequence->unsub_token);
 
         $step = QuestionStep::where('order', $stepOrder)->first();
 
@@ -113,6 +113,7 @@ class EmailPreviewController extends Controller
         }
 
         $mailable = new QuestionEmail($sequence, $step);
+        $mailable->unsubscribeUrl = $unsubscribeUrl;
         return $mailable->render();
     }
 }

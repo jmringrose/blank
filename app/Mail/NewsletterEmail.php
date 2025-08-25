@@ -48,16 +48,24 @@ class NewsletterEmail extends Mailable implements ShouldQueue
             'sent_at' => now()->toDateTimeString()
         ]);
         
+        // Get the email content
+        $emailContent = view($viewName, [
+            'record' => $this->sequence,
+            'firstName' => $this->sequence->first,
+            'lastName' => $this->sequence->last,
+            'email' => $this->sequence->email,
+            'currentStep' => $this->sequence->current_step,
+            'unsubscribeUrl' => $this->unsubscribeUrl,
+            'daysToGo' => $daysToGo
+        ])->render();
+        
         return $this->subject($this->step->title)
-            ->view($viewName)
+            ->view('email-templates.wrapper')
             ->with([
-                'record' => $this->sequence,
-                'firstName' => $this->sequence->first,
-                'lastName' => $this->sequence->last,
-                'email' => $this->sequence->email,
-                'currentStep' => $this->sequence->current_step,
+                'title' => $this->step->title,
+                'emailContent' => $emailContent,
                 'unsubscribeUrl' => $this->unsubscribeUrl,
-                'daysToGo' => $daysToGo
+                'hasUnsubscribe' => false
             ]);
     }
 }

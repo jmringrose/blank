@@ -15,9 +15,9 @@ Route::get('/unsubscribe/question/{token}', [\App\Http\Controllers\QuestionUnsub
 
 // email previews (auth required)
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/preview/marketing/{step?}', [\App\Http\Controllers\EmailPreviewController::class, 'marketing'])->name('email.preview.marketing');
-    Route::get('/preview/newsletter/{step?}', [\App\Http\Controllers\EmailPreviewController::class, 'newsletter'])->name('email.preview.newsletter');
-    Route::get('/preview/question/{step?}', [\App\Http\Controllers\EmailPreviewController::class, 'question'])->name('email.preview.question');
+
+
+
 });
 
 // auth pages
@@ -49,6 +49,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/newsletter-steps/data', [\App\Http\Controllers\NewsletterStepController::class, 'data']);
     Route::get('/newsletter-steps', [\App\Http\Controllers\NewsletterStepController::class, 'index'])->name('newsletter-steps.index');
     Route::post('/newsletter-steps', [\App\Http\Controllers\NewsletterStepController::class, 'store'])->name('newsletter-steps.store');
+    Route::put('/newsletter-steps/{id}', [\App\Http\Controllers\NewsletterStepController::class, 'update'])->name('newsletter-steps.update');
     Route::delete('/newsletter-steps/{id}', [\App\Http\Controllers\NewsletterStepController::class, 'destroy'])->name('newsletter-steps.destroy');
 
     // marketing steps
@@ -91,7 +92,76 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Question steps data route
     Route::get('/question-steps/data', [\App\Http\Controllers\QuestionStepController::class, 'data']);
     
-    // Question preview route
+    // Marketing preview route
+    Route::get('/preview/marketing/{step}', function($step) {
+        $marketingStep = \App\Models\MarketingStep::where('order', $step)->first();
+        
+        if (!$marketingStep) {
+            abort(404, 'Marketing step not found');
+        }
+        
+        // Create sample marketing sequence for preview
+        $sequence = (object) [
+            'id' => 1,
+            'first' => 'Sample',
+            'last' => 'User',
+            'email' => 'sample@example.com',
+            'current_step' => $step,
+            'name' => 'Sample User'
+        ];
+        
+        $viewName = 'emails.marketing.' . str_replace('.blade.php', '', $marketingStep->filename);
+        $unsubscribeUrl = url('/unsubscribe/marketing/sample-token');
+        
+        return view($viewName, [
+            'sequence' => $sequence,
+            'record' => $sequence,
+            'firstName' => $sequence->first,
+            'lastName' => $sequence->last,
+            'email' => $sequence->email,
+            'currentStep' => $sequence->current_step,
+            'unsubscribeUrl' => $unsubscribeUrl
+        ]);
+    });
+    
+    // Newsletter preview route
+    Route::get('/preview/newsletter/{step}', function($step) {
+        $newsletterStep = \App\Models\NewsletterStep::where('order', $step)->first();
+        
+        if (!$newsletterStep) {
+            abort(404, 'Newsletter step not found');
+        }
+        
+        // Create sample newsletter sequence for preview
+        $sequence = (object) [
+            'id' => 1,
+            'first' => 'Sample',
+            'last' => 'User',
+            'email' => 'sample@example.com',
+            'current_step' => $step,
+            'tour_date' => '2026-02-01',
+            'tour_date_str' => '1 Feb 2026',
+            'name' => 'Sample User'
+        ];
+        
+        $viewName = 'emails.newsletters.' . str_replace('.blade.php', '', $newsletterStep->filename);
+        $unsubscribeUrl = url('/unsubscribe/newsletter/sample-token');
+        
+        // Calculate days to go (sample)
+        $daysToGo = 45;
+        
+        return view($viewName, [
+            'record' => $sequence,
+            'firstName' => $sequence->first,
+            'lastName' => $sequence->last,
+            'email' => $sequence->email,
+            'currentStep' => $sequence->current_step,
+            'unsubscribeUrl' => $unsubscribeUrl,
+            'daysToGo' => $daysToGo
+        ]);
+    });
+    
+    // Question preview route (allows draft previews)
     Route::get('/preview/question/{step}', function($step) {
         $questionStep = \App\Models\QuestionStep::where('order', $step)->first();
         
@@ -100,20 +170,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
         }
         
         // Create a sample questioner for preview
-        $questioner = (object) [
-            'id' => request('questioner_id', 1),
+        $sequence = (object) [
+            'id' => 1,
             'first' => 'Sample',
             'last' => 'User',
             'email' => 'sample@example.com'
         ];
         
+        if (!$questionStep->filename) {
+            abort(404, 'Question template file not configured');
+        }
+        
         $viewName = 'emails.questions.' . str_replace('.blade.php', '', $questionStep->filename);
+        $unsubscribeUrl = url('/unsubscribe/question/sample-token');
         
         return view($viewName, [
-            'questioner' => $questioner,
-            'step' => $questionStep,
-            'firstName' => $questioner->first,
-            'lastName' => $questioner->last
+            'record' => $sequence,
+            'firstName' => $sequence->first,
+            'lastName' => $sequence->last,
+            'email' => $sequence->email,
+            'name' => trim($sequence->first . ' ' . $sequence->last),
+            'unsubscribeUrl' => $unsubscribeUrl
         ]);
     });
 

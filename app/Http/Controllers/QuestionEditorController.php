@@ -129,7 +129,8 @@ class QuestionEditorController extends Controller
             $template = view('email-templates.wrapper', [
                 'title' => $title,
                 'emailContent' => $content,
-                'hasUnsubscribe' => $hasUnsubscribe
+                'hasUnsubscribe' => $hasUnsubscribe,
+                'unsubscribeUrl' => '{{ $unsubscribeUrl }}'
             ])->render();
         }
 

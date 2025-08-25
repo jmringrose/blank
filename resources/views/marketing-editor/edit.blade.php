@@ -54,7 +54,7 @@
 
             <div class="flex justify-end space-x-1">
                 @if(isset($step))
-                    <a href="{{ route('email.preview.marketing', $step->order) }}" class="btn btn-info" target="_blank">👁️ View</a>
+                    <a href="/preview/marketing/{{ $step->order }}" class="btn btn-info" target="_blank">👁️ View</a>
                     <button type="submit" name="action" value="save_continue" class="btn btn-success">Save & Continue</button>
                     <button type="submit" name="action" value="save" class="btn btn-primary">Update Marketing Email</button>
                 @else

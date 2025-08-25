@@ -93,6 +93,18 @@
 
                     <div class="form-control w-full">
                         <label class="label">
+                            <span class="label-text font-medium">Filename</span>
+                        </label>
+                        <input
+                            :value="editingItem ? stepFormData.filename : `question${stepFormData.order}.blade.php`"
+                            type="text"
+                            class="input input-bordered w-full bg-gray-100"
+                            readonly
+                        />
+                    </div>
+
+                    <div class="form-control w-full">
+                        <label class="label">
                             <span class="label-text font-medium">Notes (Optional)</span>
                         </label>
                         <textarea
@@ -261,7 +273,12 @@ const previewEmail = (item) => {
 const closeAddStepModal = () => {
     showAddStepModal.value = false
     editingItem.value = null
-    stepFormData.value = { order: 1, title: '', notes: '', draft: true }
+    resetFormData()
+}
+
+const resetFormData = () => {
+    const nextOrder = items.value.length > 0 ? Math.max(...items.value.map(i => i.order)) + 1 : 1
+    stepFormData.value = { order: nextOrder, title: '', notes: '', draft: true }
 }
 
 const clearSearch = () => {
@@ -273,6 +290,7 @@ onMounted(() => {
     getHistory()
     
     document.getElementById('addStepBtn')?.addEventListener('click', () => {
+        resetFormData()
         showAddStepModal.value = true
     })
 })

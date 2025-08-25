@@ -152,11 +152,11 @@ const toast = useToast();
 // =====================
 const headers = [
     {text: "ID", value: "id", sortable: true, width: 50},
-    {text: "First", value: "first", sortable: true, width: 150},
-    {text: "Last", value: "last", sortable: true, width: 150},
+    {text: "First", value: "first", sortable: true, width: 130},
+    {text: "Last", value: "last", sortable: true, width: 130},
     {text: "Email", value: "email", sortable: true, width: 150},
-    {text: "Current", value: "current_step", sortable: true, width: 80},
-    {text: "Next", value: "next_send_at", sortable: true, width: 120},
+    {text: "Step", value: "current_step", sortable: true, width: 70},
+    {text: "Next", value: "next_send_at", sortable: true, width: 110},
     {text: "Unsub", value: "unsub_token", sortable: true, width: 50},
     {text: "Actions", value: "actions", width: 80}
 ];

@@ -22,11 +22,19 @@ class TestDeliveryMail extends Mailable
 
     public function content(): Content
     {
+        // Get the email content
+        $emailContent = view('emails.test-delivery', [
+            'recipientName' => $this->recipientName,
+        ])->render();
+        
         return new Content(
-            view: 'emails.test-delivery',
+            view: 'email-templates.wrapper',
             text: 'emails.test-delivery_plain',
             with: [
-                'recipientName' => $this->recipientName,
+                'title' => $this->customSubject ?? 'Delivery test — please reply "Received"',
+                'emailContent' => $emailContent,
+                'unsubscribeUrl' => '#',
+                'hasUnsubscribe' => true // Test emails don't need unsubscribe
             ],
         );
     }

@@ -54,7 +54,31 @@ class NewsletterStepController extends Controller
 
     public function update(Request $request, string $id)
     {
-        //
+        $step = \App\Models\NewsletterStep::findOrFail($id);
+        
+        $validated = $request->validate([
+            'order' => 'required|integer|unique:newsletter_steps,order,' . $id,
+            'title' => 'required|string|max:255',
+            'filename' => 'required|string|max:255',
+            'draft' => 'boolean'
+        ]);
+        
+        // If filename changed, rename the file
+        if ($step->filename !== $validated['filename']) {
+            $oldPath = resource_path('views/emails/newsletters/' . $step->filename);
+            $newPath = resource_path('views/emails/newsletters/' . $validated['filename']);
+            
+            if (file_exists($oldPath)) {
+                rename($oldPath, $newPath);
+            }
+        }
+        
+        $step->update($validated);
+        
+        return response()->json([
+            'message' => 'Newsletter step updated successfully',
+            'step' => $step
+        ]);
     }
 
     public function data()
