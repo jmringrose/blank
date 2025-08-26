@@ -35,6 +35,8 @@ class APISequenceController extends Controller
             'current_step' => 'required|integer|min:0',
             'unsub_token'  => 'nullable|string|max:255',
             'next_send_at' => 'nullable|date',
+            'ip_address'   => 'nullable|string|max:45',
+            'location'     => 'nullable|string|max:255',
         ]);
         $emailSequence = EmailSequence::findOrFail($id);
         $emailSequence->update($validated);
@@ -61,7 +63,9 @@ class APISequenceController extends Controller
         $sequence->email = $validated['Email'];
         $sequence->current_step = 1;
         $sequence->unsub_token = Str::random(12);
-        $sequence->next_send_at = Carbon::now('America/New_York'); // Set the current time as the next send time
+        $sequence->next_send_at = Carbon::now('America/New_York');
+        $sequence->ip_address = $request->ip();
+        $sequence->location = 'Unknown';
         $sequence->save();
 
         // Notify adminFirst_Name
@@ -158,7 +162,12 @@ class APISequenceController extends Controller
             ->orderBy('current_step')
             ->get();
 
-        // Optionally, transform to a key=>value array for easier frontend use
+        // Get latest 3 signups
+        $latestSignups = EmailSequence::orderBy('created_at', 'desc')
+            ->take(3)
+            ->get(['first', 'last', 'location', 'ip_address', 'created_at']);
+
+        // Transform to a key=>value array for easier frontend use
         $steps = [];
         foreach ($byStep as $row) {
             $steps[$row->current_step] = $row->count;
@@ -166,7 +175,8 @@ class APISequenceController extends Controller
 
         return response()->json([
             'total' => $total,
-            'steps' => $steps
+            'steps' => $steps,
+            'latest_signups' => $latestSignups
         ]);
     }
     public function queueStatus()

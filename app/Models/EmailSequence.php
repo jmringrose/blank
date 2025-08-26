@@ -15,7 +15,9 @@ class EmailSequence extends Model
         'email',
         'current_step',
         'unsub_token',
-        'next_send_at'];
+        'next_send_at',
+        'ip_address',
+        'location'];
 
     /**
      * Accessor to format the next_send_at field.

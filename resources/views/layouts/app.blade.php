@@ -47,13 +47,13 @@
                           link1="Dashboard"
                           url1="/dashboard"
 
-                          link2="Survey Data"
+                          link2="Surveys"
                           url2="/formdata"
 
-                          link3="Customer Newsletters"
+                          link3="Newsletters"
                           url3="/newsletter-sequences"
 
-                          link4="Pre Sales"
+                          link4="Pre-Sales"
                           url4="/sequences"
 
                           link5="Questions"

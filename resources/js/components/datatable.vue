@@ -45,7 +45,7 @@
     </div>
     <EasyDataTable
         v-model:items-selected="itemsSelected"
-        :expand-column-width=10
+        :expand-column-width=30
         :headers="filteredHeaders"
         :items="items"
         :row-class-name="rowClass"
@@ -70,6 +70,22 @@
     </span>
                 <!-- Hidden ISO date string for sorting -->
                 <span class="sr-only">{{ next_send_at || '9999-12-31' }}</span>
+            </div>
+        </template>
+        <template #expand="item">
+            <div class="p-3 bg-stone-500 rounded text-yellow-100">
+                <h4 class="font-bold mb-1 font-semibold text-stone-900 text-xl">User Details:</h4>
+                <hr class="text-stone-700 mb-3">
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="flex">
+                        <span class="font-medium w-32 text-stone-900">IP Address:</span>
+                        <span class="text-gray-200">{{ item.ip_address || 'Unknown' }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="font-medium w-32 text-stone-900">Location:</span>
+                        <span class="text-gray-200">{{ item.location || 'Unknown' }}</span>
+                    </div>
+                </div>
             </div>
         </template>
         <template #item-actions="item">
@@ -114,6 +130,7 @@
                 </button>
             </div>
         </template>
+
     </EasyDataTable>
     <!-- Loading and error states -->
     <div v-if="loading" class="flex justify-center my-4">
@@ -181,6 +198,7 @@ const visibleColumns = ref(headers.map(header => header.value));
 const filteredHeaders = computed(() =>
     headers.filter(header => visibleColumns.value.includes(header.value))
 );
+
 const rowClass = (item) => {
     return itemsSelected.value.includes(item) ? 'custom-selected' : 'b1';
 };
@@ -415,6 +433,8 @@ const toggleColumnVisibility = (columnValue: string) => {
         visibleColumns.value.push(columnValue);
     }
 };
+
+
 </script>
 <style scoped>
 .custom-pagination {

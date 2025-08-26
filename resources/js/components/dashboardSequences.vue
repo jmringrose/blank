@@ -1,14 +1,109 @@
 <template>
-    <div class="container mt-4 max-w-5xl mx-auto ark:text-gray-100 bg-base-300 p-1 md:p-2 rounded-lg shadow-lg border">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <!-- WordPress Forms -->
-            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 border-stone-500  p-4">
-                <div class="flex justify-between items-center mb-2">
-                    <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100">Pre-Trip Survey Forms</h1>
+    <div class="container mt-4 max-w-[1300px] mx-auto   dark:text-gray-50 bg-base-300 p-1 md:p-2 rounded-lg shadow-lg border">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+
+
+            <!-- Marketing Sequences Dashboard -->
+            <div class="bg-base-200 rounded-xl shadow-md border border-stone-500 p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50">Pre Sales
+                        Marketing Sequences</h1>
                     <div class="flex gap-2">
                         <button
                             :disabled="isLoading"
-                            class="px-3 py-2 bg-blue-400 hover:bg-blue-200 rounded text-blue-700 text-sm"
+                            class="btn btn-primary btn-sm"
+                            @click="fetchSummary">
+                            <LucideRefreshCw class="inline w-4 h-4 mr-1"/>
+                            Refresh
+                        </button>
+                        <button
+                            v-if="pollingPaused"
+                            class="px-3 py-2 bg-green-400 hover:bg-green-200 rounded text-green-700 text-sm"
+                            @click="restartPolling"
+                        >
+                            ▶ Restart
+                        </button>
+                    </div>
+                </div>
+                <div class="my-4">
+                    <p class="text-lg">Total Sequences: <b>{{ summary.total }}</b>
+                    </p>
+                    <p class="text-sm text-gray-400">Next send: <b>{{ nextMarketingSend || 'None scheduled' }}</b></p>
+                    <div v-if="lastChecked" class="text-xs text-gray-200 mb-2 mt-2">
+                        Last checked: {{ lastCheckedFormatted }} ({{ lastCheckedAgo }})
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="table table-sm w-full">
+                        <thead>
+                        <tr class="">
+                            <th class="px-2 py-1 ">Step</th>
+                            <th class="px-2 py-1 ">Count</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="(count, step) in summary.steps" :key="step">
+                            <td class="px-2 py-1 text-sm">{{ getStepName(step) }}</td>
+                            <td class="px-2 py-1  text-sm">{{ count }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div v-if="summary.latest_signups && summary.latest_signups.length > 0" class="mt-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-md font-semibold">Latest Signups</h3>
+                        <button class="btn btn-xs btn-ghost" @click="showIpDetails = !showIpDetails">
+                            <span class="material-symbols-outlined text-sm">{{ showIpDetails ? 'expand_less' : 'expand_more' }}</span>
+                        </button>
+                    </div>
+                    <div class="space-y-1">
+                        <div v-for="signup in summary.latest_signups" :key="signup.created_at" class="text-xs bg-base-300 p-2 rounded">
+                            <div class="font-semibold">{{ signup.first }} {{ signup.last }}</div>
+                            <div class="text-gray-400">{{ formatSignupDate(signup.created_at) }} • {{ signup.location || 'Unknown' }}</div>
+                            <div v-if="showIpDetails" class="text-xs text-gray-500 mt-1">
+                                IP: {{ signup.ip_address || 'Not captured' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Newsletter Sequences -->
+            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700 dark:text-gray-50 border-stone-500  p-4">
+                <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50 mb-4">Customer Update Newsletter Sequences</h1>
+                <p class="text-sm text-gray-400 mb-4">Next send: <b>{{ nextNewsletterSend || 'None scheduled' }}</b></p>
+                <div class="mt-6">
+                    <div class="overflow-x-auto">
+                        <table class="table table-sm w-full">
+                            <thead>
+                            <tr>
+                                <th class="text-left">Name</th>
+                                <th class="text-left">Step</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="user in newsletterSummary" :key="user.id">
+                                <td class="text-sm">{{ user.first }} {{ user.last }}</td>
+                                <td class="text-sm">
+                                    <span v-if="user.current_step === 0" class="badge badge-error badge-sm">Unsubscribed</span>
+                                    <span v-else>{{ getNewsletterStepTitle(user.current_step) }}</span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WordPress Forms -->
+            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700   dark:text-gray-50 border-stone-500  p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50">Pre-Trip Survey Forms</h1>
+                    <div class="flex gap-2">
+                        <button
+                            :disabled="isLoading"
+                            class="btn btn-primary btn-sm"
                             @click="fetchFormCount"
                         >
                             <LucideRefreshCw class="inline w-4 h-4 mr-1"/>
@@ -49,6 +144,72 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Marketing Emails -->
+            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700  dark:text-gray-50 border-stone-500  p-4">
+                <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50 mb-4">Marketing Emails</h1>
+                <div class="space-y-2">
+                    <a class="btn btn-primary btn-sm w-full" href="/marketing-steps">
+                        ✏️ Edit Marketing Emails
+                    </a>
+                    <a v-for="step in marketingSteps" :key="step.order" :href="`/preview/marketing/${step.order}`" class="btn btn-outline border-gray-500 btn-sm w-full flex justify-between items-center" target="_blank">
+                        <span class="text-gray-700  dark:text-gray-50">📧 Step {{ step.order }} - {{ step.title }}</span>
+                        <span v-if="step.draft" class="badge badge-warning badge-sm">Draft</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Newsletter Emails -->
+            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700   dark:text-gray-50 border-stone-500  p-4">
+                <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50 mb-4">Newsletter Emails</h1>
+                <div class="space-y-2">
+                    <a class="btn btn-primary btn-sm w-full" href="/newsletter-steps">
+                        ✏️ Edit Newsletters
+                    </a>
+                    <a v-for="step in newsletterSteps" :key="step.order" :href="`/preview/newsletter/${step.order}`" class="btn btn-outline border-gray-500 btn-sm w-full flex justify-between items-center" target="_blank">
+                        <span class="text-gray-700  dark:text-gray-50">📰 Step {{ step.order }} - {{ step.title }}</span>
+                        <span v-if="step.draft" class="badge badge-warning badge-sm">Draft</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Question Emails -->
+            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700   dark:text-gray-50 border-stone-500  p-4">
+                <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50 mb-4">Question Emails</h1>
+                <div class="space-y-2">
+                    <a class="btn btn-primary btn-sm w-full" href="/question-steps">
+                        ✏️ Edit Questions
+                    </a>
+                    <a v-for="step in questionSteps" :key="step.order" :href="`/preview/question/${step.order}`" class="btn btn-outline border-gray-500 btn-sm w-full flex justify-between items-center" target="_blank">
+                        <div class="text-gray-700 dark:text-gray-50 flex"> <div class="material-symbols-outlined mr-1">Help</div> Step {{ step.order }} - {{ step.title }}</div>
+                        <span v-if="step.draft" class="badge badge-warning badge-sm">Draft</span>
+                    </a>
+                </div>
+            </div>
+            <!-- Recent Email Activity -->
+            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700   dark:text-gray-50 border-stone-500 p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50">Recent Email Activity</h1>
+                    <button
+                        class="btn btn-primary btn-sm"
+                        @click="fetchEmailLogs">
+                        <LucideRefreshCw class="inline w-4 h-4 mr-1"/>
+                        Refresh
+                    </button>
+                </div>
+                <div class="space-y-2 max-h-64 overflow-y-auto">
+                    <div v-for="log in emailLogs" :key="log.time" :class="[
+                    'text-xs p-2 rounded',
+                    log.what.includes('Newsletter') ? 'bg-blue-100 dark:bg-blue-900' : 'bg-base-300'
+                ]">
+                        <div class="font-semibold">{{ log.who }} ({{ log.email }})</div>
+                        <div class="text-gray-400">{{ log.what }} • {{ log.when }}</div>
+                    </div>
+                    <div v-if="emailLogs.length === 0" class="text-gray-400 text-sm">No recent email activity</div>
+                </div>
+            </div>
+
+
             <!-- Queue Status -->
             <div class="bg-base-200 rounded-xl shadow-md border border-stone-500 p-4">
                 <div class="flex px-4 mb-2">
@@ -59,11 +220,11 @@
                         />
                     </div>
                     <div class="font-bold text-md">
-                        <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Queue Worker: <span :class="queueStatus.running ? 'text-green-600' : 'text-red-500'">{{ queueStatus.running ? 'Running' : 'Not Running' }}</span></h1>
+                        <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50 mb-4">Queue Worker: <span :class="queueStatus.running ? 'text-green-600' : 'text-red-500'">{{ queueStatus.running ? 'Running' : 'Not Running' }}</span></h1>
                     </div>
                     <div class="flex-1 text-right w-32">
                         <button
-                            class="px-3 py-2 bg-blue-400 hover:bg-blue-400 rounded text-blue-700 text-sm"
+                            class="btn btn-primary btn-sm"
                             @click="notifyAndRefreshSummary">
                             <LucideRefreshCw class="inline w-4 h-4 mr-1"/>
                             Refresh
@@ -101,130 +262,11 @@
                     </tbody>
                 </table>
             </div>
-            <!-- Sequences Dashboard -->
-            <div class="bg-base-200 rounded-xl shadow-md border border-stone-500 p-4">
-                <div class="flex justify-between items-center mb-4">
-                    <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100">Pre Sales
-                        Marketing Sequences</h1>
-                    <div class="flex gap-2">
-                        <button
-                            :disabled="isLoading"
-                            class="px-3 py-2 bg-blue-400 hover:bg-blue-200 rounded text-blue-700 text-sm"
-                            @click="fetchSummary">
-                            <LucideRefreshCw class="inline w-4 h-4 mr-1"/>
-                            Refresh
-                        </button>
-                        <button
-                            v-if="pollingPaused"
-                            class="px-3 py-2 bg-green-400 hover:bg-green-200 rounded text-green-700 text-sm"
-                            @click="restartPolling"
-                        >
-                            ▶ Restart
-                        </button>
-                    </div>
-                </div>
-                <div class="my-4">
-                    <p class="text-lg">Total Sequences: <b>{{ summary.total }}</b>
-                    </p>
-                    <p class="text-sm text-gray-400">Next send: <b>{{ nextMarketingSend || 'None scheduled' }}</b></p>
-                    <div v-if="lastChecked" class="text-xs text-gray-200 mb-2 mt-2">
-                        Last checked: {{ lastCheckedFormatted }} ({{ lastCheckedAgo }})
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="table table-sm w-full">
-                        <thead>
-                        <tr class="">
-                            <th class="px-2 py-1 ">Step</th>
-                            <th class="px-2 py-1 ">Count</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="(count, step) in summary.steps" :key="step">
-                            <td class="px-2 py-1 text-sm">{{ getStepName(step) }}</td>
-                            <td class="px-2 py-1  text-sm">{{ count }}</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- Newsletter Sequences -->
-            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700 dark:text-gray-50 border-stone-500  p-4">
-                <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Customer Update Newsletter Sequences</h1>
-                <p class="text-sm text-gray-400 mb-4">Next send: <b>{{ nextNewsletterSend || 'None scheduled' }}</b></p>
-                <div class="mt-6">
-                    <div class="overflow-x-auto">
-                        <table class="table table-sm w-full">
-                            <thead>
-                            <tr>
-                                <th class="text-left">Name</th>
-                                <th class="text-left">Step</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr v-for="user in newsletterSummary" :key="user.id">
-                                <td class="text-sm">{{ user.first }} {{ user.last }}</td>
-                                <td class="text-sm">
-                                    <span v-if="user.current_step === 0" class="badge badge-error badge-sm">Unsubscribed</span>
-                                    <span v-else>{{ user.current_step }}</span>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <!-- Marketing Emails -->
-            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 border-stone-500  p-4">
-                <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Marketing Emails</h1>
-                <div class="space-y-2">
-                    <a class="btn btn-primary btn-sm w-full" href="/marketing-steps">
-                        ✏️ Edit Marketing Emails
-                    </a>
-                    <a v-for="step in marketingSteps" :key="step.order" :href="`/preview/marketing/${step.order}`" class="btn btn-outline border-gray-500 btn-sm w-full flex justify-between items-center" target="_blank">
-                        <span>📧 Step {{ step.order }} - {{ step.title }}</span>
-                        <span v-if="step.draft" class="badge badge-warning badge-sm">Draft</span>
-                    </a>
-                </div>
-            </div>
-            <!-- Newsletter Emails -->
-            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 border-stone-500  p-4">
-                <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Newsletter Emails</h1>
-                <div class="space-y-2">
-                    <a class="btn btn-primary btn-sm w-full" href="/newsletter-steps">
-                        ✏️ Edit Newsletters
-                    </a>
-                    <a v-for="step in newsletterSteps" :key="step.order" :href="`/preview/newsletter/${step.order}`" class="btn btn-outline border-gray-500 btn-sm w-full flex justify-between items-center" target="_blank">
-                        <span>📰 Step {{ step.order }} - {{ step.title }}</span>
-                        <span v-if="step.draft" class="badge badge-warning badge-sm">Draft</span>
-                    </a>
-                </div>
-            </div>
-            <!-- Recent Email Activity -->
-            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 border-stone-500 p-4">
-                <div class="flex justify-between items-center mb-4">
-                    <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100">Recent Email Activity</h1>
-                    <button
-                        class="px-3 py-2 bg-blue-400 hover:bg-blue-200 rounded text-blue-700 text-sm"
-                        @click="fetchEmailLogs">
-                        <LucideRefreshCw class="inline w-4 h-4 mr-1"/>
-                        Refresh
-                    </button>
-                </div>
-                <div class="space-y-2 max-h-64 overflow-y-auto">
-                    <div v-for="log in emailLogs" :key="log.time" :class="[
-                    'text-xs p-2 rounded',
-                    log.what.includes('Newsletter') ? 'bg-blue-100 dark:bg-blue-900' : 'bg-base-300'
-                ]">
-                        <div class="font-semibold">{{ log.who }} ({{ log.email }})</div>
-                        <div class="text-gray-400">{{ log.what }} • {{ log.when }}</div>
-                    </div>
-                    <div v-if="emailLogs.length === 0" class="text-gray-400 text-sm">No recent email activity</div>
-                </div>
-            </div>
+
+
             <!-- Links -->
-            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700 dark:text-gray-100 border-stone-500 p-4">
-                <h1 class="text-lg font-bold text-gray-700 dark:text-gray-100 mb-4">Links</h1>
+            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700   dark:text-gray-50 border-stone-500 p-4">
+                <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50 mb-4">Links</h1>
                 <div class="space-y-2">
                     <button
                         :disabled="testEmailLoading"
@@ -295,12 +337,14 @@ const userFormsSummary = ref([])
 const newsletterSummary = ref([])
 const newsletterSteps = ref([])
 const marketingSteps = ref([])
+const questionSteps = ref([])
 const lastChecked = ref(null)
 const isLoading = ref(false)
 const testEmailLoading = ref(false)
 const nextMarketingSend = ref(null)
 const nextNewsletterSend = ref(null)
 const emailLogs = ref([])
+const showIpDetails = ref(false)
 let intervalId = null
 const pollCount = ref(0)
 const maxPolls = 20
@@ -310,19 +354,16 @@ const pollingPaused = ref(false)
 async function fetchSummary(silent = false) {
     isLoading.value = true
     try {
-        const {data} = await api.get('/sequences/data')
-        // Transform data to summary format
-        const total = data.length
-        const steps = {}
-        data.forEach(seq => {
-            steps[seq.current_step] = (steps[seq.current_step] || 0) + 1
-        })
-        // Find next send date
-        const nextSends = data.filter(seq => seq.next_send_at && seq.current_step > 0)
+        const {data} = await api.get('/dashboard/summary')
+        summary.value = data
+
+        // Get full data for next send calculation
+        const {data: fullData} = await api.get('/sequences/data')
+        const nextSends = fullData.filter(seq => seq.next_send_at && seq.current_step > 0)
             .map(seq => new Date(seq.next_send_at))
             .sort((a, b) => a - b)
         nextMarketingSend.value = nextSends.length > 0 ? nextSends[0].toLocaleString() : null
-        summary.value = {total, steps}
+
         lastChecked.value = new Date()
         if (!silent) {
             toast.success('Marketing sequences refreshed')
@@ -386,6 +427,11 @@ async function fetchNewsletterSummary() {
     }
 }
 
+const getNewsletterStepTitle = (stepNumber) => {
+    const step = newsletterSteps.value.find(s => s.order == stepNumber)
+    return step ? `${stepNumber}: ${step.title}` : `Step ${stepNumber}`
+}
+
 // --- Load newsletter steps ---
 async function fetchNewsletterSteps() {
     try {
@@ -403,6 +449,16 @@ async function fetchMarketingSteps() {
         marketingSteps.value = data.sort((a, b) => a.order - b.order)
     } catch (e) {
         console.error('Error fetching marketing steps:', e)
+    }
+}
+
+// --- Load question steps ---
+async function fetchQuestionSteps() {
+    try {
+        const {data} = await api.get(window.location.origin + '/question-steps/data')
+        questionSteps.value = data.sort((a, b) => a.order - b.order)
+    } catch (e) {
+        console.error('Error fetching question steps:', e)
     }
 }
 
@@ -460,6 +516,21 @@ function formatHumanDate(date) {
     })
 }
 
+function formatSignupDate(date) {
+    if (!date) return 'Unknown'
+    const d = new Date(date)
+    const now = new Date()
+    const diffMs = now - d
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+    if (diffDays < 7) return `${diffDays}d ago`
+    return d.toLocaleDateString()
+}
+
 const lastSeenDate = ref(null)
 watch(
     () => queueStatus.value.last_seen,
@@ -485,6 +556,7 @@ async function initialLoad() {
         await fetchNewsletterSummary()
         await fetchNewsletterSteps()
         await fetchMarketingSteps()
+        await fetchQuestionSteps()
         await fetchEmailLogs()
     } catch (e) {
         error.value = e?.message || 'Failed to load data'
@@ -497,22 +569,23 @@ function startPolling() {
     if (intervalId) clearInterval(intervalId)
     pollCount.value = 0
     pollingPaused.value = false
-    
+
     intervalId = setInterval(() => {
         pollCount.value++
-        
+
         if (pollCount.value >= maxPolls) {
             clearInterval(intervalId)
             pollingPaused.value = true
             toast.warning(`Auto-refresh paused after ${maxPolls} polls. Click restart to continue.`)
             return
         }
-        
+
         fetchSummary(true) // Silent to avoid toast spam
         getStatus()
         fetchNewsletterSummary()
         fetchNewsletterSteps()
         fetchMarketingSteps()
+        fetchQuestionSteps()
         fetchEmailLogs()
     }, 2 * 60 * 1000)
 }

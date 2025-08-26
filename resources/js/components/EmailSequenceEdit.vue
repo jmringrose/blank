@@ -112,6 +112,38 @@
                 </div>
             </div>
 
+            <div>
+                <label for="ip_address" class="block text-sm font-medium text-base-content mb-1">
+                    IP Address
+                </label>
+                <input
+                    id="ip_address"
+                    v-model="form.ip_address"
+                    type="text"
+                    class="input input-bordered w-full"
+                    placeholder="e.g., 192.168.1.1"
+                />
+                <div v-if="errors.ip_address" class="text-error text-sm mt-1">
+                    {{ errors.ip_address }}
+                </div>
+            </div>
+
+            <div>
+                <label for="location" class="block text-sm font-medium text-base-content mb-1">
+                    Location
+                </label>
+                <input
+                    id="location"
+                    v-model="form.location"
+                    type="text"
+                    class="input input-bordered w-full"
+                    placeholder="e.g., New York, NY, United States"
+                />
+                <div v-if="errors.location" class="text-error text-sm mt-1">
+                    {{ errors.location }}
+                </div>
+            </div>
+
             <div class="flex gap-4">
                 <button
                     type="submit"
@@ -151,7 +183,9 @@ const form = reactive({
     email: '',
     current_step: 0,
     unsub_token: '',
-    next_send_at: ''
+    next_send_at: '',
+    ip_address: '',
+    location: ''
 });
 
 const emailSequenceId = ref(null);
@@ -174,6 +208,8 @@ const loadEmailSequence = async () => {
         form.unsub_token = data.unsub_token || '';
         form.next_send_at = data.next_send_at ?
             new Date(data.next_send_at).toISOString().slice(0, 16) : '';
+        form.ip_address = data.ip_address || '';
+        form.location = data.location || '';
 
         loading.value = false;
     } catch (error) {
@@ -188,7 +224,13 @@ const updateEmailSequence = async () => {
     errors.value = {};
 
     try {
-        const response = await axios.put(`/updatesequence/${emailSequenceId.value}`, form);
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        const response = await axios.put(`/updatesequence/${emailSequenceId.value}`, form, {
+            headers: {
+                'X-CSRF-TOKEN': csrfToken || '',
+                'Content-Type': 'application/json'
+            }
+        });
         toast.success('Email sequence updated successfully!');
 
         // Optionally redirect or update form with returned data
@@ -201,6 +243,8 @@ const updateEmailSequence = async () => {
             form.unsub_token = data.unsub_token;
             form.next_send_at = data.next_send_at ?
                 new Date(data.next_send_at).toISOString().slice(0, 16) : '';
+            form.ip_address = data.ip_address || '';
+            form.location = data.location || '';
         }
     } catch (error) {
         if (error.response?.status === 422) {

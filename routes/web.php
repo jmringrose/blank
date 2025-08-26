@@ -88,6 +88,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Queue health route (moved from API to avoid auth)
     Route::get('/health/queue', [\App\Http\Controllers\API\APISequenceController::class, 'queueHealth']);
+    Route::get('/dashboard/summary', [\App\Http\Controllers\API\APISequenceController::class, 'dashboardSummary']);
     
     // Question steps data route
     Route::get('/question-steps/data', [\App\Http\Controllers\QuestionStepController::class, 'data']);
