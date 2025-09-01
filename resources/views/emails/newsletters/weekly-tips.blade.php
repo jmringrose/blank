@@ -7,7 +7,7 @@
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
         <h1>Weekly Tips & Tricks</h1>
-        <p>Hi {{ $record->name }},</p>
+        <p>Hi {{ $name }},</p>
         <p>This week's photography tips to elevate your images:</p>
         
         <h3>Tip #1: Golden Hour Magic</h3>

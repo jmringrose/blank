@@ -54,6 +54,7 @@ class NewsletterEmail extends Mailable implements ShouldQueue
             'firstName' => $this->sequence->first,
             'lastName' => $this->sequence->last,
             'email' => $this->sequence->email,
+            'name' => trim($this->sequence->first . ' ' . $this->sequence->last),
             'currentStep' => $this->sequence->current_step,
             'unsubscribeUrl' => $this->unsubscribeUrl,
             'daysToGo' => $daysToGo
@@ -65,7 +66,12 @@ class NewsletterEmail extends Mailable implements ShouldQueue
                 'title' => $this->step->title,
                 'emailContent' => $emailContent,
                 'unsubscribeUrl' => $this->unsubscribeUrl,
-                'hasUnsubscribe' => false
+                'hasUnsubscribe' => false,
+                'record' => $this->sequence,
+                'firstName' => $this->sequence->first,
+                'lastName' => $this->sequence->last,
+                'email' => $this->sequence->email,
+                'name' => trim($this->sequence->first . ' ' . $this->sequence->last)
             ]);
     }
 }

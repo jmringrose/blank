@@ -20,5 +20,6 @@ export default {
         },
     },
     plugins: [daisyui],
+    darkMode: 'media', // instead of 'class'
 
 };

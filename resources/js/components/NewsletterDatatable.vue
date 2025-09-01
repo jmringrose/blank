@@ -44,6 +44,15 @@
             </div>
         </template>
 
+
+        <!-- Custom slot for current step column -->
+        <template #item-current_step="{ current_step }">
+            <div class="justify-center">
+                <span v-if="current_step === 0" class="badge badge-warning">Unsub</span>
+                <span v-else>{{ current_step }}</span>
+            </div>
+        </template>
+
         <template #item-tour_date="{ tour_date }">
             <div class="text-center">
                 {{ tour_date || 'Not Set' }}
@@ -56,7 +65,7 @@
                 :title="(unsub_token && unsub_token.length > 0) ? 'Unsubscribe token exists' : 'No unsubscribe token'"
                 class="font-bold text-lg"
             >
-                {{ (unsub_token && unsub_token.length > 0) ? '✓' : '✗' }}
+                {{ (unsub_token && unsub_token.length &gt; 0) ? '✓' : '✗' }}
             </span>
         </template>
 
@@ -210,7 +219,7 @@ const userFormData = ref({
 
 const getRelativeDate = (dateString) => {
     if (!dateString) return {display: 'Not scheduled', class: 'text-gray-400'}
-    
+
     try {
         const date = new Date(dateString)
         const now = new Date()
@@ -218,10 +227,10 @@ const getRelativeDate = (dateString) => {
         const target = new Date(date.getFullYear(), date.getMonth(), date.getDate())
         const diffInMs = target.getTime() - today.getTime()
         const diffInDays = Math.round(diffInMs / (1000 * 60 * 60 * 24))
-        
+
         const weekdays = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat']
         const dayName = weekdays[date.getDay()]
-        
+
         // Today
         if (diffInDays === 0) {
             return {display: 'Today', class: 'text-blue-600 font-semibold'}
@@ -234,7 +243,7 @@ const getRelativeDate = (dateString) => {
         if (diffInDays === -1) {
             return {display: 'Yesterday', class: 'text-orange-600'}
         }
-        
+
         // This week or last week
         const sameWeek = Math.abs(diffInDays) <= 6
         if (sameWeek) {
@@ -244,29 +253,29 @@ const getRelativeDate = (dateString) => {
                 return {display: `Last ${dayName}`, class: 'text-orange-600'}
             }
         }
-        
+
         // Next week
         if (diffInDays > 6 && diffInDays <= 13) {
             return {display: `Next ${dayName}`, class: 'text-green-600'}
         }
-        
+
         // Last week
         if (diffInDays < -6 && diffInDays >= -13) {
             return {display: `Last ${dayName}`, class: 'text-orange-600'}
         }
-        
+
         // Future dates
         if (diffInDays > 13) {
             const month = date.toLocaleDateString('en-US', {month: 'short'})
             return {display: `${month} ${date.getDate()}`, class: 'text-green-600'}
         }
-        
+
         // Past dates
         if (diffInDays < -13) {
             const month = date.toLocaleDateString('en-US', {month: 'short'})
             return {display: `${month} ${date.getDate()}`, class: 'text-red-600'}
         }
-        
+
         // Fallback
         const month = date.toLocaleDateString('en-US', {month: 'short'})
         return {display: `${month} ${date.getDate()}`, class: 'text-gray-600'}
@@ -377,7 +386,7 @@ const clearSearch = () => {
 
 onMounted(() => {
     getHistory()
-    
+
     // Add click handler for the Add User button
     document.getElementById('addUserBtn')?.addEventListener('click', () => {
         showAddUserModal.value = true

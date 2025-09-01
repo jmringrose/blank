@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class ImageController extends Controller
 {
-    private $imagePath = 'img/newsletters';
+    private $imagePath = 'img/public_images';
     
     public function upload(Request $request)
     {

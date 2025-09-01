@@ -88,6 +88,13 @@
                 </div>
             </div>
         </template>
+
+
+        <template #item-location="{ location }">
+            <span class="">{{ location || 'Unknown' }}</span>
+        </template>
+
+
         <template #item-actions="item">
             <div class="flex justify-center">
                 <button class="btn btn-sm btn-secondary h-6 w-6 mr-1" @click.stop="confirmDeleteItem(item)"><span class="!text-base material-symbols-outlined">delete</span></button>
@@ -150,6 +157,7 @@
                 </button>
                 <button class="btn" @click="cancelDelete">
                     Cancel
+
                 </button>
             </div>
         </div>
@@ -169,11 +177,12 @@ const toast = useToast();
 // =====================
 const headers = [
     {text: "ID", value: "id", sortable: true, width: 50},
-    {text: "First", value: "first", sortable: true, width: 130},
-    {text: "Last", value: "last", sortable: true, width: 130},
-    {text: "Email", value: "email", sortable: true, width: 150},
+    {text: "First", value: "first", sortable: true, width: 100},
+    {text: "Last", value: "last", sortable: true, width: 100},
+    {text: "Email", value: "email", sortable: true, width: 140},
+    {text: "Location", value: "location", sortable: true, width: 140},
     {text: "Step", value: "current_step", sortable: true, width: 70},
-    {text: "Next", value: "next_send_at", sortable: true, width: 110},
+    {text: "Next", value: "next_send_at", sortable: true, width: 190},
     {text: "Unsub", value: "unsub_token", sortable: true, width: 50},
     {text: "Actions", value: "actions", width: 80}
 ];

@@ -1,13 +1,11 @@
 <template>
-    <div class="container mt-4 max-w-[1300px] mx-auto   dark:text-gray-50 bg-base-300 p-1 md:p-2 rounded-lg shadow-lg border">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-
+    <div class="container mt-4 max-w-4xl lg:max-w-[1300px] mx-auto  dark:text-gray-100 bg-slate-100 dark:bg-slate-800 p-1 md:p-2 rounded-lg shadow-lg border border-slate-300 dark:border-slate-600">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
 
             <!-- Marketing Sequences Dashboard -->
-            <div class="bg-base-200 rounded-xl shadow-md border border-stone-500 p-4">
+            <div class="bg-white dark:bg-slate-700 rounded-xl shadow-sm border border-slate-300 dark:border-slate-600 p-4">
                 <div class="flex justify-between items-center mb-4">
-                    <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50">Pre Sales
-                        Marketing Sequences</h1>
+                    <h1 class="text-lg font-bold text-gray-700   dark:text-gray-100">Pre Sales Marketing</h1>
                     <div class="flex gap-2">
                         <button
                             :disabled="isLoading"
@@ -29,7 +27,7 @@
                     <p class="text-lg">Total Sequences: <b>{{ summary.total }}</b>
                     </p>
                     <p class="text-sm text-gray-400">Next send: <b>{{ nextMarketingSend || 'None scheduled' }}</b></p>
-                    <div v-if="lastChecked" class="text-xs text-gray-200 mb-2 mt-2">
+                    <div v-if="lastChecked" class="text-xs text-gray-700 dark:text-gray-100 mb-2 mt-2">
                         Last checked: {{ lastCheckedFormatted }} ({{ lastCheckedAgo }})
                     </div>
                 </div>
@@ -68,38 +66,10 @@
                 </div>
             </div>
 
-
-            <!-- Newsletter Sequences -->
-            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700 dark:text-gray-50 border-stone-500  p-4">
-                <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50 mb-4">Customer Update Newsletter Sequences</h1>
-                <p class="text-sm text-gray-400 mb-4">Next send: <b>{{ nextNewsletterSend || 'None scheduled' }}</b></p>
-                <div class="mt-6">
-                    <div class="overflow-x-auto">
-                        <table class="table table-sm w-full">
-                            <thead>
-                            <tr>
-                                <th class="text-left">Name</th>
-                                <th class="text-left">Step</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr v-for="user in newsletterSummary" :key="user.id">
-                                <td class="text-sm">{{ user.first }} {{ user.last }}</td>
-                                <td class="text-sm">
-                                    <span v-if="user.current_step === 0" class="badge badge-error badge-sm">Unsubscribed</span>
-                                    <span v-else>{{ getNewsletterStepTitle(user.current_step) }}</span>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
             <!-- WordPress Forms -->
-            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700   dark:text-gray-50 border-stone-500  p-4">
+            <div class="bg-white dark:bg-slate-700 rounded-xl shadow-sm border text-gray-700   dark:text-gray-100 border-slate-300 dark:border-slate-600  p-4">
                 <div class="flex justify-between items-center mb-2">
-                    <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50">Pre-Trip Survey Forms</h1>
+                    <h1 class="text-lg font-bold text-gray-700   dark:text-gray-100">Pre-Trip Surveys</h1>
                     <div class="flex gap-2">
                         <button
                             :disabled="isLoading"
@@ -145,51 +115,79 @@
                 </div>
             </div>
 
+            <!-- Newsletter Sequences -->
+            <div class="bg-white dark:bg-slate-700 rounded-xl shadow-sm border text-gray-700 dark:text-gray-100 border-slate-300 dark:border-slate-600  p-4">
+                <h1 class="text-lg font-bold text-gray-700   dark:text-gray-100 mb-4">Customer Newsletters</h1>
+                <p class="text-sm text-gray-400 mb-4">Next send: <b>{{ nextNewsletterSend || 'None scheduled' }}</b></p>
+                <div class="mt-6">
+                    <div class="overflow-x-auto">
+                        <table class="table table-sm w-full">
+                            <thead>
+                            <tr>
+                                <th class="text-left">Name</th>
+                                <th class="text-left">Step</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="user in newsletterSummary" :key="user.id">
+                                <td class="text-sm">{{ user.first }} {{ user.last }}</td>
+                                <td class="text-sm">
+                                    <span v-if="user.current_step === 0" class="badge badge-error badge-sm">Unsubscribed</span>
+                                    <span v-else>{{ getNewsletterStepTitle(user.current_step) }}</span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- Marketing Emails -->
-            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700  dark:text-gray-50 border-stone-500  p-4">
-                <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50 mb-4">Marketing Emails</h1>
+            <div class="bg-white dark:bg-slate-700 rounded-xl shadow-sm border text-gray-700  dark:text-gray-100 border-slate-300 dark:border-slate-600  p-4">
+                <h1 class="text-lg font-bold text-gray-700   dark:text-gray-100 mb-4">Marketing Emails</h1>
                 <div class="space-y-2">
                     <a class="btn btn-primary btn-sm w-full" href="/marketing-steps">
                         ✏️ Edit Marketing Emails
                     </a>
                     <a v-for="step in marketingSteps" :key="step.order" :href="`/preview/marketing/${step.order}`" class="btn btn-outline border-gray-500 btn-sm w-full flex justify-between items-center" target="_blank">
-                        <span class="text-gray-700  dark:text-gray-50">📧 Step {{ step.order }} - {{ step.title }}</span>
+                        <span class="text-gray-700  dark:text-gray-100">📧 Step {{ step.order }} - {{ step.title }}</span>
                         <span v-if="step.draft" class="badge badge-warning badge-sm">Draft</span>
                     </a>
                 </div>
             </div>
 
             <!-- Newsletter Emails -->
-            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700   dark:text-gray-50 border-stone-500  p-4">
-                <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50 mb-4">Newsletter Emails</h1>
+            <div class="bg-white dark:bg-slate-700 rounded-xl shadow-sm border text-gray-700   dark:text-gray-100 border-slate-300 dark:border-slate-600  p-4">
+                <h1 class="text-lg font-bold text-gray-700   dark:text-gray-100 mb-4">Newsletter Emails</h1>
                 <div class="space-y-2">
                     <a class="btn btn-primary btn-sm w-full" href="/newsletter-steps">
                         ✏️ Edit Newsletters
                     </a>
                     <a v-for="step in newsletterSteps" :key="step.order" :href="`/preview/newsletter/${step.order}`" class="btn btn-outline border-gray-500 btn-sm w-full flex justify-between items-center" target="_blank">
-                        <span class="text-gray-700  dark:text-gray-50">📰 Step {{ step.order }} - {{ step.title }}</span>
+                        <span class="text-gray-700  dark:text-gray-100">📰 Step {{ step.order }} - {{ step.title }}</span>
                         <span v-if="step.draft" class="badge badge-warning badge-sm">Draft</span>
                     </a>
                 </div>
             </div>
 
             <!-- Question Emails -->
-            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700   dark:text-gray-50 border-stone-500  p-4">
-                <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50 mb-4">Question Emails</h1>
+            <div class="bg-white dark:bg-slate-700 rounded-xl shadow-sm border text-gray-700   dark:text-gray-100 border-slate-300 dark:border-slate-600  p-4">
+                <h1 class="text-lg font-bold text-gray-700   dark:text-gray-100 mb-4">Question Emails</h1>
                 <div class="space-y-2">
                     <a class="btn btn-primary btn-sm w-full" href="/question-steps">
                         ✏️ Edit Questions
                     </a>
                     <a v-for="step in questionSteps" :key="step.order" :href="`/preview/question/${step.order}`" class="btn btn-outline border-gray-500 btn-sm w-full flex justify-between items-center" target="_blank">
-                        <div class="text-gray-700 dark:text-gray-50 flex"> <div class="material-symbols-outlined mr-1">Help</div> Step {{ step.order }} - {{ step.title }}</div>
+                        <div class="text-gray-700 dark:text-gray-100 flex"> <div class="material-symbols-outlined mr-1">Help</div> Step {{ step.order }} - {{ step.title }}</div>
                         <span v-if="step.draft" class="badge badge-warning badge-sm">Draft</span>
                     </a>
                 </div>
             </div>
+
             <!-- Recent Email Activity -->
-            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700   dark:text-gray-50 border-stone-500 p-4">
+            <div class="bg-white dark:bg-slate-700 rounded-xl shadow-sm border text-gray-700   dark:text-gray-100 border-slate-300 dark:border-slate-600 p-4">
                 <div class="flex justify-between items-center mb-4">
-                    <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50">Recent Email Activity</h1>
+                    <h1 class="text-lg font-bold text-gray-700   dark:text-gray-100">Recent Email Activity</h1>
                     <button
                         class="btn btn-primary btn-sm"
                         @click="fetchEmailLogs">
@@ -209,9 +207,8 @@
                 </div>
             </div>
 
-
             <!-- Queue Status -->
-            <div class="bg-base-200 rounded-xl shadow-md border border-stone-500 p-4">
+            <div class="bg-white dark:bg-slate-700 rounded-xl shadow-sm border border-slate-400 dark:border-slate-600 p-4">
                 <div class="flex px-4 mb-2">
                     <div class="text-sm">
                         <component
@@ -220,7 +217,7 @@
                         />
                     </div>
                     <div class="font-bold text-md">
-                        <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50 mb-4">Queue Worker: <span :class="queueStatus.running ? 'text-green-600' : 'text-red-500'">{{ queueStatus.running ? 'Running' : 'Not Running' }}</span></h1>
+                        <h1 class="text-lg font-bold text-gray-700   dark:text-gray-100 mb-4">Queue Worker: <span :class="queueStatus.running ? 'text-green-600' : 'text-red-500'">{{ queueStatus.running ? 'Running' : 'Not Running' }}</span></h1>
                     </div>
                     <div class="flex-1 text-right w-32">
                         <button
@@ -263,10 +260,9 @@
                 </table>
             </div>
 
-
             <!-- Links -->
-            <div class="bg-base-200 rounded-xl shadow-md border text-gray-700   dark:text-gray-50 border-stone-500 p-4">
-                <h1 class="text-lg font-bold text-gray-700   dark:text-gray-50 mb-4">Links</h1>
+            <div class="bg-white dark:bg-slate-700 rounded-xl shadow-sm border text-gray-700   dark:text-gray-100 border-slate-300 dark:border-slate-600 p-4">
+                <h1 class="text-lg font-bold text-gray-700   dark:text-gray-100 mb-4">Handy Links</h1>
                 <div class="space-y-2">
                     <button
                         :disabled="testEmailLoading"
@@ -277,6 +273,16 @@
                         <LucideRefreshCw v-if="testEmailLoading" class="inline w-4 h-4 mr-1 animate-spin"/>
                         <span v-else class="material-symbols-outlined text-sm mr-1">email</span>
                         {{ testEmailLoading ? 'Sending...' : 'Send Test Email' }}
+                    </button>
+                    <button
+                        :disabled="testAllEmailsLoading"
+                        class="btn btn-secondary btn-sm w-full"
+                        type="button"
+                        @click="sendTestAllEmails"
+                    >
+                        <LucideRefreshCw v-if="testAllEmailsLoading" class="inline w-4 h-4 mr-1 animate-spin"/>
+                        <span v-else class="material-symbols-outlined text-sm mr-1">mark_email_read</span>
+                        {{ testAllEmailsLoading ? 'Sending...' : 'Test All Email Types' }}
                     </button>
                     <a
                         class="btn btn-primary btn-sm w-full"
@@ -296,6 +302,7 @@
                     </a>
                 </div>
             </div>
+
         </div>
     </div>
 </template>
@@ -341,6 +348,7 @@ const questionSteps = ref([])
 const lastChecked = ref(null)
 const isLoading = ref(false)
 const testEmailLoading = ref(false)
+const testAllEmailsLoading = ref(false)
 const nextMarketingSend = ref(null)
 const nextNewsletterSend = ref(null)
 const emailLogs = ref([])
@@ -485,6 +493,22 @@ async function sendTestEmail() {
         toast.error('Failed to send test email')
     } finally {
         testEmailLoading.value = false
+    }
+}
+
+// --- Send test all emails ---
+async function sendTestAllEmails() {
+    testAllEmailsLoading.value = true
+    try {
+        await api.post('/send-test-all-emails')
+        toast.success('All test emails sent successfully!')
+        // Refresh logs after sending
+        setTimeout(fetchEmailLogs, 2000)
+    } catch (e) {
+        console.error('Error sending test emails:', e)
+        toast.error('Failed to send test emails')
+    } finally {
+        testAllEmailsLoading.value = false
     }
 }
 

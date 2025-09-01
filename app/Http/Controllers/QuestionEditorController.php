@@ -57,9 +57,17 @@ class QuestionEditorController extends Controller
             $step->save();
         }
 
-        $this->saveEmailTemplate($step->filename, $request->content, $request->title);
+        // Decode HTML entities before saving
+        $content = html_entity_decode($request->content, ENT_QUOTES, 'UTF-8');
+        
+        // Convert placeholder format back to PHP variables
+        $content = preg_replace('/VAR_(firstName|lastName|email|unsubscribeUrl)_VAR/', '{{ $$1 }}', $content);
+        $this->saveEmailTemplate($step->filename, $content, $request->title);
 
         if ($request->input('action') === 'save_continue') {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'message' => 'Question email updated successfully']);
+            }
             return redirect()->back()->with('success', 'Question email updated successfully');
         }
 
@@ -111,6 +119,9 @@ class QuestionEditorController extends Controller
         // Remove wrapper content
         $content = preg_replace('/.*<div style=\"max-width: 600px[^>]*>/s', '', $content);
         $content = preg_replace('/<hr style=\"margin: 30px 0.*$/s', '', $content);
+        
+        // Convert PHP variables to placeholder format for editor
+        $content = preg_replace('/\{\{\s*\$(firstName|lastName|email|unsubscribeUrl)\s*\}\}/', 'VAR_$1_VAR', $content);
         
         return trim($content);
     }

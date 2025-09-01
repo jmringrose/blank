@@ -5,10 +5,6 @@
 
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
-        <!-- Standard favicon -->
-        {{--<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">--}}
-
         <!-- Apple Touch Icon (iPhone/iPad homescreen) -->
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
@@ -19,7 +15,8 @@
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
 
         <!-- Theme color for mobile browsers -->
-        <meta name="theme-color" content="#ffffff">
+        <meta name="color-scheme" content="light dark">
+        <meta name="supported-color-schemes" content="light dark">
 
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -32,7 +29,6 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 
         <!-- Scripts -->
-       {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         @stack('head')
@@ -43,22 +39,6 @@
             <headingsmall title="Test page"
                           name="{{ htmlspecialchars(Auth()->user()->name, ENT_QUOTES) }}"
                           id="{{ Auth()->user()->id }}"
-
-                          link1="Dashboard"
-                          url1="/dashboard"
-
-                          link2="Surveys"
-                          url2="/formdata"
-
-                          link3="Newsletters"
-                          url3="/newsletter-sequences"
-
-                          link4="Pre-Sales"
-                          url4="/sequences"
-
-                          link5="Questions"
-                          url5="/question-sequences"
-
                           theme="{{ htmlspecialchars(Auth()->user()->theme ?? '', ENT_QUOTES) }}"
             ></headingsmall>
             <!-- Page Heading -->

@@ -7,7 +7,7 @@
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
         <h1>Customer Success Stories</h1>
-        <p>Hi {{ $record->name }},</p>
+        <p>Hi {{ $name }},</p>
         <p>We love celebrating the amazing achievements of our photography community! Here are some inspiring success stories from fellow photographers:</p>
         
         <div style="background: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 8px;">

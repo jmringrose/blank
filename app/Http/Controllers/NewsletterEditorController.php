@@ -73,9 +73,17 @@ class NewsletterEditorController extends Controller
         $step = NewsletterStep::findOrFail($id);
         $step->update(['title' => $sanitized['title']]);
 
-        $this->saveEmailTemplate($step->filename, $sanitized['content'], $sanitized['title']);
+        // Decode HTML entities before saving
+        $content = html_entity_decode($sanitized['content'], ENT_QUOTES, 'UTF-8');
+        
+        // Convert placeholder format back to PHP variables
+        $content = preg_replace('/VAR_(firstName|lastName|email|currentStep|unsubscribeUrl|daysToGo)_VAR/', '{{ $$1 }}', $content);
+        $this->saveEmailTemplate($step->filename, $content, $sanitized['title']);
 
         if ($request->input('action') === 'save_continue') {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'message' => 'Newsletter updated successfully']);
+            }
             return redirect()->back()->with('success', 'Newsletter updated successfully');
         }
 

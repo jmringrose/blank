@@ -6,7 +6,7 @@
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h1>Welcome to Our Newsletter, {{ $record->name }}!</h1>
+        <h1>Welcome to Our Newsletter, {{ $name }}!</h1>
         <p>Thank you for subscribing to our photography newsletter. You'll receive weekly tips, tutorials, and inspiration to improve your photography skills.</p>
         <p>What to expect:</p>
         <ul>

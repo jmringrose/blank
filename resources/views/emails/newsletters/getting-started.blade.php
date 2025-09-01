@@ -7,7 +7,7 @@
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
         <h1>Getting Started Guide</h1>
-        <p>Hi {{ $record->name }},</p>
+        <p>Hi {{ $name }},</p>
         <p>Whether you're new to photography or looking to improve your skills, here's your essential getting started guide:</p>
         
         <h3>Camera Basics:</h3>

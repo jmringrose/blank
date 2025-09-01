@@ -190,6 +190,17 @@ const form = reactive({
 
 const emailSequenceId = ref(null);
 
+const formatDateForInput = (dateString) => {
+    try {
+        if (!dateString) return ''
+        // Simply slice the datetime string to fit datetime-local format
+        return dateString.slice(0, 16)
+    } catch (error) {
+        console.error('Error formatting date:', error)
+        return ''
+    }
+}
+
 // Get ID from URL
 onMounted(() => {
     const pathParts = window.location.pathname.split('/');
@@ -206,8 +217,7 @@ const loadEmailSequence = async () => {
         form.email = data.email || '';
         form.current_step = data.current_step || 0;
         form.unsub_token = data.unsub_token || '';
-        form.next_send_at = data.next_send_at ?
-            new Date(data.next_send_at).toISOString().slice(0, 16) : '';
+        form.next_send_at = data.next_send_at ? formatDateForInput(data.next_send_at) : '';
         form.ip_address = data.ip_address || '';
         form.location = data.location || '';
 
@@ -241,8 +251,7 @@ const updateEmailSequence = async () => {
             form.email = data.email;
             form.current_step = data.current_step;
             form.unsub_token = data.unsub_token;
-            form.next_send_at = data.next_send_at ?
-                new Date(data.next_send_at).toISOString().slice(0, 16) : '';
+            form.next_send_at = data.next_send_at ? formatDateForInput(data.next_send_at) : '';
             form.ip_address = data.ip_address || '';
             form.location = data.location || '';
         }

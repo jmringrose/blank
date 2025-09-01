@@ -7,7 +7,7 @@
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
         <h1>Product Updates</h1>
-        <p>Hi {{ $record->name }},</p>
+        <p>Hi {{ $name }},</p>
         <p>Here are the latest updates and new features we've added to help improve your photography experience:</p>
         
         <h3>🆕 New Workshop Series</h3>

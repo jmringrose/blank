@@ -56,9 +56,18 @@ class MarketingEditorController extends Controller
         $step = MarketingStep::findOrFail($id);
         $step->update(['title' => $request->title]);
 
-        $this->saveEmailTemplate($step->filename, $request->content, $request->title);
+        // Decode HTML entities and fix Laravel variables
+        $content = html_entity_decode($request->content, ENT_QUOTES, 'UTF-8');
+        $content = str_replace(['$record->name', '$record->first', '$record->last', '$record->email'], ['$name', '$firstName', '$lastName', '$email'], $content);
+        
+        // Convert placeholder format back to PHP variables
+        $content = preg_replace('/VAR_(firstName|lastName|email|currentStep|unsubscribeUrl)_VAR/', '{{ $$1 }}', $content);
+        $this->saveEmailTemplate($step->filename, $content, $request->title);
 
         if ($request->input('action') === 'save_continue') {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'message' => 'Marketing email updated successfully']);
+            }
             return redirect()->back()->with('success', 'Marketing email updated successfully');
         }
 
@@ -105,6 +114,12 @@ class MarketingEditorController extends Controller
             $content = preg_replace('/.*<div style="max-width: 600px[^>]*>/s', '', $content);
             $content = preg_replace('/<hr style="margin: 30px 0.*$/s', '', $content);
             
+            // Decode HTML entities to prevent JavaScript syntax errors
+            $content = html_entity_decode($content, ENT_QUOTES, 'UTF-8');
+            
+            // Convert PHP variables to placeholder format for editor
+            $content = preg_replace('/\{\{\s*\$(firstName|lastName|email|currentStep|unsubscribeUrl)\s*\}\}/', 'VAR_$1_VAR', $content);
+            
             return trim($content);
         }
         return '';
@@ -131,7 +146,8 @@ class MarketingEditorController extends Controller
             $template = view('email-templates.wrapper', [
                 'title' => $title,
                 'emailContent' => $content,
-                'hasUnsubscribe' => $hasUnsubscribe
+                'hasUnsubscribe' => $hasUnsubscribe,
+                'unsubscribeUrl' => '{{ $unsubscribeUrl }}'
             ])->render();
         }
 

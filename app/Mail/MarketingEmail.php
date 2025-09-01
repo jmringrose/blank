@@ -46,24 +46,30 @@ class MarketingEmail extends Mailable implements ShouldQueue
             'sent_at' => now()->toDateTimeString()
         ]);
         
-        // Get the email content
-        $emailContent = view($viewName, [
+        // Add name property to sequence for template use
+        $this->sequence->name = trim($this->sequence->first . ' ' . $this->sequence->last);
+        
+        // Create variables for template
+        $templateVars = [
             'sequence' => $this->sequence,
             'record' => $this->sequence,
             'firstName' => $this->sequence->first,
             'lastName' => $this->sequence->last,
             'email' => $this->sequence->email,
+            'name' => $this->sequence->name,
             'currentStep' => $this->step,
             'unsubscribeUrl' => $this->unsubscribeUrl
-        ])->render();
+        ];
+        
+        // Get the email content
+        $emailContent = view($viewName, $templateVars)->render();
         
         return $this->subject($subject)
             ->view('email-templates.wrapper')
-            ->with([
+            ->with(array_merge($templateVars, [
                 'title' => $subject,
                 'emailContent' => $emailContent,
-                'unsubscribeUrl' => $this->unsubscribeUrl,
                 'hasUnsubscribe' => false
-            ]);
+            ]));
     }
 }

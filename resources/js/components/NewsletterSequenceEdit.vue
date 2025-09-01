@@ -110,9 +110,9 @@ const loadSequence = async () => {
             last: data.last,
             email: data.email,
             current_step: data.current_step,
-            next_send_at: data.next_send_at ? data.next_send_at.slice(0, 16) : '',
+            next_send_at: data.next_send_at ? formatDateForInput(data.next_send_at) : '',
             unsub_token: data.unsub_token || '',
-            tour_date: data.tour_date || '',
+            tour_date: data.tour_date ? data.tour_date.split('T')[0] : '',
             tour_date_str: data.tour_date_str || ''
         }
     } catch (err) {
@@ -120,6 +120,17 @@ const loadSequence = async () => {
         toast.error('Failed to load sequence')
     } finally {
         loading.value = false
+    }
+}
+
+const formatDateForInput = (dateString) => {
+    try {
+        if (!dateString) return ''
+        // Simply slice the datetime string to fit datetime-local format
+        return dateString.slice(0, 16)
+    } catch (error) {
+        console.error('Error formatting date:', error)
+        return ''
     }
 }
 

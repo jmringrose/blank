@@ -20,8 +20,8 @@ class NewsletterSequence extends Model
         'tour_date_str'
     ];
 
-    public function getNextSendAtAttribute($value)
-    {
-        return \Carbon\Carbon::parse($value)->format('Y-m-d H:i:s');
-    }
+    protected $casts = [
+        'next_send_at' => 'datetime',
+        'tour_date' => 'date'
+    ];
 }

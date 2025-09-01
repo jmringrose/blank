@@ -36,13 +36,21 @@ class NewsletterSequenceController extends Controller
         $sequence->last = $request->last;
         $sequence->email = $request->email;
         $sequence->current_step = $request->current_step;
-        $sequence->next_send_at = $request->next_send_at;
-        $sequence->tour_date = $request->tour_date;
-        $sequence->unsub_token = $request->unsub_token;
         
-        if ($request->tour_date) {
-            $sequence->tour_date_str = Carbon::parse($request->tour_date)->format('j M Y');
+        // Store next_send_at as entered (no timezone conversion)
+        $sequence->next_send_at = $request->next_send_at;
+        
+        // Only update tour_date if provided
+        if ($request->has('tour_date')) {
+            $sequence->tour_date = $request->tour_date;
+            if ($request->tour_date) {
+                $sequence->tour_date_str = Carbon::parse($request->tour_date)->format('j M Y');
+            } else {
+                $sequence->tour_date_str = null;
+            }
         }
+        
+        $sequence->unsub_token = $request->unsub_token;
         
         $sequence->save();
         

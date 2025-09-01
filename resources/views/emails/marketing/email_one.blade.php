@@ -171,7 +171,7 @@
             </td>
             <td style="display: flex; align-items: center; justify-content: center; gap: 2px; padding: 1px;">
                 <div class="text-lg" style="color: #333333; margin: 0;">
-                    {{ $record->first  }} - Here's the link to Your <br/>
+                    {{ $firstName  }} - Here's the link to Your <br/>
                     "Free Costa Rica Photo Guide" in case you forgot to download it.</div>
             </td>
         </tr>

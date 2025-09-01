@@ -224,6 +224,27 @@ class APISequenceController extends Controller
         }
     }
 
+    public function sendTestAllEmails()
+    {
+        try {
+            // Send marketing step 1
+            \Artisan::call('email:test-marketing', ['step' => 1, '--email' => env('ADMIN_EMAIL')]);
+            
+            // Send newsletter step 1
+            \Artisan::call('email:test-newsletter', ['step' => 1, '--email' => env('ADMIN_EMAIL')]);
+            
+            // Send question step 1 if it exists
+            $questionStep = \App\Models\QuestionStep::where('order', 1)->first();
+            if ($questionStep) {
+                \Artisan::call('email:test-question', ['step' => 1, '--email' => env('ADMIN_EMAIL')]);
+            }
+            
+            return response()->json(['message' => 'All test emails sent successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to send test emails: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function sendTestEmail(Request $request)
     {
         $validated = $request->validate([

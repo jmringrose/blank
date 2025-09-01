@@ -2,12 +2,17 @@
     <div class="container mx-auto p-2">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-2xl font-bold">Newsletter Steps</h2>
-            <button @click="showCreateModal = true" class="btn btn-primary">
-                <span class="material-symbols-outlined">add</span>
-                Add Step
-            </button>
+            <div class="flex items-center ">
+                <a class="btn btn-primary mr-2" href="newsletter-sequences" role="button">
+                    <span class="material-symbols-outlined">edit</span>
+                    Users
+                </a>
+                <button class="btn btn-primary" @click="showCreateModal = true">
+                    <span class="material-symbols-outlined">add</span>
+                    Add Step
+                </button>
+            </div>
         </div>
-
         <EasyDataTable
             :headers="headers"
             :items="items"
@@ -16,11 +21,11 @@
             alternating
             body-text-direction="left"
             header-text-direction="left"
+            hide-rows-per-page
             sort-by="order"
             sort-type="asc"
             table-class-name="customize-table"
             theme-color="#1d90ff"
-            hide-rows-per-page
         >
             <template #item-draft="item">
                 <span :class="item.draft ? 'badge badge-warning' : 'badge badge-success'">
@@ -29,32 +34,25 @@
             </template>
             <template #item-actions="item">
                 <div class="flex justify-center space-x-1">
-
-                    <button class="btn btn-sm btn-secondary h-6 w-6" @click.stop="editItem(item)" title="Edit Record">
+                    <button class="btn btn-sm btn-secondary h-6 w-6" title="Edit Record" @click.stop="editItem(item)">
                         <span class="!text-base material-symbols-outlined">database</span>
                     </button>
-
-                    <button class="btn btn-sm btn-secondary h-6 w-6" @click.stop="duplicateItem(item)" title="Duplicate">
+                    <button class="btn btn-sm btn-secondary h-6 w-6" title="Duplicate" @click.stop="duplicateItem(item)">
                         <span class="!text-base material-symbols-outlined">content_copy</span>
                     </button>
-
                     <a :href="`/newsletter-editor/${item.id}/edit`" class="btn btn-sm btn-secondary h-6 w-6" title="Edit File">
                         <span class="!text-base material-symbols-outlined">edit</span>
                     </a>
-
-                    <a :href="`/preview/newsletter/${item.order}`" target="_blank" class="btn btn-sm btn-secondary h-6 w-6" title="View">
+                    <a :href="`/preview/newsletter/${item.order}`" class="btn btn-sm btn-secondary h-6 w-6" target="_blank" title="View">
                         <span class="!text-base material-symbols-outlined">visibility</span>
                     </a>
-
-                    <button class="btn btn-sm btn-warning h-6 w-6" @click.stop="sendTestEmail(item)" :disabled="sendingEmails.has(item.id)" :class="{'opacity-50 cursor-not-allowed': sendingEmails.has(item.id)}" title="Send Test Email">
+                    <button :class="{'opacity-50 cursor-not-allowed': sendingEmails.has(item.id)}" :disabled="sendingEmails.has(item.id)" class="btn btn-sm btn-warning h-6 w-6" title="Send Test Email" @click.stop="sendTestEmail(item)">
                         <span class="!text-base material-symbols-outlined">mail</span>
                     </button>
-
-                    <button class="btn btn-sm h-6 w-6" :class="item.draft ? 'btn-success' : 'btn-info'" @click.stop="togglePublish(item)" :title="item.draft ? 'Publish' : 'Unpublish'">
+                    <button :class="item.draft ? 'btn-success' : 'btn-info'" :title="item.draft ? 'Publish' : 'Unpublish'" class="btn btn-sm h-6 w-6" @click.stop="togglePublish(item)">
                         <span class="!text-base material-symbols-outlined">{{ item.draft ? 'check_circle' : 'cancel' }}</span>
                     </button>
-
-                    <button class="btn btn-sm btn-secondary h-6 w-6 ml-2 bg-red-400" @click.stop="deleteItem(item)" title="Delete">
+                    <button class="btn btn-sm btn-secondary h-6 w-6 ml-2 bg-red-400" title="Delete" @click.stop="deleteItem(item)">
                         <span class="!text-base material-symbols-outlined">delete</span>
                     </button>
                 </div>
@@ -78,39 +76,35 @@
                 </div>
             </template>
         </EasyDataTable>
-
         <!-- Create/Edit Modal -->
         <div v-if="showCreateModal || showEditModal" class="modal modal-open">
             <div class="modal-box max-w-md">
                 <h3 class="font-bold text-lg mb-4">{{ showCreateModal ? 'Add' : 'Edit' }} Newsletter Step</h3>
-
-                <form @submit.prevent="saveItem" class="space-y-4">
+                <form class="space-y-4" @submit.prevent="saveItem">
                     <div class="form-control w-full">
                         <label class="label">
                             <span class="label-text font-medium">Order</span>
                         </label>
                         <input
                             v-model="formData.order"
-                            type="number"
                             class="input input-bordered w-full"
                             placeholder="Enter order number"
                             required
+                            type="number"
                         />
                     </div>
-
                     <div class="form-control w-full">
                         <label class="label">
                             <span class="label-text font-medium">Title</span>
                         </label>
                         <input
                             v-model="formData.title"
-                            type="text"
                             class="input input-bordered w-full"
                             placeholder="Enter newsletter title"
                             required
+                            type="text"
                         />
                     </div>
-
                     <div class="form-control w-full">
                         <label class="label">
                             <span class="label-text font-medium">Filename</span>
@@ -118,15 +112,14 @@
                         </label>
                         <input
                             v-model="formData.filename"
-                            type="text"
                             class="input input-bordered w-full"
                             placeholder="welcome-email.blade.php"
+                            type="text"
                         />
                     </div>
-
                     <div class="form-control">
                         <label class="label cursor-pointer justify-start">
-                            <input v-model="formData.draft" type="checkbox" class="checkbox checkbox-primary mr-3" />
+                            <input v-model="formData.draft" class="checkbox checkbox-primary mr-3" type="checkbox"/>
                             <span class="label-text font-medium">Save as Draft</span>
                         </label>
                         <div class="label">
@@ -134,31 +127,28 @@
                         </div>
                     </div>
                 </form>
-
                 <div class="modal-action mt-6">
-                    <button @click="saveItem" class="btn btn-primary">
+                    <button class="btn btn-primary" @click="saveItem">
                         <span class="material-symbols-outlined mr-2">save</span>
                         Save Step
                     </button>
-                    <button @click="closeModal" class="btn btn-ghost">
+                    <button class="btn btn-ghost" @click="closeModal">
                         Cancel
                     </button>
                 </div>
             </div>
         </div>
-
         <!-- Delete Confirmation Modal -->
         <div v-if="showDeleteModal" class="modal modal-open">
             <div class="modal-box">
                 <h3 class="font-bold text-lg">Confirm Delete</h3>
                 <p class="py-4">Are you sure you want to delete "{{ itemToDelete?.title }}"? This action cannot be undone.</p>
                 <div class="modal-action">
-                    <button @click="confirmDelete" class="btn btn-error">Delete</button>
-                    <button @click="closeDeleteModal" class="btn btn-ghost">Cancel</button>
+                    <button class="btn btn-error" @click="confirmDelete">Delete</button>
+                    <button class="btn btn-ghost" @click="closeDeleteModal">Cancel</button>
                 </div>
             </div>
         </div>
-
         <!-- Test Email Modal -->
         <div v-if="showTestEmailModal" class="modal modal-open">
             <div class="modal-box">
@@ -169,22 +159,21 @@
                         <span class="label-text">Email Address</span>
                     </label>
                     <div class="flex gap-2">
-                        <input v-model="testEmailAddress" type="email" class="input input-bordered flex-1" placeholder="Enter email address" required>
-                        <button @click="useTestRecipient" class="btn btn-outline btn-sm">Use Test Recipient</button>
+                        <input v-model="testEmailAddress" class="input input-bordered flex-1" placeholder="Enter email address" required type="email">
+                        <button class="btn btn-outline btn-sm" @click="useTestRecipient">Use Test Recipient</button>
                     </div>
                 </div>
                 <div class="modal-action">
-                    <button @click="confirmSendTestEmail" class="btn btn-primary" :disabled="!testEmailAddress">Send Test Email</button>
-                    <button @click="closeTestEmailModal" class="btn btn-ghost">Cancel</button>
+                    <button :disabled="!testEmailAddress" class="btn btn-primary" @click="confirmSendTestEmail">Send Test Email</button>
+                    <button class="btn btn-ghost" @click="closeTestEmailModal">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
 </template>
-
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useToast } from 'vue-toastification'
+import {onMounted, ref} from 'vue'
+import {useToast} from 'vue-toastification'
 import axios from 'axios'
 
 const toast = useToast()
@@ -198,23 +187,20 @@ const editingItem = ref(null)
 const itemToDelete = ref(null)
 const testEmailStep = ref(null)
 const testEmailAddress = ref('')
-
 const formData = ref({
     order: '',
     title: '',
     filename: '',
     draft: true
 })
-
 const headers = [
-    { text: "ID", value: "id", sortable: true },
-    { text: "Order", value: "order", sortable: true },
-    { text: "Title", value: "title", sortable: true },
-    { text: "Filename", value: "filename", sortable: true },
-    { text: "Status", value: "draft" },
-    { text: "Actions", value: "actions" }
+    {text: "ID", value: "id", sortable: true},
+    {text: "Order", value: "order", sortable: true},
+    {text: "Title", value: "title", sortable: true},
+    {text: "Filename", value: "filename", sortable: true},
+    {text: "Status", value: "draft"},
+    {text: "Actions", value: "actions"}
 ]
-
 const fetchData = async () => {
     loading.value = true
     try {
@@ -226,18 +212,15 @@ const fetchData = async () => {
         loading.value = false
     }
 }
-
 const editItem = (item) => {
     editingItem.value = item
-    formData.value = { ...item }
+    formData.value = {...item}
     showEditModal.value = true
 }
-
 const deleteItem = (item) => {
     itemToDelete.value = item
     showDeleteModal.value = true
 }
-
 const confirmDelete = async () => {
     try {
         await axios.delete(`/newsletter-steps/${itemToDelete.value.id}`)
@@ -248,12 +231,10 @@ const confirmDelete = async () => {
         toast.error('Failed to delete step')
     }
 }
-
 const closeDeleteModal = () => {
     showDeleteModal.value = false
     itemToDelete.value = null
 }
-
 const saveItem = async () => {
     try {
         if (showCreateModal.value) {
@@ -269,7 +250,6 @@ const saveItem = async () => {
         toast.error('Failed to save step')
     }
 }
-
 const duplicateItem = async (item) => {
     try {
         const maxOrder = Math.max(...items.value.map(i => i.order))
@@ -287,7 +267,6 @@ const duplicateItem = async (item) => {
         toast.error('Failed to duplicate step')
     }
 }
-
 const togglePublish = async (item) => {
     try {
         await axios.get(`/newsletter-editor/toggle/${item.id}`)
@@ -298,31 +277,25 @@ const togglePublish = async (item) => {
         toast.error('Failed to toggle publish status')
     }
 }
-
 const sendingEmails = ref(new Set())
-
 const sendTestEmail = (step) => {
     testEmailStep.value = step
     testEmailAddress.value = '' // Reset to empty so user must enter/confirm
     showTestEmailModal.value = true
 }
-
 const confirmSendTestEmail = async () => {
     const step = testEmailStep.value
     if (sendingEmails.value.has(step.id) || !testEmailAddress.value) {
         return
     }
-    
     try {
         sendingEmails.value.add(step.id)
         toast.info(`Sending test email for step ${step.order}...`)
-        
         const response = await axios.post('/send-test-email', {
             type: 'newsletter',
             step: step.order,
             email: testEmailAddress.value
         })
-        
         toast.success(`Test email sent to ${testEmailAddress.value} for step ${step.order}: ${step.title}`)
         closeTestEmailModal()
     } catch (error) {
@@ -332,30 +305,25 @@ const confirmSendTestEmail = async () => {
         sendingEmails.value.delete(step.id)
     }
 }
-
 const useTestRecipient = () => {
     testEmailAddress.value = window.Laravel?.env?.ADMIN_EMAIL || 'james@jringrose.com'
     confirmSendTestEmail() // Also submit immediately
 }
-
 const closeTestEmailModal = () => {
     showTestEmailModal.value = false
     testEmailStep.value = null
     testEmailAddress.value = ''
 }
-
 const closeModal = () => {
     showCreateModal.value = false
     showEditModal.value = false
     editingItem.value = null
-    formData.value = { order: '', title: '', filename: '', draft: true }
+    formData.value = {order: '', title: '', filename: '', draft: true}
 }
-
 onMounted(() => {
     fetchData()
 })
 </script>
-
 <style scoped>
 .custom-pagination {
     display: flex;

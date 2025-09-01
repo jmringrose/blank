@@ -19,13 +19,9 @@ class EmailSequence extends Model
         'ip_address',
         'location'];
 
-    /**
-     * Accessor to format the next_send_at field.
-     */
-    public function getNextSendAtAttribute($value)
-    {
-        return \Carbon\Carbon::parse($value)->format('Y-m-d H:i:s'); // Change the date format as needed
-    }
+    protected $casts = [
+        'next_send_at' => 'datetime'
+    ];
 
 
 }

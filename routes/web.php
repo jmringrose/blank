@@ -79,6 +79,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Test email routes
     Route::post('/send-test-email', [\App\Http\Controllers\API\APISequenceController::class, 'sendTestEmail']);
     Route::post('/send-simple-test-email', [\App\Http\Controllers\API\APISequenceController::class, 'sendSimpleTestEmail']);
+    Route::post('/send-test-all-emails', [\App\Http\Controllers\API\APISequenceController::class, 'sendTestAllEmails']);
 
     // Email logs
     // Forms routes (moved from API to avoid auth)
@@ -238,16 +239,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
             }
         }
 
-        // Look for newsletter and marketing email send logs
+        // Look for newsletter, marketing, and question email send logs
         foreach ($lines as $line) {
-            if (strpos($line, 'Newsletter email sent') !== false || strpos($line, 'Marketing email sent') !== false) {
+            if (strpos($line, 'Newsletter email sent') !== false || strpos($line, 'Marketing email sent') !== false || strpos($line, 'Question email sent') !== false) {
                 preg_match('/\[(.*?)\]/', $line, $timeMatch);
                 preg_match('/"recipient_name":"(.*?)"/', $line, $nameMatch);
                 preg_match('/"recipient_email":"(.*?)"/', $line, $emailMatch);
                 preg_match('/"step_number":(\d+)/', $line, $stepMatch);
                 preg_match('/"step_title":"(.*?)"/', $line, $titleMatch);
 
-                $type = strpos($line, 'Newsletter') !== false ? 'Newsletter' : 'Marketing';
+                $type = strpos($line, 'Newsletter') !== false ? 'Newsletter' : (strpos($line, 'Question') !== false ? 'Question' : 'Marketing');
 
                 if ($timeMatch && $nameMatch && $emailMatch && $stepMatch && $titleMatch) {
                     $logs[] = [
@@ -286,7 +287,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/api/images', function() {
         try {
             // Check if img directory exists
-            $imgPath = public_path('img');
+            $imgPath = public_path('img/public_images');
 
             if (!is_dir($imgPath)) {
                 // Try to create the directory
@@ -323,8 +324,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
                 $images[] = [
                     'name' => $file,
-                    'path' => '/img/' . $file,
-                    'url' => asset('img/' . $file),
+                    'path' => '/img/public_images/' . $file,
+                    'url' => asset('img/public_images/' . $file),
                     'size' => filesize($filePath),
                     'modified' => date('Y-m-d H:i:s', filemtime($filePath))
                 ];
@@ -413,6 +414,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
+});
+
+// WordPress route
+Route::get('/wordpress', function () {
+    return view('wordpress');
 });
 
 require __DIR__.'/auth.php';

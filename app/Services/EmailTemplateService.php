@@ -77,6 +77,9 @@ class EmailTemplateService
         // Also decode specific entities
         $content = str_replace(['&lt;', '&gt;', '&amp;'], ['<', '>', '&'], $content);
         
+        // Convert PHP variables to placeholder format for editor
+        $content = preg_replace('/\{\{\s*\$(firstName|lastName|email|currentStep|unsubscribeUrl|daysToGo)\s*\}\}/', 'VAR_$1_VAR', $content);
+        
         return trim($content);
     }
 

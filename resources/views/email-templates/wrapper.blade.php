@@ -6,11 +6,11 @@
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        {!! $emailContent !!}
-
-        @if(!$hasUnsubscribe)
-            @include('emails.partials.unsubscribe')
-        @endif
+        @php
+            // Convert placeholder variables to PHP format
+            $convertedContent = preg_replace('/VAR_(firstName|lastName|name|email|currentStep|unsubscribeUrl)_VAR/', '{{ $$1 }}', $emailContent);
+        @endphp
+        {!! $convertedContent !!}
     </div>
 </body>
 </html>
