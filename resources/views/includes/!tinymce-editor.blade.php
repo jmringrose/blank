@@ -26,13 +26,13 @@
 
             // Minimal toolbar to reduce icon clutter
             // Add or remove to taste
-            toolbar: ' undo redo removeformat | styleselect | bold italic underline | bullist numlist | alignleft aligncenter alignright | link image | spellchecktoggle | code ',
+            toolbar: 'styleselect | bold italic underline | bullist numlist | alignleft aligncenter alignright | link image | spellchecktoggle | undo redo',
 
             // Logical pulldowns
             menu: {
                 edit:  { title: 'Edit',  items: 'undo redo | cut copy paste | searchreplace removeformat' },
                 insert:{ title: 'Insert',items: 'link image media charmap hr | anchor insertdatetime' },
-                format:{ title: 'Format',items: 'styleselect | bold italic strikethrough | forecolor backcolor | alignleft aligncenter alignright ' },
+                format:{ title: 'Format',items: 'styleselect | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright | superscript subscript' },
                 table: { title: 'Table', items: 'inserttable | cell row column | tableprops deletetable' },
                 view:  { title: 'View',  items: 'preview | code fullscreen' },
                 tools: { title: 'Tools', items: 'wordcount' },
@@ -74,9 +74,9 @@
     p { margin: 0 0 16px 0; }
     h1, h2, h3 { margin: 0 0 16px 0; }
     table { border-collapse: collapse; }
-    .email-container { width: 100% !important; max-width: 600px !important; margin: 0 auto !important; }
+    .email-container { width: 100% !important; max-width: 610px !important; margin: 0 auto !important; }
     @media only screen and (min-width: 601px) {
-      .email-container { width: 600px !important; margin-left: auto !important; margin-right: auto !important; }
+      .email-container { width: 610px !important; margin-left: auto !important; margin-right: auto !important; }
     }
     img { max-width: 100%; height: auto; display: block; }
   `,
@@ -135,14 +135,8 @@
                     editor.getBody().spellcheck = true;
                 });
 
-                // Remove empty paragraphs on save
-                editor.on('GetContent', function(e) {
-                    e.content = e.content.replace(/<p lang="[^"]*"><br ?\/><\/p>/g, '');
-                    e.content = e.content.replace(/<p><br ?\/><\/p>/g, '');
-                });
-
                 // custom toggle remains
-                /*let isOn = true;
+                let isOn = true;
                 editor.ui.registry.addToggleButton('spellchecktoggle', {
                     text: 'Spelling',
                     tooltip: 'Toggle browser spellcheck',
@@ -158,9 +152,6 @@
                     onSetup: (api) => { api.setActive(isOn); return () => {}; }
                 });
 
-
-                 */
-
                 // auto-apply email image styles
                 editor.on('NodeChange', () => {
                     const imgs = editor.getBody().querySelectorAll('img:not([data-email-styled])');
@@ -175,7 +166,6 @@
                 });
             }
         });
-
 function showImageBrowser(callback) {
     const modalHTML = '<div id="imageBrowserModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center" style="z-index: 99999;">' +
         '<div class="bg-stone-200 rounded-lg p-6 max-w-4xl w-4/5 max-h-4/5 overflow-y-auto">' +
@@ -230,7 +220,7 @@ function selectImage(url, alt) {
         const emailStyles = {
             alt: alt || '',
             title: alt || '',
-            width: '610',
+            width: '600',
             style: 'width:100%; max-width:600px; height:auto; display:block; border:0;'
         };
         window.imageCallbackFn(url, emailStyles);

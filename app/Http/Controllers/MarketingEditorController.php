@@ -56,9 +56,15 @@ class MarketingEditorController extends Controller
         $step = MarketingStep::findOrFail($id);
         $step->update(['title' => $request->title]);
 
-        // Decode HTML entities and fix Laravel variables
-        $content = html_entity_decode($request->content, ENT_QUOTES, 'UTF-8');
-        $content = str_replace(['$record->name', '$record->first', '$record->last', '$record->email'], ['$name', '$firstName', '$lastName', '$email'], $content);
+        // Handle HTML entities carefully for complete documents
+        if (strpos($request->content, '<!DOCTYPE') !== false || strpos($request->content, '<html') !== false) {
+            // For complete HTML documents, minimal processing to preserve formatting
+            $content = $request->content;
+        } else {
+            // For simple content, decode HTML entities and fix Laravel variables
+            $content = html_entity_decode($request->content, ENT_QUOTES, 'UTF-8');
+            $content = str_replace(['$record->name', '$record->first', '$record->last', '$record->email'], ['$name', '$firstName', '$lastName', '$email'], $content);
+        }
         
         // Convert placeholder format back to PHP variables
         $content = preg_replace('/VAR_(firstName|lastName|email|currentStep|unsubscribeUrl)_VAR/', '{{ $$1 }}', $content);
@@ -110,9 +116,17 @@ class MarketingEditorController extends Controller
         if (file_exists($filePath)) {
             $content = file_get_contents($filePath);
             
-            // Remove everything before and after our content
-            $content = preg_replace('/.*<div style="max-width: 600px[^>]*>/s', '', $content);
+            // Remove everything before and after our content - be more specific
+            $content = preg_replace('/.*?<div style="max-width: 6[0-9]{2}px[^>]*>/s', '', $content);
             $content = preg_replace('/<hr style="margin: 30px 0.*$/s', '', $content);
+            
+            // Remove any wrapper divs at start and end
+            while (preg_match('/^\s*<div style="max-width: 6[0-9]{2}px[^>]*>/', $content)) {
+                $content = preg_replace('/^\s*<div style="max-width: 6[0-9]{2}px[^>]*>\s*/', '', $content);
+            }
+            while (preg_match('/<\/div>\s*$/', $content)) {
+                $content = preg_replace('/\s*<\/div>\s*$/', '', $content);
+            }
             
             // Decode HTML entities to prevent JavaScript syntax errors
             $content = html_entity_decode($content, ENT_QUOTES, 'UTF-8');
@@ -131,7 +145,7 @@ class MarketingEditorController extends Controller
         if (strpos($content, '<!DOCTYPE') !== false || strpos($content, '<html') !== false) {
             $template = $content;
         } else {
-            // Clean up extra spans around variables
+            // Clean up extra spans around variables (only for simple content)
             $content = $this->cleanupVariableSpans($content);
             
             // Check if unsubscribe link already exists

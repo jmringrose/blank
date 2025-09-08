@@ -15,7 +15,7 @@ import StatusButton from './components/StatusButton.vue';
 import StatusPanel from './components/StatusPanel.vue';
 import StatusLight from './components/StatusLight.vue';
 import test from './components/test.vue';
-import tabdemo from './components/TabDemo.vue';
+/*import tabdemo from './components/TabDemo.vue';*/
 import HeadingSmall from './components/HeadingSmall.vue';
 import videoplayer from './components/VideoPlayer.vue';
 import Datatable from './components/datatable.vue';
@@ -81,7 +81,7 @@ app.component('storedump', storedump);
 app.component('test', test);
 app.component('formdemo', formdemo);
 app.component('formdata', formdata);
-app.component('tabdemo', tabdemo);
+/*app.component('tabdemo', tabdemo);*/
 app.component('headingsmall', HeadingSmall);
 app.component('videoplayer', videoplayer);
 app.component('datatable', Datatable);

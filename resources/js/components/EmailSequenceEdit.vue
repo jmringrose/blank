@@ -193,7 +193,11 @@ const emailSequenceId = ref(null);
 const formatDateForInput = (dateString) => {
     try {
         if (!dateString) return ''
-        // Simply slice the datetime string to fit datetime-local format
+        // Handle database format "2025-09-01 14:11:00" -> "2025-09-01T14:11"
+        if (dateString.includes(' ')) {
+            return dateString.replace(' ', 'T').slice(0, 16)
+        }
+        // Handle other formats
         return dateString.slice(0, 16)
     } catch (error) {
         console.error('Error formatting date:', error)

@@ -19,9 +19,7 @@ class EmailSequence extends Model
         'ip_address',
         'location'];
 
-    protected $casts = [
-        'next_send_at' => 'datetime'
-    ];
+    // No casts for next_send_at to prevent timezone conversion
 
 
 }

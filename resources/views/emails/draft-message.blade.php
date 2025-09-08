@@ -1,9 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Newsletter Draft</title>
-    <style>
+<!DOCTYPE html-->
+<html-->
+<head-->
+    <meta charset="utf-8"-->
+    <title-->Newsletter Draft</title-->
+    <style-->
         body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
@@ -46,19 +46,19 @@
         .btn:hover {
             background-color: #2563eb;
         }
-    </style>
-</head>
-<body>
-    <div class="draft-container">
-        <div class="draft-icon">📝</div>
-        <h1 class="draft-title">Newsletter Draft</h1>
-        <p class="draft-message">
-            <strong>{{ $stepTitle }}</strong> (Step {{ $stepOrder }}) is currently in draft mode and not available for preview.
-        </p>
-        <p class="draft-message">
+    </style-->
+</head-->
+<body-->
+    <div class="draft-container"-->
+        <div class="draft-icon"-->📝</div-->
+        <h1 class="draft-title"-->Newsletter Draft</h1-->
+        <p class="draft-message"-->
+            <strong-->{{ $stepTitle }}</strong--> (Step {{ $stepOrder }}) is currently in draft mode and not available for preview.
+        </p-->
+        <p class="draft-message"-->
             To publish this newsletter or edit its content, please visit the newsletter steps management page.
-        </p>
-        <a href="/newsletter-steps" class="btn">Manage Newsletter Steps</a>
-    </div>
-</body>
-</html>
+        </p-->
+        <a href="/newsletter-steps" class="btn"-->Manage Newsletter Steps</a-->
+    </div-->
+</body-->
+</html-->

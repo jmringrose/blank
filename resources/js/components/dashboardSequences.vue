@@ -276,13 +276,43 @@
                     </button>
                     <button
                         :disabled="testAllEmailsLoading"
-                        class="btn btn-secondary btn-sm w-full"
+                        class="btn btn-primary btn-sm w-full"
                         type="button"
                         @click="sendTestAllEmails"
                     >
                         <LucideRefreshCw v-if="testAllEmailsLoading" class="inline w-4 h-4 mr-1 animate-spin"/>
                         <span v-else class="material-symbols-outlined text-sm mr-1">mark_email_read</span>
                         {{ testAllEmailsLoading ? 'Sending...' : 'Test All Email Types' }}
+                    </button>
+                    <button
+                        :disabled="testMarketingLoading"
+                        class="btn btn-primary btn-sm w-full"
+                        type="button"
+                        @click="sendAllMarketingEmails"
+                    >
+                        <LucideRefreshCw v-if="testMarketingLoading" class="inline w-4 h-4 mr-1 animate-spin"/>
+                        <span v-else class="material-symbols-outlined text-sm mr-1">campaign</span>
+                        {{ testMarketingLoading ? 'Sending...' : 'Send All Marketing Emails' }}
+                    </button>
+                    <button
+                        :disabled="testNewsletterLoading"
+                        class="btn btn-primary btn-sm w-full"
+                        type="button"
+                        @click="sendAllNewsletterEmails"
+                    >
+                        <LucideRefreshCw v-if="testNewsletterLoading" class="inline w-4 h-4 mr-1 animate-spin"/>
+                        <span v-else class="material-symbols-outlined text-sm mr-1">newspaper</span>
+                        {{ testNewsletterLoading ? 'Sending...' : 'Send All Newsletter Emails' }}
+                    </button>
+                    <button
+                        :disabled="testQuestionLoading"
+                        class="btn btn-primary btn-sm w-full"
+                        type="button"
+                        @click="sendAllQuestionEmails"
+                    >
+                        <LucideRefreshCw v-if="testQuestionLoading" class="inline w-4 h-4 mr-1 animate-spin"/>
+                        <span v-else class="material-symbols-outlined text-sm mr-1">help</span>
+                        {{ testQuestionLoading ? 'Sending...' : 'Send All Question Emails' }}
                     </button>
                     <a
                         class="btn btn-primary btn-sm w-full"
@@ -303,6 +333,27 @@
                 </div>
             </div>
 
+        </div>
+
+        <!-- Test Email Modal -->
+        <div v-if="showTestEmailModal" class="modal modal-open">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg">Send All {{ emailType.charAt(0).toUpperCase() + emailType.slice(1) }} Emails</h3>
+                <p class="py-2">Send all published {{ emailType }} emails to:</p>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Email Address</span>
+                    </label>
+                    <div class="flex gap-2">
+                        <input v-model="testEmailAddress" type="email" class="input input-bordered flex-1" placeholder="Enter email address" required>
+                        <button @click="useTestRecipient" class="btn btn-outline btn-sm">Use Test Recipient</button>
+                    </div>
+                </div>
+                <div class="modal-action">
+                    <button @click="confirmSendAllEmails" class="btn btn-primary" :disabled="!testEmailAddress">Send All Emails</button>
+                    <button @click="closeTestEmailModal" class="btn btn-ghost">Cancel</button>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -349,6 +400,12 @@ const lastChecked = ref(null)
 const isLoading = ref(false)
 const testEmailLoading = ref(false)
 const testAllEmailsLoading = ref(false)
+const testMarketingLoading = ref(false)
+const testNewsletterLoading = ref(false)
+const testQuestionLoading = ref(false)
+const showTestEmailModal = ref(false)
+const testEmailAddress = ref('')
+const emailType = ref('')
 const nextMarketingSend = ref(null)
 const nextNewsletterSend = ref(null)
 const emailLogs = ref([])
@@ -510,6 +567,62 @@ async function sendTestAllEmails() {
     } finally {
         testAllEmailsLoading.value = false
     }
+}
+
+// --- Send all marketing emails ---
+function sendAllMarketingEmails() {
+    emailType.value = 'marketing'
+    testEmailAddress.value = ''
+    showTestEmailModal.value = true
+}
+
+// --- Send all newsletter emails ---
+function sendAllNewsletterEmails() {
+    emailType.value = 'newsletter'
+    testEmailAddress.value = ''
+    showTestEmailModal.value = true
+}
+
+// --- Send all question emails ---
+function sendAllQuestionEmails() {
+    emailType.value = 'question'
+    testEmailAddress.value = ''
+    showTestEmailModal.value = true
+}
+
+// --- Confirm send all emails ---
+async function confirmSendAllEmails() {
+    if (!testEmailAddress.value) return
+
+    const loadingRef = emailType.value === 'marketing' ? testMarketingLoading :
+                      emailType.value === 'newsletter' ? testNewsletterLoading : testQuestionLoading
+
+    loadingRef.value = true
+    try {
+        const endpoint = `/send-all-${emailType.value}-emails`
+        await api.post(endpoint, { email: testEmailAddress.value })
+        toast.success(`All ${emailType.value} emails sent successfully!`)
+        setTimeout(fetchEmailLogs, 2000)
+        closeTestEmailModal()
+    } catch (e) {
+        console.error(`Error sending ${emailType.value} emails:`, e)
+        toast.error(`Failed to send ${emailType.value} emails`)
+    } finally {
+        loadingRef.value = false
+    }
+}
+
+// --- Use test recipient ---
+function useTestRecipient() {
+    testEmailAddress.value = 'james@jringrose.com'
+    confirmSendAllEmails()
+}
+
+// --- Close test email modal ---
+function closeTestEmailModal() {
+    showTestEmailModal.value = false
+    emailType.value = ''
+    testEmailAddress.value = ''
 }
 
 // --- Refresh button ---

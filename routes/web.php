@@ -80,6 +80,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/send-test-email', [\App\Http\Controllers\API\APISequenceController::class, 'sendTestEmail']);
     Route::post('/send-simple-test-email', [\App\Http\Controllers\API\APISequenceController::class, 'sendSimpleTestEmail']);
     Route::post('/send-test-all-emails', [\App\Http\Controllers\API\APISequenceController::class, 'sendTestAllEmails']);
+    Route::post('/send-all-marketing-emails', [\App\Http\Controllers\API\APISequenceController::class, 'sendAllMarketingEmails']);
+    Route::post('/send-all-newsletter-emails', [\App\Http\Controllers\API\APISequenceController::class, 'sendAllNewsletterEmails']);
+    Route::post('/send-all-question-emails', [\App\Http\Controllers\API\APISequenceController::class, 'sendAllQuestionEmails']);
 
     // Email logs
     // Forms routes (moved from API to avoid auth)

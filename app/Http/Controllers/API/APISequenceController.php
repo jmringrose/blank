@@ -34,11 +34,18 @@ class APISequenceController extends Controller
             'email'        => 'required|email|max:255',
             'current_step' => 'required|integer|min:0',
             'unsub_token'  => 'nullable|string|max:255',
-            'next_send_at' => 'nullable|date',
+            'next_send_at' => 'nullable|string',
             'ip_address'   => 'nullable|string|max:45',
             'location'     => 'nullable|string|max:255',
         ]);
         $emailSequence = EmailSequence::findOrFail($id);
+        
+        // Handle next_send_at - store exactly as received without timezone conversion
+        if (isset($validated['next_send_at']) && $validated['next_send_at']) {
+            // Ensure it's stored as a simple datetime string without timezone info
+            $validated['next_send_at'] = str_replace('T', ' ', $validated['next_send_at']) . ':00';
+        }
+        
         $emailSequence->update($validated);
         return response()->json([
             'success' => true,
@@ -268,6 +275,75 @@ class APISequenceController extends Controller
             return response()->json(['message' => 'Test email sent successfully']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to send test email: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function sendAllMarketingEmails(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'nullable|email'
+        ]);
+
+        try {
+            $publishedSteps = \App\Models\MarketingStep::where('draft', false)->orderBy('order')->get();
+            $email = $validated['email'] ?? env('ADMIN_EMAIL');
+            
+            foreach ($publishedSteps as $step) {
+                \Artisan::call('email:test-marketing', [
+                    'step' => $step->order,
+                    '--email' => $email
+                ]);
+            }
+            
+            return response()->json(['message' => count($publishedSteps) . ' marketing emails sent successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to send marketing emails: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function sendAllNewsletterEmails(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'nullable|email'
+        ]);
+
+        try {
+            $publishedSteps = \App\Models\NewsletterStep::where('draft', false)->orderBy('order')->get();
+            $email = $validated['email'] ?? env('ADMIN_EMAIL');
+            
+            foreach ($publishedSteps as $step) {
+                \Artisan::call('email:test-newsletter', [
+                    'step' => $step->order,
+                    '--email' => $email
+                ]);
+            }
+            
+            return response()->json(['message' => count($publishedSteps) . ' newsletter emails sent successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to send newsletter emails: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function sendAllQuestionEmails(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'nullable|email'
+        ]);
+
+        try {
+            $publishedSteps = \App\Models\QuestionStep::where('draft', false)->orderBy('order')->get();
+            $email = $validated['email'] ?? env('ADMIN_EMAIL');
+            
+            foreach ($publishedSteps as $step) {
+                \Artisan::call('email:test-question', [
+                    'step' => $step->order,
+                    '--email' => $email
+                ]);
+            }
+            
+            return response()->json(['message' => count($publishedSteps) . ' question emails sent successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to send question emails: ' . $e->getMessage()], 500);
         }
     }
 }
