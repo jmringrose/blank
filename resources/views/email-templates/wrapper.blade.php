@@ -27,9 +27,7 @@
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.4; color: #333; margin:0; padding:0; background:#eff1f3;" class="sm-block">
 <div style="max-width: 620px; margin: 0 auto; padding: 4px; background-color: #fffcfa;" class="sm-px">
-    XXXX
-
-    {!! $convertedContent !!}
+      {!! $convertedContent !!}
 </div>
 </body>
 </html>

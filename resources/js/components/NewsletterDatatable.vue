@@ -192,12 +192,12 @@ const toast = useToast()
 const headers = [
     {text: "First", value: "first", sortable: true, width: 100},
     {text: "Last", value: "last", sortable: true, width: 100},
-    {text: "Email", value: "email", sortable: true, width: 200},
-    {text: "Step", value: "current_step", sortable: true, width: 120},
-    {text: "Next Send", value: "next_send_at", sortable: true, width: 150},
+    {text: "Email", value: "email", sortable: true, width: 220},
+    {text: "Step", value: "current_step", sortable: true, width: 40},
+    {text: "Next Send", value: "next_send_at", sortable: true, width: 120},
     {text: "Tour", value: "tour_date_str", sortable: true, width: 150},
     {text: "Unsub", value: "unsub_token", sortable: true, width: 80},
-    {text: "Actions", value: "actions", width: 120}
+    {text: "Actions", value: "actions", width: 100}
 ]
 
 const searchField = ref("")

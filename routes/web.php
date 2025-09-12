@@ -280,6 +280,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Newsletter sequences
     Route::get('/newsletter-sequence/{id}', [\App\Http\Controllers\NewsletterSequenceController::class, 'show']);
     Route::post('/newsletter-sequences', [\App\Http\Controllers\NewsletterSequenceController::class, 'store']);
+    Route::delete('/newsletter-sequence/{id}', [\App\Http\Controllers\NewsletterSequenceController::class, 'destroy']);
 
 
 

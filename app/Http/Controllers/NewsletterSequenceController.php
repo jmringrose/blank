@@ -70,6 +70,7 @@ class NewsletterSequenceController extends Controller
         $first = $request->first ?? $request->input('data.first') ?? $request->input('First_Name');
         $last = $request->last ?? $request->input('data.last') ?? $request->input('Last_Name');
         $email = $request->email ?? $request->input('data.email') ?? $request->input('Email');
+        $tourDate = $request->tour_date ?? $request->input('data.tour_date');
         
         \Log::info('Extracted fields:', ['first' => $first, 'last' => $last, 'email' => $email]);
         
@@ -85,18 +86,36 @@ class NewsletterSequenceController extends Controller
             return response()->json(['message' => 'User already exists in newsletter (no action needed)'], 200);
         }
 
-        $sequence = NewsletterSequence::create([
+        $createData = [
             'first' => $first,
             'last' => $last,
             'email' => $email,
             'current_step' => 1,
             'next_send_at' => Carbon::now()->addMinutes(5),
             'unsub_token' => Str::random(32)
-        ]);
+        ];
+        
+        // Add tour_date if provided
+        if ($tourDate) {
+            $createData['tour_date'] = $tourDate;
+            $createData['tour_date_str'] = Carbon::parse($tourDate)->format('j M Y');
+        }
+        
+        $sequence = NewsletterSequence::create($createData);
 
         return response()->json([
             'message' => 'User added to newsletter successfully',
             'sequence' => $sequence
+        ]);
+    }
+    
+    public function destroy($id)
+    {
+        $sequence = NewsletterSequence::findOrFail($id);
+        $sequence->delete();
+        
+        return response()->json([
+            'message' => 'Newsletter sequence deleted successfully'
         ]);
     }
 }
