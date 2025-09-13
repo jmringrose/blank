@@ -13,6 +13,10 @@
                     <ul class="menu menu-sm dropdown-content bg-base-300  rounded-box z-1 mt-3 w-52 p-2 shadow-lg border">
 
                         <li class="mt-1 mr-2">
+                            <a href="/dashboard" class=""><span class="material-symbols-outlined">Database</span> Dashboard</a>
+                        </li>
+
+                        <li class="mt-1 mr-2">
                             <details>
                                 <summary><span class="material-symbols-outlined">Ballot</span> Marketing</summary>
                                 <ul>
@@ -46,7 +50,6 @@
                                 </ul>
                             </details>
                         </li>
-
 
 
                     </ul>
@@ -93,8 +96,6 @@
                             <li><a href="/question-steps">Question Emails</a></li>
                         </ul>
                     </li>
-
-
 
                 </ul>
             </div>

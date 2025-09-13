@@ -12,7 +12,6 @@ Route::get('/unsubscribe/marketing/{token}', [\App\Http\Controllers\MarketingUns
 Route::get('/unsubscribe/newsletter/{token}', [\App\Http\Controllers\NewsletterUnsubscribeController::class, 'unsubscribe']);
 Route::get('/unsubscribe/question/{token}', [\App\Http\Controllers\QuestionUnsubscribeController::class, 'unsubscribe'])->name('unsubscribe');
 
-
 // email previews (auth required)
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -66,15 +65,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/sequence/bulk-delete', [\App\Http\Controllers\API\APISequenceController::class, 'bulkDelete']);
 
     // API routes for dashboard
-    Route::get('/marketing-steps/data', function() {
-        return App\Models\MarketingStep::orderBy('order')->get();
-    });
-    Route::get('/sequences/data', function() {
-        return App\Models\EmailSequence::all();
-    });
-    Route::get('/newsletter-sequences/data', function() {
-        return App\Models\NewsletterSequence::all();
-    });
+    Route::get('/marketing-steps/data', [\App\Http\Controllers\DataController::class, 'marketingSteps']);
+    Route::get('/sequences/data', [\App\Http\Controllers\DataController::class, 'sequences']);
+    Route::get('/newsletter-sequences/data', [\App\Http\Controllers\DataController::class, 'newsletterSequences']);
 
     // Test email routes
     Route::post('/send-test-email', [\App\Http\Controllers\API\APISequenceController::class, 'sendTestEmail']);
@@ -93,185 +86,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Queue health route (moved from API to avoid auth)
     Route::get('/health/queue', [\App\Http\Controllers\API\APISequenceController::class, 'queueHealth']);
     Route::get('/dashboard/summary', [\App\Http\Controllers\API\APISequenceController::class, 'dashboardSummary']);
-    
+
     // Question steps data route
     Route::get('/question-steps/data', [\App\Http\Controllers\QuestionStepController::class, 'data']);
-    
-    // Marketing preview route
-    Route::get('/preview/marketing/{step}', function($step) {
-        $marketingStep = \App\Models\MarketingStep::where('order', $step)->first();
-        
-        if (!$marketingStep) {
-            abort(404, 'Marketing step not found');
-        }
-        
-        // Create sample marketing sequence for preview
-        $sequence = (object) [
-            'id' => 1,
-            'first' => 'Sample',
-            'last' => 'User',
-            'email' => 'sample@example.com',
-            'current_step' => $step,
-            'name' => 'Sample User'
-        ];
-        
-        $viewName = 'emails.marketing.' . str_replace('.blade.php', '', $marketingStep->filename);
-        $unsubscribeUrl = url('/unsubscribe/marketing/sample-token');
-        
-        return view($viewName, [
-            'sequence' => $sequence,
-            'record' => $sequence,
-            'firstName' => $sequence->first,
-            'lastName' => $sequence->last,
-            'email' => $sequence->email,
-            'currentStep' => $sequence->current_step,
-            'unsubscribeUrl' => $unsubscribeUrl
-        ]);
-    });
-    
-    // Newsletter preview route
-    Route::get('/preview/newsletter/{step}', function($step) {
-        $newsletterStep = \App\Models\NewsletterStep::where('order', $step)->first();
-        
-        if (!$newsletterStep) {
-            abort(404, 'Newsletter step not found');
-        }
-        
-        // Create sample newsletter sequence for preview
-        $sequence = (object) [
-            'id' => 1,
-            'first' => 'Sample',
-            'last' => 'User',
-            'email' => 'sample@example.com',
-            'current_step' => $step,
-            'tour_date' => '2026-02-01',
-            'tour_date_str' => '1 Feb 2026',
-            'name' => 'Sample User'
-        ];
-        
-        $viewName = 'emails.newsletters.' . str_replace('.blade.php', '', $newsletterStep->filename);
-        $unsubscribeUrl = url('/unsubscribe/newsletter/sample-token');
-        
-        // Calculate days to go (sample)
-        $daysToGo = 45;
-        
-        return view($viewName, [
-            'record' => $sequence,
-            'firstName' => $sequence->first,
-            'lastName' => $sequence->last,
-            'email' => $sequence->email,
-            'currentStep' => $sequence->current_step,
-            'unsubscribeUrl' => $unsubscribeUrl,
-            'daysToGo' => $daysToGo
-        ]);
-    });
-    
-    // Question preview route (allows draft previews)
-    Route::get('/preview/question/{step}', function($step) {
-        $questionStep = \App\Models\QuestionStep::where('order', $step)->first();
-        
-        if (!$questionStep) {
-            abort(404, 'Question step not found');
-        }
-        
-        // Create a sample questioner for preview
-        $sequence = (object) [
-            'id' => 1,
-            'first' => 'Sample',
-            'last' => 'User',
-            'email' => 'sample@example.com'
-        ];
-        
-        if (!$questionStep->filename) {
-            abort(404, 'Question template file not configured');
-        }
-        
-        $viewName = 'emails.questions.' . str_replace('.blade.php', '', $questionStep->filename);
-        $unsubscribeUrl = url('/unsubscribe/question/sample-token');
-        
-        return view($viewName, [
-            'record' => $sequence,
-            'firstName' => $sequence->first,
-            'lastName' => $sequence->last,
-            'email' => $sequence->email,
-            'name' => trim($sequence->first . ' ' . $sequence->last),
-            'unsubscribeUrl' => $unsubscribeUrl
-        ]);
-    });
 
-    Route::get('/email-logs', function() {
-        $logFile = storage_path('logs/laravel.log');
-        if (!file_exists($logFile)) {
-            return response()->json([]);
-        }
+    // Preview routes
+    Route::get('/preview/marketing/{step}', [\App\Http\Controllers\EmailPreviewController::class, 'marketing']);
+    Route::get('/preview/newsletter/{step}', [\App\Http\Controllers\EmailPreviewController::class, 'newsletter']);
+    Route::get('/preview/question/{step}', [\App\Http\Controllers\EmailPreviewController::class, 'question']);
 
-        // Use tail to get last 1000 lines efficiently
-        $output = shell_exec("tail -1000 {$logFile}");
-        if (!$output) {
-            return response()->json([]);
-        }
-
-        $lines = explode("\n", $output);
-        $logs = [];
-
-        for ($i = 0; $i < count($lines) - 2; $i++) {
-            $line1 = $lines[$i] ?? '';
-            $line2 = $lines[$i + 1] ?? '';
-            $line3 = $lines[$i + 2] ?? '';
-
-            // Look for the 3-line pattern: Building -> Sequence data -> Built successfully
-            if (strpos($line1, 'Building newsletter email') !== false &&
-                strpos($line2, 'Sequence data:') !== false &&
-                strpos($line3, 'Newsletter email built successfully') !== false) {
-
-                preg_match('/\[(.*?)\]/', $line3, $timeMatch);
-                preg_match('/"first":"(.*?)"/', $line2, $firstMatch);
-                preg_match('/"last":"(.*?)"/', $line2, $lastMatch);
-                preg_match('/"email":"(.*?)"/', $line2, $emailMatch);
-                preg_match('/"current_step":(\d+)/', $line2, $stepMatch);
-
-                if ($timeMatch && $firstMatch && $emailMatch) {
-                    $logs[] = [
-                        'time' => $timeMatch[1],
-                        'who' => trim(($firstMatch[1] ?? '') . ' ' . ($lastMatch[1] ?? '')),
-                        'email' => $emailMatch[1] ?? '',
-                        'what' => 'Newsletter Step ' . ($stepMatch[1] ?? '?'),
-                        'when' => \Carbon\Carbon::parse($timeMatch[1])->diffForHumans()
-                    ];
-                }
-            }
-        }
-
-        // Look for newsletter, marketing, and question email send logs
-        foreach ($lines as $line) {
-            if (strpos($line, 'Newsletter email sent') !== false || strpos($line, 'Marketing email sent') !== false || strpos($line, 'Question email sent') !== false) {
-                preg_match('/\[(.*?)\]/', $line, $timeMatch);
-                preg_match('/"recipient_name":"(.*?)"/', $line, $nameMatch);
-                preg_match('/"recipient_email":"(.*?)"/', $line, $emailMatch);
-                preg_match('/"step_number":(\d+)/', $line, $stepMatch);
-                preg_match('/"step_title":"(.*?)"/', $line, $titleMatch);
-
-                $type = strpos($line, 'Newsletter') !== false ? 'Newsletter' : (strpos($line, 'Question') !== false ? 'Question' : 'Marketing');
-
-                if ($timeMatch && $nameMatch && $emailMatch && $stepMatch && $titleMatch) {
-                    $logs[] = [
-                        'time' => $timeMatch[1],
-                        'who' => $nameMatch[1],
-                        'email' => $emailMatch[1],
-                        'what' => $type . ' Step ' . $stepMatch[1] . ': ' . $titleMatch[1],
-                        'when' => \Carbon\Carbon::parse($timeMatch[1])->diffForHumans()
-                    ];
-                }
-            }
-        }
-
-        // Sort by time and return last 10
-        usort($logs, function($a, $b) {
-            return strtotime($b['time']) - strtotime($a['time']);
-        });
-
-        return response()->json(array_slice($logs, 0, 10)); // Last 10 emails
-    });
+    Route::get('/email-logs', [\App\Http\Controllers\EmailLogController::class, 'index']);
 
     // Image upload routes
     Route::post('/upload-image', [\App\Http\Controllers\ImageController::class, 'upload']);
@@ -282,97 +106,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/newsletter-sequences', [\App\Http\Controllers\NewsletterSequenceController::class, 'store']);
     Route::delete('/newsletter-sequence/{id}', [\App\Http\Controllers\NewsletterSequenceController::class, 'destroy']);
 
-
-
-
-
-    // storage images API
-    // API endpoint for TinyMCE image browser
-    Route::get('/api/images', function() {
-        try {
-            // Check if img directory exists
-            $imgPath = public_path('img/public_images');
-
-            if (!is_dir($imgPath)) {
-                // Try to create the directory
-                if (!mkdir($imgPath, 0755, true)) {
-                    return response()->json([
-                        'error' => 'img directory does not exist',
-                        'path' => $imgPath,
-                        'images' => []
-                    ]);
-                }
-            }
-
-            // Get all image files from public/img directory
-            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
-            $images = [];
-
-            $files = scandir($imgPath);
-            if ($files === false) {
-                return response()->json([
-                    'error' => 'Cannot read img directory',
-                    'path' => $imgPath,
-                    'images' => []
-                ]);
-            }
-
-            foreach ($files as $file) {
-                if ($file === '.' || $file === '..') continue;
-
-                $filePath = $imgPath . '/' . $file;
-                if (!is_file($filePath)) continue;
-
-                $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                if (!in_array($extension, $allowedExtensions)) continue;
-
-                $images[] = [
-                    'name' => $file,
-                    'path' => '/img/public_images/' . $file,
-                    'url' => asset('img/public_images/' . $file),
-                    'size' => filesize($filePath),
-                    'modified' => date('Y-m-d H:i:s', filemtime($filePath))
-                ];
-            }
-
-            // Sort by name
-            usort($images, function($a, $b) {
-                return strcmp($a['name'], $b['name']);
-            });
-
-            return response()->json([
-                'success' => true,
-                'path' => $imgPath,
-                'count' => count($images),
-                'images' => $images
-            ]);
-
-        } catch (Exception $e) {
-            return response()->json([
-                'error' => 'Unable to load images',
-                'message' => $e->getMessage(),
-                'images' => []
-            ], 500);
-        }
-    })->name('api.images');
-
-    Route::get('/storage-images', function() {
-        $images = [];
-        $storagePath = storage_path('app/public/images');
-
-        if (is_dir($storagePath)) {
-            $files = glob($storagePath . '/*.{jpg,jpeg,png,gif,webp}', GLOB_BRACE);
-            foreach ($files as $file) {
-                $filename = basename($file);
-                $images[] = [
-                    'name' => $filename,
-                    'url' => '/storage/images/' . $filename
-                ];
-            }
-        }
-
-        return response()->json($images);
-    });
+    // Image API routes
+    Route::get('/api/images', [\App\Http\Controllers\ImageApiController::class, 'publicImages'])->name('api.images');
+    Route::get('/storage-images', [\App\Http\Controllers\ImageApiController::class, 'storageImages']);
 
     // newsletter editor
     Route::get('/newsletter-editor/create', [\App\Http\Controllers\NewsletterEditorController::class, 'create'])->name('newsletter-editor.create');
@@ -415,8 +151,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/question-editor/{id}', [\App\Http\Controllers\QuestionEditorController::class, 'update'])->name('question-editor.update');
     Route::get('/question-editor/toggle/{id}', [\App\Http\Controllers\QuestionEditorController::class, 'toggle'])->name('question-editor.toggle');
     Route::delete('/question-editor/{id}', [\App\Http\Controllers\QuestionEditorController::class, 'destroy'])->name('question-editor.destroy');
-
-
 
 });
 

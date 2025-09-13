@@ -1,10 +1,15 @@
 <template>
-    <div class="container mt-4 max-w-5xl mx-auto text-base bg-base-300 p-1 md:p-3 rounded-lg shadow-lg border">
+    <div class="container mt-4 max-w-4xl mx-auto text-base bg-base-300 p-1 md:p-3 rounded-lg shadow-lg border">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold ml-4">Marketing Steps</h1>
             <div class="space-x-2">
-                <a href="/dashboard" class="btn btn-outline">← Back to Dashboard</a>
+<!--                <a href="/dashboard" class="btn btn-outline">← Back to Dashboard</a>-->
+                <a role="button" class="btn btn-primary mr-2" href="sequences">
+                    <span class="material-symbols-outlined">edit</span>
+                    Prospects
+                </a>
                 <button @click="createStep" class="btn btn-primary">Create New Marketing Step</button>
+
             </div>
         </div>
 
@@ -31,7 +36,6 @@
             </template>
             <template #item-actions="item">
                 <div class="flex justify-center space-x-1">
-
                     <button class="btn btn-sm btn-secondary h-6 w-6" @click.stop="editStep(item)" title="Edit Record">
                         <span class="!text-base material-symbols-outlined">database</span>
                     </button>
@@ -203,7 +207,7 @@ export default {
         })
 
         const headers = [
-            { text: "Order", value: "order", sortable: true },
+            { text: "Order", value: "order", sortable: true, width: 100 },
             { text: "Title", value: "title", sortable: true },
             { text: "Filename", value: "filename", sortable: true },
             { text: "Status", value: "draft" },
@@ -312,7 +316,7 @@ export default {
         }
 
         const sendingEmails = ref(new Set())
-        
+
         const sendTestEmail = (step) => {
             testEmailStep.value = step
             testEmailAddress.value = ''
@@ -324,17 +328,17 @@ export default {
             if (sendingEmails.value.has(step.id) || !testEmailAddress.value) {
                 return
             }
-            
+
             try {
                 sendingEmails.value.add(step.id)
                 toast.info(`Sending test email for step ${step.order}...`)
-                
+
                 const response = await axios.post('/send-test-email', {
                     type: 'marketing',
                     step: step.order,
                     email: testEmailAddress.value
                 })
-                
+
                 toast.success(`Test email sent to ${testEmailAddress.value} for step ${step.order}: ${step.title}`)
                 closeTestEmailModal()
             } catch (error) {

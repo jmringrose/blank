@@ -1,9 +1,8 @@
 <template>
-    <div class="container mt-4 max-w-4xl lg:max-w-[1300px] mx-auto  dark:text-gray-100 bg-slate-100 dark:bg-slate-800 p-1 md:p-2 rounded-lg shadow-lg border border-slate-300 dark:border-slate-600">
+    <div class="container mt-4 max-w-4xl lg:max-w-[1300px] mx-auto  dark:text-gray-100 bg-slate-100 dark:bg-slate-600 p-1 md:p-2 rounded-lg shadow-lg border border-slate-300 dark:border-slate-600">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-
             <!-- Marketing Sequences Dashboard -->
-            <div class="bg-white dark:bg-slate-700 rounded-xl shadow-sm border border-slate-300 dark:border-slate-600 p-4">
+            <div class="bg-gray-100 dark:bg-slate-700 rounded-xl shadow-sm border border-slate-300 dark:border-slate-600 p-4">
                 <div class="flex justify-between items-center mb-4">
                     <h1 class="text-lg font-bold text-gray-700   dark:text-gray-100">Pre Sales Marketing</h1>
                     <div class="flex gap-2">
@@ -34,8 +33,8 @@
                 <div class="overflow-x-auto">
                     <table class="table table-sm w-full">
                         <thead>
-                        <tr class="">
-                            <th class="px-2 py-1 ">Step</th>
+                        <tr class="dark:text-gray-300 text-gray-700">
+                            <th class="px-2 py-1 ">Next Step</th>
                             <th class="px-2 py-1 ">Count</th>
                         </tr>
                         </thead>
@@ -55,10 +54,10 @@
                         </button>
                     </div>
                     <div class="space-y-1">
-                        <div v-for="signup in summary.latest_signups" :key="signup.created_at" class="text-xs bg-base-300 p-2 rounded">
-                            <div class="font-semibold">{{ signup.first }} {{ signup.last }}</div>
-                            <div class="text-gray-400">{{ formatSignupDate(signup.created_at) }} • {{ signup.location || 'Unknown' }}</div>
-                            <div v-if="showIpDetails" class="text-xs text-gray-500 mt-1">
+                        <div v-for="signup in summary.latest_signups" :key="signup.created_at" class="text-xs bg-stone-300 p-2 rounded">
+                            <div class="font-semibold text-gray-700">{{ signup.first }} {{ signup.last }}</div>
+                            <div class="text-gray-900">{{ formatSignupDate(signup.created_at) }} • {{ signup.location || 'Unknown' }}</div>
+                            <div v-if="showIpDetails" class="text-xs text-gray-700 mt-1">
                                 IP: {{ signup.ip_address || 'Not captured' }}
                             </div>
                         </div>
@@ -97,7 +96,7 @@
                     <div class="overflow-x-auto">
                         <table class="table table-sm w-full">
                             <thead>
-                            <tr>
+                            <tr class="text-gray-200">
                                 <th class="text-left">Name</th>
                                 <th class="text-left">Forms</th>
                             </tr>
@@ -123,9 +122,9 @@
                     <div class="overflow-x-auto">
                         <table class="table table-sm w-full">
                             <thead>
-                            <tr>
+                            <tr class="text-gray-200">
                                 <th class="text-left">Name</th>
-                                <th class="text-left">Step</th>
+                                <th class="text-left">Next Step</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -150,7 +149,7 @@
                         ✏️ Edit Marketing Emails
                     </a>
                     <a v-for="step in marketingSteps" :key="step.order" :href="`/preview/marketing/${step.order}`" class="btn btn-outline border-gray-500 btn-sm w-full flex justify-between items-center" target="_blank">
-                        <span class="text-gray-700  dark:text-gray-100">📧 Step {{ step.order }} - {{ step.title }}</span>
+                        <span class="text-gray-700  dark:text-gray-100">Step {{ step.order }} - {{ step.title }}</span>
                         <span v-if="step.draft" class="badge badge-warning badge-sm">Draft</span>
                     </a>
                 </div>
@@ -164,7 +163,7 @@
                         ✏️ Edit Newsletters
                     </a>
                     <a v-for="step in newsletterSteps" :key="step.order" :href="`/preview/newsletter/${step.order}`" class="btn btn-outline border-gray-500 btn-sm w-full flex justify-between items-center" target="_blank">
-                        <span class="text-gray-700  dark:text-gray-100">📰 Step {{ step.order }} - {{ step.title }}</span>
+                        <span class="text-gray-700  dark:text-gray-100">Step {{ step.order }} - {{ step.title }}</span>
                         <span v-if="step.draft" class="badge badge-warning badge-sm">Draft</span>
                     </a>
                 </div>
@@ -178,7 +177,7 @@
                         ✏️ Edit Questions
                     </a>
                     <a v-for="step in questionSteps" :key="step.order" :href="`/preview/question/${step.order}`" class="btn btn-outline border-gray-500 btn-sm w-full flex justify-between items-center" target="_blank">
-                        <div class="text-gray-700 dark:text-gray-100 flex"> <div class="material-symbols-outlined mr-1">Help</div> Step {{ step.order }} - {{ step.title }}</div>
+                        <div class="text-gray-700 dark:text-gray-100 flex">#{{ step.order }} - {{ step.title }}</div>
                         <span v-if="step.draft" class="badge badge-warning badge-sm">Draft</span>
                     </a>
                 </div>
@@ -197,11 +196,13 @@
                 </div>
                 <div class="space-y-2 max-h-64 overflow-y-auto">
                     <div v-for="log in emailLogs" :key="log.time" :class="[
-                    'text-xs p-2 rounded',
-                    log.what.includes('Newsletter') ? 'bg-blue-100 dark:bg-blue-900' : 'bg-base-300'
+                    'text-xs p-2 rounded bg-stone-300',
+                     log.what.includes('Newsletter') ? 'bg-blue-100 dark:bg-stone-200' : 'bg-base-300',
+                     log.what.includes('Marketing') ? 'bg-blue-100 dark:bg-blue-100' : 'bg-base-300',
+                     log.what.includes('Question') ? 'bg-blue-100 dark:bg-yellow-100' : 'bg-base-300',
                 ]">
-                        <div class="font-semibold">{{ log.who }} ({{ log.email }})</div>
-                        <div class="text-gray-400">{{ log.what }} • {{ log.when }}</div>
+                        <div class="font-semibold text-gray-700">{{ log.who }} ({{ log.email }})</div>
+                        <div class="text-gray-600">{{ log.what }} • {{ log.when }}</div>
                     </div>
                     <div v-if="emailLogs.length === 0" class="text-gray-400 text-sm">No recent email activity</div>
                 </div>
@@ -615,6 +616,7 @@ async function confirmSendAllEmails() {
 // --- Use test recipient ---
 function useTestRecipient() {
     testEmailAddress.value = 'james@jringrose.com'
+    closeTestEmailModal()
     confirmSendAllEmails()
 }
 
